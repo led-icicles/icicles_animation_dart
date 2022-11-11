@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:icicles_animation_dart/src/utils/debug_log.dart';
 import 'package:icicles_animation_dart/src/utils/size.dart';
 
 const NEWEST_ANIMATION_VERSION = 1;
@@ -53,8 +54,6 @@ class AnimationHeader implements AnimationHeaderData {
     return xCount * yCount;
   }
 
-  final Uint8List data;
-
   AnimationHeader({
     required this.xCount,
     required this.yCount,
@@ -62,7 +61,6 @@ class AnimationHeader implements AnimationHeaderData {
     required this.name,
     this.loopsCount = 1, //loops
     this.radioPanelsCount = 0,
-    required this.data,
   }) {
     if (xCount > UINT_8_MAX_SIZE) {
       throw ArgumentError('Only 255 leds in X axis are supported.');
@@ -127,54 +125,36 @@ class AnimationHeader implements AnimationHeaderData {
   static Converter<List<int>, String> get decoder => utf8.decoder;
 
   Uint8List _getEncodedAnimationNameV2() {
-    print('Encoding header: endian=$endian, size=${size}bytes');
-
     var offset = 0;
 
     final bytes = Uint8List(size);
     final dataView = ByteData.view(bytes.buffer);
-    print('Allocating header bytes → [$bytes].');
 
-    print('Writing version number: "$versionNumber".');
     dataView.setUint16(offset, versionNumber, endian);
     offset += UINT_16_SIZE_IN_BYTES;
-    print('Version number has been written → [$bytes].');
 
-    print('Encoding name: "$name".');
     final encodedName = encoder.convert(name);
-    print('Name encoded: "$encodedName".');
     bytes.setAll(offset, encodedName);
     offset += encodedName.length;
 
     bytes[offset++] = NULL_CHAR;
-    print('Name has been written → [$bytes].');
-    print('Encoding xCount: "$xCount".');
     dataView.setUint8(offset++, xCount);
-    print('xCount has been written → [$bytes].');
-    print('Encoding yCount: "$yCount".');
     dataView.setUint8(offset++, yCount);
-    print('yCount has been written → [$bytes].');
-    print('Encoding loopsCount: "$loopsCount".');
     dataView.setUint16(offset, loopsCount, endian);
     offset += UINT_16_SIZE_IN_BYTES;
-    print('loopsCount has been written → [$bytes].');
-    print('Encoding radioPanelsCount: "$radioPanelsCount".');
     dataView.setUint8(offset++, radioPanelsCount);
-    print('radioPanelsCount has been written → [$bytes].');
 
-    print('Animation file header encoded → [$bytes].');
     return bytes;
   }
 
-  Uint8List encode() {
+  Uint8List toBytes() {
     return _getEncodedAnimationNameV2();
   }
 
-  static AnimationHeader decode(ByteBuffer buffer) {
+  factory AnimationHeader.fromBytes(Uint8List bytes) {
     var offset = 0;
 
-    final bytes = Uint8List.view(buffer);
-    final dataView = ByteData.view(buffer);
+    final dataView = ByteData.view(bytes.buffer);
     final versionNumber = dataView.getUint16(
       offset,
       endian,
@@ -198,7 +178,6 @@ class AnimationHeader implements AnimationHeaderData {
       loopsCount: loopsCount,
       versionNumber: versionNumber,
       radioPanelsCount: radioPanelsCount,
-      data: Uint8List.sublistView(bytes, offset),
     );
   }
 }
