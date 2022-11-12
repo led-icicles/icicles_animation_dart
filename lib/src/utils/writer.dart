@@ -68,4 +68,9 @@ class Writer {
     writeUint8(color.green);
     writeUint8(color.blue);
   }
+
+  void writeIndexedColor565(IndexedColor color) {
+    writeUint16(color.index);
+    writeUint16(color.toRgb565());
+  }
 }
