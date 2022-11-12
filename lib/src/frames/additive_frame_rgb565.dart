@@ -16,6 +16,12 @@ class AdditiveFrameRgb565 extends AdditiveFrame {
     return typeSize + durationSize + sizeFieldSize + changedPixelsSize;
   }
 
+  AdditiveFrameRgb565(super.duration, super.changedPixels);
+
+  factory AdditiveFrameRgb565.fromAdditiveFrame(AdditiveFrame frame) {
+    return AdditiveFrameRgb565(frame.duration, frame.changedPixels);
+  }
+
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
     final writter = Writer(size, endian)
@@ -29,11 +35,5 @@ class AdditiveFrameRgb565 extends AdditiveFrame {
     }
 
     return writter.bytes;
-  }
-
-  AdditiveFrameRgb565(super.duration, super.changedPixels);
-
-  factory AdditiveFrameRgb565.fromAdditiveFrame(AdditiveFrame frame) {
-    return AdditiveFrameRgb565(frame.duration, frame.changedPixels);
   }
 }

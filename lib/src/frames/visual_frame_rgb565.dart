@@ -15,6 +15,12 @@ class VisualFrameRgb565 extends VisualFrame {
     return typeSize + durationSize + colorsSize;
   }
 
+  VisualFrameRgb565(super.duration, super.pixels);
+
+  factory VisualFrameRgb565.fromVisualFrame(VisualFrame frame) {
+    return VisualFrameRgb565(frame.duration, frame.pixels);
+  }
+
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
     final writter = Writer(size, endian)
@@ -27,11 +33,5 @@ class VisualFrameRgb565 extends VisualFrame {
     }
 
     return writter.bytes;
-  }
-
-  VisualFrameRgb565(super.duration, super.pixels);
-
-  factory VisualFrameRgb565.fromVisualFrame(VisualFrame frame) {
-    return VisualFrameRgb565(frame.duration, frame.pixels);
   }
 }
