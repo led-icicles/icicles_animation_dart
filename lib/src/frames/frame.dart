@@ -44,7 +44,8 @@ abstract class Frame {
   Frame(this.duration) {
     if (!duration.isNegative && duration > Frame.maxDuration) {
       throw ArgumentError(
-          'Not valid duration provided. Duration should be larger or equal 0 but no larger than [Frame.maxDuration].');
+        'Not valid duration provided. Duration should be larger or equal 0 but no larger than [Frame.maxDuration].',
+      );
     }
   }
 

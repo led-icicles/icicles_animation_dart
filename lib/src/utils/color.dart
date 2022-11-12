@@ -147,6 +147,14 @@ class Color {
     return Color.fromARGB(alpha, red, green, b);
   }
 
+  /// Returns the color value in rgb565 format (uses 2 bytes instead of 3)
+  ///
+  /// For most led strips, the difference between 24bit and 16bit
+  /// colors is imperceptible
+  int toRgb565() {
+    return (((red & 0xf8) << 8) + ((green & 0xfc) << 3) + (blue >> 3));
+  }
+
   // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
   static double _linearizeColorComponent(double component) {
     if (component <= 0.03928) return component / 12.92;
@@ -314,6 +322,9 @@ class IndexedColor implements Color {
   IndexedColor withRed(int r) => IndexedColor(index, color.withRed(r));
 
   IndexedColor withIndex(int index) => IndexedColor(index, color);
+
+  @override
+  int toRgb565() => color.toRgb565();
 
   @override
   bool operator ==(Object other) {

@@ -1,9 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:icicles_animation_dart/src/utils/color.dart';
-import 'package:icicles_animation_dart/src/utils/size.dart';
-
-import 'frame.dart';
+import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 /// This frame does not support opacity when converted to bytes
 class VisualFrame extends Frame {
@@ -77,26 +74,16 @@ class VisualFrame extends Frame {
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
-    var dataPointer = 0;
-
-    final data = Uint8List(size);
-    final dataView = ByteData.view(data.buffer);
-
-    /// frame header
-    dataView.setUint8(dataPointer++, type.value);
-
-    /// frame duration (little endian)
-    dataView.setUint16(dataPointer, duration.inMilliseconds, endian);
-    dataPointer += 2;
+    final writter = Writer(size, endian)
+      ..writeFrameType(type)
+      ..writeDuration(duration);
 
     /// frame pixels
     for (var i = 0; i < pixels.length; i++) {
-      data[dataPointer++] = pixels[i].red;
-      data[dataPointer++] = pixels[i].green;
-      data[dataPointer++] = pixels[i].blue;
+      writter.writeColor(pixels[i]);
     }
 
-    return data;
+    return writter.bytes;
   }
 
   factory VisualFrame.fromBytes(

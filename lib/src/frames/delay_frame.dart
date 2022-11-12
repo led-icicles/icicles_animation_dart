@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
-import 'frame.dart';
+import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 class DelayFrame extends Frame {
   @override
-  FrameType type = FrameType.DelayFrame;
+  final FrameType type = FrameType.DelayFrame;
 
   DelayFrame(super.duration);
 
@@ -18,21 +18,11 @@ class DelayFrame extends Frame {
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
-    var dataPointer = 0;
+    final writter = Writer(size, endian)
+      ..writeFrameType(type)
+      ..writeDuration(duration);
 
-    final data = Uint8List(size);
-    final dataView = ByteData.view(data.buffer);
-
-    /// frame header
-    dataView
-
-      /// frame type
-      ..setUint8(dataPointer++, type.value)
-
-      /// frame duration
-      ..setUint16(dataPointer++, duration.inMilliseconds, endian);
-
-    return data;
+    return writter.bytes;
   }
 
   factory DelayFrame.fromBytes(

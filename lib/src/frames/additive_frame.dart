@@ -1,10 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:icicles_animation_dart/src/utils/color.dart';
-import 'package:icicles_animation_dart/src/utils/size.dart';
-
-import 'frame.dart';
-import 'visual_frame.dart';
+import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 class AdditiveFrame extends Frame {
   @override
@@ -23,7 +19,9 @@ class AdditiveFrame extends Frame {
   }
 
   static List<IndexedColor> getChangedPixelsFromFrames(
-      VisualFrame prevFrame, VisualFrame nextFrame) {
+    VisualFrame prevFrame,
+    VisualFrame nextFrame,
+  ) {
     VisualFrame.assertVisualFramesCompatibility(prevFrame, nextFrame);
 
     final changedPixels = <IndexedColor>[];
@@ -77,41 +75,17 @@ class AdditiveFrame extends Frame {
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
-    final data = Uint8List(size);
-    final dataView = ByteData.view(data.buffer);
-
-    var dataPointer = 0;
-
-    /// frame header
-    dataView.setUint8(dataPointer++, type.value);
-
-    /// frame duration (little endian)
-    dataView.setUint16(dataPointer, duration.inMilliseconds, endian);
-    dataPointer += 2;
-
-    /// frame size (little endian)
-    final changedPixelsCount = changedPixels.length;
-    dataView.setUint16(dataPointer, changedPixelsCount, endian);
-    dataPointer += 2;
+    final writter = Writer(size, endian)
+      ..writeFrameType(type)
+      ..writeDuration(duration)
+      ..writeUint16(changedPixels.length);
 
     /// frame pixels
     for (var i = 0; i < changedPixels.length; i++) {
-      final changedPixel = changedPixels[i];
-      final index = changedPixel.index;
-
-      /// pixel index (little endian)
-      dataView.setUint16(dataPointer, index, endian);
-      dataPointer += 2;
-
-      final color = changedPixel;
-
-      dataView
-        ..setUint8(dataPointer++, color.red)
-        ..setUint8(dataPointer++, color.green)
-        ..setUint8(dataPointer++, color.blue);
+      writter.writeIndexedColor(changedPixels[i]);
     }
 
-    return data;
+    return writter.bytes;
   }
 
   factory AdditiveFrame.fromBytes(

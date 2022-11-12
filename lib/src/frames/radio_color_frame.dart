@@ -1,9 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:icicles_animation_dart/src/utils/color.dart';
-
-import '../utils/size.dart';
-import 'frame.dart';
+import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 class RadioColorFrame extends Frame {
   static const maxPanelIndex = UINT_8_MAX_SIZE;
@@ -64,29 +61,13 @@ class RadioColorFrame extends Frame {
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
-    var dataPointer = 0;
+    final writter = Writer(size, endian)
+      ..writeFrameType(type)
+      ..writeDuration(duration)
+      ..writeUint8(panelIndex)
+      ..writeColor(color);
 
-    final bytes = Uint8List(size);
-    final dataView = ByteData.view(bytes.buffer);
-
-    /// frame type
-    dataView.setUint8(dataPointer++, type.value);
-
-    /// frame duration (little endian)
-    dataView.setUint16(dataPointer, duration.inMilliseconds, endian);
-    dataPointer += 2;
-    // bytes[dataPointer++] = this.duration & 255;
-    // bytes[dataPointer++] = this.duration >>> 8;
-    /// panel index
-    dataView.setUint8(dataPointer++, panelIndex);
-
-    /// color
-    dataView
-      ..setUint8(dataPointer++, color.red)
-      ..setUint8(dataPointer++, color.green)
-      ..setUint8(dataPointer++, color.blue);
-
-    return bytes;
+    return writter.bytes;
   }
 
   @override
