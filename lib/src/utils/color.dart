@@ -265,3 +265,11 @@ class Colors {
   static const blue = Color(0xFF0000FF);
   static const white = Color(0xFFFFFFFF);
 }
+
+class IndexedColor extends Color {
+  final int index;
+
+  Color toColor() => Color(value);
+
+  IndexedColor(this.index, super.value);
+}

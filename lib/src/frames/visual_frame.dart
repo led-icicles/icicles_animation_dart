@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:icicles_animation_dart/src/utils/color.dart';
+import 'package:icicles_animation_dart/src/utils/size.dart';
 
 import 'frame.dart';
 
@@ -115,11 +116,11 @@ class VisualFrame extends Frame {
 
     /// frame pixels
     for (var i = 0; i < pixels.length; i++) {
-      pixels[i] = Color.fromRGBO(
+      pixels[i] = Color.fromARGB(
+        UINT_8_MAX_SIZE,
         bytes[offset++],
         bytes[offset++],
         bytes[offset++],
-        1.0,
       );
     }
 
