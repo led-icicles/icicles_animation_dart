@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:icicles_animation_dart/src/utils/size.dart';
+import 'package:meta/meta.dart';
 
 enum FrameType {
   /// [(1)type][(2)duration]
@@ -34,6 +35,7 @@ enum FrameType {
   const FrameType(this.value);
 }
 
+@immutable
 abstract class Frame {
   static const maxDuration = Duration(milliseconds: UINT_16_MAX_SIZE);
   FrameType get type;

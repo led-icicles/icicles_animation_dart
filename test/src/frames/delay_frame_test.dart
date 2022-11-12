@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:icicles_animation_dart/src/animation/animation_header.dart';
 import 'package:icicles_animation_dart/src/frames/delay_frame.dart';
 import 'package:test/test.dart';
 
