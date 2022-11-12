@@ -18,5 +18,10 @@ void main() {
     expect(frame.pixels, encodedFrame.pixels);
     expect(frame.pixels, orderedEquals(pixels));
     expect(encodedFrame.pixels, orderedEquals(pixels));
+    expect(frame.size, equals(12));
+    expect(
+      encoded,
+      orderedEquals([2, 112, 23, 255, 0, 0, 0, 255, 0, 0, 0, 255]),
+    );
   });
 }

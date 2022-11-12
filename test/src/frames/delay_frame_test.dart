@@ -9,5 +9,7 @@ void main() {
     final encodedFrame = DelayFrame.fromBytes(encoded);
 
     expect(frame.duration, encodedFrame.duration);
+    expect(frame.size, equals(3));
+    expect(encoded, orderedEquals([1, 112, 23]));
   });
 }
