@@ -4,7 +4,7 @@ import 'frame.dart';
 
 class DelayFrame extends Frame {
   @override
-  final FrameType type = FrameType.DelayFrame;
+  FrameType type = FrameType.DelayFrame;
 
   DelayFrame(super.duration);
 
@@ -33,5 +33,20 @@ class DelayFrame extends Frame {
       ..setUint16(dataPointer++, duration.inMilliseconds, endian);
 
     return data;
+  }
+
+  factory DelayFrame.fromBytes(
+    Uint8List list, [
+    Endian endian = Endian.little,
+  ]) {
+    var offset = 0;
+    if (list[offset] != FrameType.DelayFrame.value) {
+      throw ArgumentError('Invalid frame type : ${list[offset]}');
+    }
+
+    final dataView = ByteData.view(list.buffer);
+    final milliseconds = dataView.getUint16(++offset, endian);
+
+    return DelayFrame(Duration(milliseconds: milliseconds));
   }
 }
