@@ -36,16 +36,20 @@ class DelayFrame extends Frame {
   }
 
   factory DelayFrame.fromBytes(
-    Uint8List list, [
+    Uint8List bytes, [
     Endian endian = Endian.little,
   ]) {
     var offset = 0;
-    if (list[offset] != FrameType.DelayFrame.value) {
-      throw ArgumentError('Invalid frame type : ${list[offset]}');
+
+    final dataView = ByteData.view(bytes.buffer);
+
+    final type = dataView.getUint8(offset++);
+
+    if (type != FrameType.DelayFrame.value) {
+      throw ArgumentError('Invalid frame type: $type');
     }
 
-    final dataView = ByteData.view(list.buffer);
-    final milliseconds = dataView.getUint16(++offset, endian);
+    final milliseconds = dataView.getUint16(offset, endian);
 
     return DelayFrame(Duration(milliseconds: milliseconds));
   }

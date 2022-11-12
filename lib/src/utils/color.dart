@@ -266,10 +266,64 @@ class Colors {
   static const white = Color(0xFFFFFFFF);
 }
 
-class IndexedColor extends Color {
+class IndexedColor implements Color {
   final int index;
+  final Color color;
 
   Color toColor() => Color(value);
 
-  IndexedColor(this.index, super.value);
+  const IndexedColor(this.index, this.color);
+
+  static const zero = IndexedColor(0, Color(0x00000000));
+
+  @override
+  int get alpha => color.alpha;
+
+  @override
+  int get blue => color.blue;
+
+  @override
+  double computeLuminance() => color.computeLuminance();
+
+  @override
+  int get green => color.green;
+
+  @override
+  double get opacity => color.opacity;
+
+  @override
+  int get red => color.red;
+
+  @override
+  int get value => color.value;
+
+  @override
+  IndexedColor withAlpha(int a) => IndexedColor(index, color.withAlpha(a));
+
+  @override
+  IndexedColor withBlue(int b) => IndexedColor(index, color.withBlue(b));
+
+  @override
+  IndexedColor withGreen(int g) => IndexedColor(index, color.withGreen(g));
+
+  @override
+  IndexedColor withOpacity(double opacity) =>
+      IndexedColor(index, color.withOpacity(opacity));
+
+  @override
+  IndexedColor withRed(int r) => IndexedColor(index, color.withRed(r));
+
+  IndexedColor withIndex(int index) => IndexedColor(index, color);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is IndexedColor &&
+        other.index == index &&
+        other.value == value;
+  }
+
+  @override
+  int get hashCode => Object.hash(index, value);
 }

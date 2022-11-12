@@ -33,7 +33,7 @@ class AdditiveFrame extends Frame {
       final nextPixel = nextFrame.pixels[index];
 
       if (nextPixel != prevPixel) {
-        final indexedColor = IndexedColor(index, nextPixel.value);
+        final indexedColor = IndexedColor(index, nextPixel);
         changedPixels.add(indexedColor);
       }
     }
@@ -77,21 +77,22 @@ class AdditiveFrame extends Frame {
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
+    final data = Uint8List(size);
+    final dataView = ByteData.view(data.buffer);
+
     var dataPointer = 0;
 
-    final data = Uint8List(size);
-
     /// frame header
-    data[dataPointer++] = type.value;
+    dataView.setUint8(dataPointer++, type.value);
 
     /// frame duration (little endian)
-    data[dataPointer++] = duration.inMilliseconds & 255;
-    data[dataPointer++] = duration.inMilliseconds >>> 8;
+    dataView.setUint16(dataPointer, duration.inMilliseconds, endian);
+    dataPointer += 2;
 
     /// frame size (little endian)
     final changedPixelsCount = changedPixels.length;
-    data[dataPointer++] = changedPixelsCount & 255;
-    data[dataPointer++] = changedPixelsCount >>> 8;
+    dataView.setUint16(dataPointer, changedPixelsCount, endian);
+    dataPointer += 2;
 
     /// frame pixels
     for (var i = 0; i < changedPixels.length; i++) {
@@ -99,16 +100,54 @@ class AdditiveFrame extends Frame {
       final index = changedPixel.index;
 
       /// pixel index (little endian)
-      data[dataPointer++] = index & 255;
-      data[dataPointer++] = index >>> 8;
+      dataView.setUint16(dataPointer, index, endian);
+      dataPointer += 2;
 
       final color = changedPixel;
 
-      data[dataPointer++] = color.red;
-      data[dataPointer++] = color.green;
-      data[dataPointer++] = color.blue;
+      dataView
+        ..setUint8(dataPointer++, color.red)
+        ..setUint8(dataPointer++, color.green)
+        ..setUint8(dataPointer++, color.blue);
     }
 
     return data;
+  }
+
+  factory AdditiveFrame.fromBytes(
+    Uint8List bytes, [
+    Endian endian = Endian.little,
+  ]) {
+    var offset = 0;
+
+    final dataView = ByteData.view(bytes.buffer);
+    final type = dataView.getUint8(offset++);
+    if (type != FrameType.AdditiveFrame.value) {
+      throw ArgumentError('Invalid frame type: $type');
+    }
+    final duration = Duration(milliseconds: dataView.getUint16(offset, endian));
+    offset += 2;
+    final changedPixelsCount = dataView.getUint16(offset, endian);
+    offset += 2;
+
+    final changedPixels = List<IndexedColor>.filled(
+      changedPixelsCount,
+      IndexedColor.zero,
+    );
+    for (var i = 0; i < changedPixels.length; i++) {
+      final index = dataView.getUint16(offset, endian);
+      offset += 2;
+      changedPixels[i] = IndexedColor(
+        index,
+        Color.fromARGB(
+          UINT_8_MAX_SIZE,
+          dataView.getUint8(offset++),
+          dataView.getUint8(offset++),
+          dataView.getUint8(offset++),
+        ),
+      );
+    }
+
+    return AdditiveFrame(duration, changedPixels);
   }
 }
