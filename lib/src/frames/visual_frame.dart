@@ -8,6 +8,29 @@ class VisualFrame extends Frame {
   FrameType get type => FrameType.VisualFrame;
   final List<Color> pixels;
 
+  void _isValidIndex(int index) {
+    if (index >= pixels.length || index < 0) {
+      throw RangeError.index(
+        index,
+        pixels,
+        'pixels',
+        'Invalid pixel index provided ($index). Valid range is from "0" to "${pixels.length - 1}"',
+      );
+    }
+  }
+
+  int getPixelIndex(AnimationHeader header, int x, int y) {
+    final index = x * header.yCount + y;
+    _isValidIndex(index);
+    return index;
+  }
+
+  List<Color> getColumn(AnimationHeader header, int x) =>
+      List<Color>.generate(header.yCount, (y) => pixels[x * header.yCount + y]);
+
+  List<Color> getRow(AnimationHeader header, int y) =>
+      List<Color>.generate(header.xCount, (x) => pixels[x * header.yCount + y]);
+
   VisualFrame(
     super.duration,
     List<Color> pixels,
