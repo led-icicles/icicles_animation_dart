@@ -3,62 +3,11 @@ import 'dart:typed_data';
 
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 import 'package:icicles_animation_dart/src/frames/additive_frame_rgb565.dart';
+import 'package:icicles_animation_dart/src/utils/progress_bar.dart';
 import 'package:path/path.dart' as p;
 
 export 'animation_header.dart';
 export 'animation_view.dart';
-
-class ProgressBar {
-  final int size;
-
-  ProgressBar([this.size = 10]);
-
-  Stopwatch? stoper;
-
-  bool get isActive => stoper != null;
-
-  void render(double progress) {
-    if (!stdout.hasTerminal) return;
-
-    if (isActive) {
-      if (stoper!.elapsedMilliseconds < 100) {
-        return;
-      } else {
-        stoper!.reset();
-      }
-
-      for (var i = 0; i < stdout.terminalColumns; i++) {
-        stdout.writeCharCode(8); // output backspace
-      }
-    } else {
-      stoper = Stopwatch()..start();
-    }
-
-    final buffer = StringBuffer();
-    buffer.write('[');
-    final barSegments = (size * progress).floor();
-    for (var i = 0; i < barSegments; i++) {
-      buffer.write('#');
-    }
-    for (var i = 0; i < size - barSegments; i++) {
-      buffer.write('-');
-    }
-
-    buffer.write('] ');
-    final percent = (progress * 100).toStringAsFixed(2).padRight(5);
-    buffer.write(percent);
-    buffer.write('%');
-    stdout.write(buffer.toString());
-  }
-
-  void done() {
-    if (!stdout.hasTerminal) return;
-    render(1.0);
-    stdout.writeln();
-    stoper?.stop();
-    stoper = null;
-  }
-}
 
 class Animation {
   final _frames = <Frame>[];
@@ -298,7 +247,7 @@ class Animation {
 
     final sink = file.openWrite(mode: FileMode.write);
 
-    print('Writing ${_frames.length} frames...');
+    print('Encoding ${_frames.length} frames...');
     final bar = ProgressBar();
     bar.render(0);
 
@@ -326,15 +275,16 @@ class Animation {
         sink.add(bytes);
         bar.render(i / _frames.length);
       }
+      bar.done();
+      print('Writing to file...');
       await sink.flush();
       await sink.close();
-      bar.done();
 
       toFileWatch.stop();
 
       print(
-        'Written ${_frames.length} frames of '
-        'size ${(size / 1000).toStringAsFixed(2)}KB '
+        'Written ${_frames.length} frames with '
+        'size of ${(size / 1000).toStringAsFixed(2)}KB '
         'in ${toFileWatch.elapsedMilliseconds}ms.',
       );
 
