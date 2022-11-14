@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:icicles_animation_dart/src/animation/animation_view.dart';
 import 'package:icicles_animation_dart/src/frames/frame.dart';
 
 import 'color.dart';
@@ -72,5 +73,9 @@ class Writer {
   void writeIndexedColor565(IndexedColor color) {
     writeUint16(color.index);
     writeUint16(color.toRgb565());
+  }
+
+  void writeSerialMessageType(SerialMessageTypes type) {
+    writeUint8(type.value);
   }
 }
