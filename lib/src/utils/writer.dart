@@ -55,6 +55,8 @@ class Writer {
 
   /// If a [color] has an opacity, it is converted to its opaque
   /// representation by blending [color] with the black.
+  ///
+  /// Color occupies 24bits in the [bytes] array
   void writeColor(Color color) {
     final encodedColor =
         color.isOpaque ? Color.alphaBlend(color, Colors.black) : color;

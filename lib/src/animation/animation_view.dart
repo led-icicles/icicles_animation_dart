@@ -3,15 +3,12 @@ import 'dart:typed_data';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 enum SerialMessageTypes {
-  // ignore: slash_for_doc_comments
-  /**
-   * Keep leds aware of ongoing serial communication.
-   *
-   * Built-in animations are stopped.
-   */
+  /// Keep leds aware of ongoing serial communication.
+  ///
+  /// Built-in animations are stopped.
   ping(0),
 
-  // display following frame
+  /// display following frame
   displayView(1),
 
   /// End serial communication and start playing built-in animations
