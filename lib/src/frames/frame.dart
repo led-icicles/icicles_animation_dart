@@ -53,7 +53,7 @@ enum FrameType {
         throw ArgumentError.value(
           value,
           'value',
-          'Unsupported frame type value.',
+          'Unsupported frame type value',
         );
     }
   }

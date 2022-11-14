@@ -178,10 +178,10 @@ class Animation {
       return;
     } else if (newFrame is! VisualFrame) {
       throw ArgumentError('Unsupported frame type.');
-    } else if (newFrame.pixels.length != _header.ledsCount) {
+    } else if (newFrame.pixels.length != _header.pixelsCount) {
       throw ArgumentError('Unsupported frame length. '
           'Current: ${newFrame.pixels.length}, '
-          'required: ${_header.ledsCount}');
+          'required: ${_header.pixelsCount}');
     }
 
     if (optimize) {
@@ -221,7 +221,7 @@ class Animation {
   }
 
   /// Animation frames count - loops are not included
-  int get animationFramesCount {
+  int get frameCount {
     return _frames.length;
   }
 
@@ -315,7 +315,11 @@ class Animation {
     Uint8List bytes, [
     Endian endian = Endian.little,
   ]) {
-    final header = AnimationHeader.fromBytes(bytes);
+    final startWatch = Stopwatch()..start();
+
+    final reader = Reader(bytes, endian);
+
+    final header = AnimationHeader.fromReader(reader);
 
     final animation = Animation(
       header.name,
@@ -329,8 +333,6 @@ class Animation {
     );
 
     final pixelsCount = header.pixelsCount;
-
-    final reader = Reader(bytes, endian);
 
     while (reader.hasMoreData) {
       final frameType = reader.readFrameType();
@@ -381,9 +383,11 @@ class Animation {
       }
     }
 
+    startWatch.stop();
+
     print(
-      'frames count: ${animation._frames.length}, '
-      'size: ${(animation.size / 1000).toStringAsFixed(2)}KB',
+      'Decoded ${animation._frames.length} frames '
+      'of size ${(animation.size / 1000).toStringAsFixed(2)}KB in ${startWatch.elapsedMilliseconds}ms',
     );
 
     return animation;

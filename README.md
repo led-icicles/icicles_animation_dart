@@ -1,22 +1,10 @@
-A library for Dart developers.
-
-Created from templates made available by Stagehand under a BSD-style
-[license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
-
-## Usage
-
-A simple usage example:
-
-```dart
-import 'package:icicles_animation_dart/icicles_animation_dart.dart';
-
-main() {
-  var awesome = new Awesome();
-}
+### Decoding performance (test/data/darkening.anim file)
 ```
-
-## Features and bugs
-
-Please file feature requests and bugs at the [issue tracker][tracker].
-
-[tracker]: http://example.com/issues/replaceme
+Decoded 2184 frames of size 1900.77KB in 23ms
+Decoded 2184 frames of size 1900.77KB in 13ms
+Decoded 2184 frames of size 1900.77KB in 29ms
+Decoded 2184 frames of size 1900.77KB in 7ms
+Decoded 2184 frames of size 1900.77KB in 7ms
+Decoded 2184 frames of size 1900.77KB in 7ms
+Decoded 2184 frames of size 1900.77KB in 7ms
+```

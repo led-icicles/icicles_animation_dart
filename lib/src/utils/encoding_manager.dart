@@ -4,8 +4,7 @@ import 'dart:typed_data';
 import 'package:icicles_animation_dart/src/animation/animation_view.dart';
 import 'package:icicles_animation_dart/src/frames/frame.dart';
 import 'package:icicles_animation_dart/src/utils/encodable.dart';
-
-import 'color.dart';
+import 'package:icicles_animation_dart/src/utils/utils.dart';
 
 abstract class EncodingManager {
   Endian get endian;
@@ -106,6 +105,7 @@ class Writer extends EncodingManager {
   ]) {
     final encoded = encoder.convert(value);
     writeBytes(encoded);
+    writeUint8(NULL_CHAR);
   }
 
   void writeEncodable(Encodable encodable) {
@@ -143,7 +143,7 @@ class Reader extends EncodingManager {
   }
 
   Color readColor() {
-    return Color.fromARGB(255, readUint8(), readUint8(), readUint8());
+    return Color.fromRGB(readUint8(), readUint8(), readUint8());
   }
 
   Color readColor565() {
@@ -164,5 +164,20 @@ class Reader extends EncodingManager {
 
   IndexedColor readIndexedColor565() {
     return IndexedColor(readUint16(), readColor565());
+  }
+
+  String readString([
+    Converter<List<int>, String> decoder = const Utf8Decoder(),
+  ]) {
+    final endIndex = bytes.indexOf(NULL_CHAR, pointer);
+    final encodedString = Uint8List.sublistView(bytes, pointer, endIndex);
+
+    final decodedString = decoder.convert(encodedString);
+
+    // Adding 1 additional character in order to skip the [NULL_CHAR].
+    // It is important to add [encodedString] length as decoded can have a
+    // different lenght.
+    _pointer += encodedString.length + 1;
+    return decodedString;
   }
 }

@@ -78,10 +78,6 @@ class AnimationHeader implements Encodable {
     }
   }
 
-  int get ledsCount {
-    return xCount * yCount;
-  }
-
   int get size {
     /// NULL CHAR IS USED AS THE SEPARATOR
 
@@ -106,15 +102,11 @@ class AnimationHeader implements Encodable {
   /// encode type
   static Endian get endian => Endian.little;
 
-  static Converter<String, List<int>> get encoder => utf8.encoder;
-  static Converter<List<int>, String> get decoder => utf8.decoder;
-
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
     final writter = Writer(size, endian)
       ..writeUint16(versionNumber)
       ..writeString(name)
-      ..writeUint8(NULL_CHAR)
       ..writeUint8(xCount)
       ..writeUint8(yCount)
       ..writeUint16(loopsCount)
@@ -123,33 +115,23 @@ class AnimationHeader implements Encodable {
     return writter.bytes;
   }
 
-  factory AnimationHeader.fromBytes(Uint8List bytes) {
-    var offset = 0;
-
-    final dataView = ByteData.view(bytes.buffer);
-    final versionNumber = dataView.getUint16(
-      offset,
-      endian,
-    );
-    offset += UINT_16_SIZE_IN_BYTES;
-    final nameEndIndex = bytes.indexOf(NULL_CHAR, offset);
-    final nameBytes = bytes.getRange(offset, nameEndIndex).toList();
-    final name = decoder.convert(nameBytes);
-
-    offset = nameEndIndex + NULL_CHAR_SIZE_IN_BYTES;
-    final xCount = dataView.getUint8(offset++);
-    final yCount = dataView.getUint8(offset++);
-    final loopsCount = dataView.getUint16(offset, endian);
-    offset += UINT_16_SIZE_IN_BYTES;
-    final radioPanelsCount = dataView.getUint8(offset++);
-
+  /// When [withType] is set to true, type will be also read from the [reader].
+  factory AnimationHeader.fromReader(Reader reader) {
+    // Arguments are ordered and represents order of the encoded elements in memory
     return AnimationHeader(
-      xCount: xCount,
-      yCount: yCount,
-      name: name,
-      loopsCount: loopsCount,
-      versionNumber: versionNumber,
-      radioPanelsCount: radioPanelsCount,
+      versionNumber: reader.readUint16(),
+      name: reader.readString(),
+      xCount: reader.readUint8(),
+      yCount: reader.readUint8(),
+      loopsCount: reader.readUint16(),
+      radioPanelsCount: reader.readUint8(),
     );
+  }
+
+  factory AnimationHeader.fromBytes(
+    Uint8List bytes, [
+    Endian endian = Endian.little,
+  ]) {
+    return AnimationHeader.fromReader(Reader(bytes, endian));
   }
 }
