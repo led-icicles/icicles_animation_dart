@@ -57,6 +57,22 @@ class Color {
                 ((b & 0xff) << 0)) &
             0xFFFFFFFF;
 
+  /// Construct a color from the lower 6 bits of three integers.
+  ///
+  /// * `r` is [red], from 0 to 255.
+  /// * `g` is [green], from 0 to 255.
+  /// * `b` is [blue], from 0 to 255.
+  ///
+  /// Out of range values are brought into range using modulo 255.
+  ///
+  /// Colors created by this constructors are fully opaque
+  const Color.fromRGB(int r, int g, int b)
+      : value = ((255 << 24) |
+                ((r & 0xff) << 16) |
+                ((g & 0xff) << 8) |
+                ((b & 0xff) << 0)) &
+            0xFFFFFFFF;
+
   /// Create a color from red, green, blue, and opacity, similar to `rgba()` in CSS.
   ///
   /// * `r` is [red], from 0 to 255.

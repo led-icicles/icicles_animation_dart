@@ -88,40 +88,36 @@ class AdditiveFrame extends Frame {
     return writter.bytes;
   }
 
+  /// When [withType] is set to true, type will be also read from the [reader].
+  factory AdditiveFrame.fromReader(
+    Reader reader, {
+    bool withType = true,
+  }) {
+    if (withType) {
+      final frameType = reader.readFrameType();
+      if (frameType != FrameType.AdditiveFrame) {
+        throw ArgumentError('Invalid frame type : ${frameType.name}');
+      }
+    }
+
+    final duration = reader.readDuration();
+    final changedPixelsCount = reader.readUint16();
+
+    final changedPixels = List<IndexedColor>.generate(
+      changedPixelsCount,
+      (_) => reader.readIndexedColor(),
+    );
+
+    return AdditiveFrame(duration, changedPixels);
+  }
+
   factory AdditiveFrame.fromBytes(
     Uint8List bytes, [
     Endian endian = Endian.little,
   ]) {
-    var offset = 0;
-
-    final dataView = ByteData.view(bytes.buffer);
-    final type = dataView.getUint8(offset++);
-    if (type != FrameType.AdditiveFrame.value) {
-      throw ArgumentError('Invalid frame type: $type');
-    }
-    final duration = Duration(milliseconds: dataView.getUint16(offset, endian));
-    offset += 2;
-    final changedPixelsCount = dataView.getUint16(offset, endian);
-    offset += 2;
-
-    final changedPixels = List<IndexedColor>.filled(
-      changedPixelsCount,
-      IndexedColor.zero,
+    return AdditiveFrame.fromReader(
+      Reader(bytes, endian),
+      withType: true,
     );
-    for (var i = 0; i < changedPixels.length; i++) {
-      final index = dataView.getUint16(offset, endian);
-      offset += 2;
-      changedPixels[i] = IndexedColor(
-        index,
-        Color.fromARGB(
-          UINT_8_MAX_SIZE,
-          dataView.getUint8(offset++),
-          dataView.getUint8(offset++),
-          dataView.getUint8(offset++),
-        ),
-      );
-    }
-
-    return AdditiveFrame(duration, changedPixels);
   }
 }

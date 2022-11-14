@@ -1,36 +1,23 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:icicles_animation_dart/src/utils/debug_log.dart';
-import 'package:icicles_animation_dart/src/utils/size.dart';
+import 'package:icicles_animation_dart/icicles_animation_dart.dart';
+import 'package:icicles_animation_dart/src/utils/encodable.dart';
 
 const NEWEST_ANIMATION_VERSION = 1;
 const MIN_ANIMATION_VERSION = 1;
 
-abstract class AnimationHeaderData {
-  String get name;
-  int get xCount;
-  int get yCount;
-  int? get loopsCount;
-  int? get versionNumber;
-  int? get radioPanelsCount;
-}
-
-class AnimationHeader implements AnimationHeaderData {
+class AnimationHeader implements Encodable {
   /// **uint16** max number: `65535` */
-  @override
   final int versionNumber;
 
   /// utf-8 animation name */
-  @override
   final String name;
 
   /// **uint8** max number: `255` */
-  @override
   final int xCount;
 
   /// **uint8** max number: `255` */
-  @override
   final int yCount;
 
   /// **uint16** max number: `65535`
@@ -38,7 +25,6 @@ class AnimationHeader implements AnimationHeaderData {
   /// `0` - infinite (or device maximum loop iterations - if defined)
   ///
   /// `1` - is a default value
-  @override
   final int loopsCount;
 
   /// **uint8** max number: `255`
@@ -47,7 +33,6 @@ class AnimationHeader implements AnimationHeaderData {
   ///     if panels are present, they will play inline animations.
   ///
   /// `1-255` - The radio panels will turn black at the start of the animation and wait for instructions.
-  @override
   final int radioPanelsCount;
 
   int get pixelsCount {
@@ -124,31 +109,18 @@ class AnimationHeader implements AnimationHeaderData {
   static Converter<String, List<int>> get encoder => utf8.encoder;
   static Converter<List<int>, String> get decoder => utf8.decoder;
 
-  Uint8List _getEncodedAnimationNameV2() {
-    var offset = 0;
+  @override
+  Uint8List toBytes([Endian endian = Endian.little]) {
+    final writter = Writer(size, endian)
+      ..writeUint16(versionNumber)
+      ..writeString(name)
+      ..writeUint8(NULL_CHAR)
+      ..writeUint8(xCount)
+      ..writeUint8(yCount)
+      ..writeUint16(loopsCount)
+      ..writeUint8(radioPanelsCount);
 
-    final bytes = Uint8List(size);
-    final dataView = ByteData.view(bytes.buffer);
-
-    dataView.setUint16(offset, versionNumber, endian);
-    offset += UINT_16_SIZE_IN_BYTES;
-
-    final encodedName = encoder.convert(name);
-    bytes.setAll(offset, encodedName);
-    offset += encodedName.length;
-
-    bytes[offset++] = NULL_CHAR;
-    dataView.setUint8(offset++, xCount);
-    dataView.setUint8(offset++, yCount);
-    dataView.setUint16(offset, loopsCount, endian);
-    offset += UINT_16_SIZE_IN_BYTES;
-    dataView.setUint8(offset++, radioPanelsCount);
-
-    return bytes;
-  }
-
-  Uint8List toBytes() {
-    return _getEncodedAnimationNameV2();
+    return writter.bytes;
   }
 
   factory AnimationHeader.fromBytes(Uint8List bytes) {

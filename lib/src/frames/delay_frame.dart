@@ -25,22 +25,27 @@ class DelayFrame extends Frame {
     return writter.bytes;
   }
 
+  /// When [withType] is set to true, type will be also read from the [reader].
+  factory DelayFrame.fromReader(
+    Reader reader, {
+    bool withType = true,
+  }) {
+    if (withType) {
+      final frameType = reader.readFrameType();
+      if (frameType != FrameType.DelayFrame) {
+        throw ArgumentError('Invalid frame type : ${frameType.name}');
+      }
+    }
+    return DelayFrame(reader.readDuration());
+  }
+
   factory DelayFrame.fromBytes(
     Uint8List bytes, [
     Endian endian = Endian.little,
   ]) {
-    var offset = 0;
-
-    final dataView = ByteData.view(bytes.buffer);
-
-    final type = dataView.getUint8(offset++);
-
-    if (type != FrameType.DelayFrame.value) {
-      throw ArgumentError('Invalid frame type: $type');
-    }
-
-    final milliseconds = dataView.getUint16(offset, endian);
-
-    return DelayFrame(Duration(milliseconds: milliseconds));
+    return DelayFrame.fromReader(
+      Reader(bytes, endian),
+      withType: true,
+    );
   }
 }

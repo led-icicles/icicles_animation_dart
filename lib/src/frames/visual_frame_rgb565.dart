@@ -34,4 +34,40 @@ class VisualFrameRgb565 extends VisualFrame {
 
     return writter.bytes;
   }
+
+  /// When [withType] is set to true, type will be also read from the [reader].
+  factory VisualFrameRgb565.fromReader(
+    Reader reader,
+    int pixelsCount, {
+    bool withType = true,
+  }) {
+    if (withType) {
+      final frameType = reader.readFrameType();
+      if (frameType != FrameType.VisualFrameRgb565) {
+        throw ArgumentError('Invalid frame type : ${frameType.name}');
+      }
+    }
+
+    final duration = reader.readDuration();
+
+    final pixels = List<Color>.filled(pixelsCount, Colors.black);
+
+    /// frame pixels
+    for (var i = 0; i < pixels.length; i++) {
+      pixels[i] = reader.readColor565();
+    }
+    return VisualFrameRgb565(duration, pixels);
+  }
+
+  factory VisualFrameRgb565.fromBytes(
+    Uint8List bytes,
+    int pixelsCount, [
+    Endian endian = Endian.little,
+  ]) {
+    return VisualFrameRgb565.fromReader(
+      Reader(bytes, endian),
+      pixelsCount,
+      withType: true,
+    );
+  }
 }

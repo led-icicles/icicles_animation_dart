@@ -1,14 +1,15 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:icicles_animation_dart/src/animation/animation_view.dart';
 import 'package:icicles_animation_dart/src/frames/frame.dart';
+import 'package:icicles_animation_dart/src/utils/encodable.dart';
 
 import 'color.dart';
 
-class Writer {
-  final Endian endian;
-  final Uint8List bytes;
-
+abstract class EncodingManager {
+  Endian get endian;
+  Uint8List get bytes;
   int _pointer = 0;
   int get pointer {
     return _pointer;
@@ -18,7 +19,7 @@ class Writer {
     return bytes.length;
   }
 
-  Writer(int size, this.endian) : bytes = Uint8List(size);
+  bool get hasMoreData => pointer < bytes.length;
 
   void _assertSize(int index) {
     if (index >= size) {
@@ -30,6 +31,15 @@ class Writer {
     _assertSize(index);
     _pointer = index;
   }
+}
+
+class Writer extends EncodingManager {
+  @override
+  final Endian endian;
+  @override
+  final Uint8List bytes;
+
+  Writer(int size, this.endian) : bytes = Uint8List(size);
 
   void writeUint8(int value) {
     bytes[_pointer++] = value;
@@ -43,6 +53,11 @@ class Writer {
       bytes[_pointer++] = value >>> 8;
       bytes[_pointer++] = value & 255;
     }
+  }
+
+  void writeBytes(List<int> encoded) {
+    bytes.setAll(_pointer, encoded);
+    _pointer += encoded.length;
   }
 
   void writeFrameType(FrameType type) {
@@ -83,5 +98,71 @@ class Writer {
 
   void writeSerialMessageType(SerialMessageTypes type) {
     writeUint8(type.value);
+  }
+
+  void writeString(
+    String value, [
+    Converter<String, List<int>> encoder = const Utf8Encoder(),
+  ]) {
+    final encoded = encoder.convert(value);
+    writeBytes(encoded);
+  }
+
+  void writeEncodable(Encodable encodable) {
+    final encoded = encodable.toBytes(endian);
+    writeBytes(encoded);
+  }
+}
+
+class Reader extends EncodingManager {
+  @override
+  final Endian endian;
+  @override
+  final Uint8List bytes;
+
+  Reader(this.bytes, this.endian);
+
+  int readUint8() {
+    return bytes[_pointer++];
+  }
+
+  int readUint16() {
+    if (endian == Endian.little) {
+      return readUint8() + readUint8() * 256;
+    } else {
+      return readUint8() * 256 + readUint8();
+    }
+  }
+
+  FrameType readFrameType() {
+    return FrameType.fromValue(readUint8());
+  }
+
+  Duration readDuration() {
+    return Duration(milliseconds: readUint16());
+  }
+
+  Color readColor() {
+    return Color.fromARGB(255, readUint8(), readUint8(), readUint8());
+  }
+
+  Color readColor565() {
+    final encoded = readUint16();
+    final r5 = (encoded >> 11) & 0x1f;
+    final g6 = (encoded >> 5) & 0x3f;
+    final b5 = encoded & 0x1f;
+
+    final r8 = (r5 * 527 + 23) >> 6;
+    final g8 = (g6 * 259 + 33) >> 6;
+    final b8 = (b5 * 527 + 23) >> 6;
+    return Color.fromRGB(r8, g8, b8);
+  }
+
+  IndexedColor readIndexedColor() {
+    return IndexedColor(readUint16(), readColor());
+  }
+
+  IndexedColor readIndexedColor565() {
+    return IndexedColor(readUint16(), readColor565());
   }
 }

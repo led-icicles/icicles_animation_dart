@@ -70,31 +70,32 @@ class RadioColorFrame extends Frame {
     return writter.bytes;
   }
 
-  @override
+  /// When [withType] is set to true, type will be also read from the [reader].
+  factory RadioColorFrame.fromReader(
+    Reader reader, {
+    bool withType = true,
+  }) {
+    if (withType) {
+      final frameType = reader.readFrameType();
+      if (frameType != FrameType.RadioColorFrame) {
+        throw ArgumentError('Invalid frame type : ${frameType.name}');
+      }
+    }
+
+    return RadioColorFrame(
+      reader.readDuration(),
+      reader.readUint8(),
+      reader.readColor(),
+    );
+  }
+
   factory RadioColorFrame.fromBytes(
     Uint8List bytes, [
     Endian endian = Endian.little,
   ]) {
-    var offset = 0;
-
-    final dataView = ByteData.view(bytes.buffer);
-    final type = dataView.getUint8(offset++);
-
-    if (type != FrameType.RadioColorFrame.value) {
-      throw ArgumentError('Invalid frame type : $type');
-    }
-
-    final duration = Duration(milliseconds: dataView.getUint16(offset, endian));
-    offset += 2;
-
-    final panelIndex = dataView.getUint8(offset++);
-    final color = Color.fromARGB(
-      UINT_8_MAX_SIZE,
-      dataView.getUint8(offset++),
-      dataView.getUint8(offset++),
-      dataView.getUint8(offset++),
+    return RadioColorFrame.fromReader(
+      Reader(bytes, endian),
+      withType: true,
     );
-
-    return RadioColorFrame(duration, panelIndex, color);
   }
 }

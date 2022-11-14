@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:icicles_animation_dart/src/utils/encodable.dart';
 import 'package:icicles_animation_dart/src/utils/size.dart';
 import 'package:meta/meta.dart';
 
@@ -33,10 +34,33 @@ enum FrameType {
   final int value;
 
   const FrameType(this.value);
+
+  factory FrameType.fromValue(int value) {
+    switch (value) {
+      case 1:
+        return FrameType.DelayFrame;
+      case 2:
+        return FrameType.VisualFrame;
+      case 3:
+        return FrameType.AdditiveFrame;
+      case 12:
+        return FrameType.VisualFrameRgb565;
+      case 13:
+        return FrameType.AdditiveFrameRgb565;
+      case 100:
+        return FrameType.RadioColorFrame;
+      default:
+        throw ArgumentError.value(
+          value,
+          'value',
+          'Unsupported frame type value.',
+        );
+    }
+  }
 }
 
 @immutable
-abstract class Frame {
+abstract class Frame implements Encodable {
   static const maxDuration = Duration(milliseconds: UINT_16_MAX_SIZE);
   FrameType get type;
   final Duration duration;
@@ -51,5 +75,7 @@ abstract class Frame {
 
   /// Frame size in bytes
   int get size;
-  Uint8List toBytes();
+
+  @override
+  Uint8List toBytes([Endian endian = Endian.little]);
 }

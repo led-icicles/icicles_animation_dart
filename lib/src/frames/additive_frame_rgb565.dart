@@ -36,4 +36,37 @@ class AdditiveFrameRgb565 extends AdditiveFrame {
 
     return writter.bytes;
   }
+
+  /// When [withType] is set to true, type will be also read from the [reader].
+  factory AdditiveFrameRgb565.fromReader(
+    Reader reader, {
+    bool withType = true,
+  }) {
+    if (withType) {
+      final frameType = reader.readFrameType();
+      if (frameType != FrameType.AdditiveFrameRgb565) {
+        throw ArgumentError('Invalid frame type : ${frameType.name}');
+      }
+    }
+
+    final duration = reader.readDuration();
+    final changedPixelsCount = reader.readUint16();
+
+    final changedPixels = List<IndexedColor>.generate(
+      changedPixelsCount,
+      (_) => reader.readIndexedColor565(),
+    );
+
+    return AdditiveFrameRgb565(duration, changedPixels);
+  }
+
+  factory AdditiveFrameRgb565.fromBytes(
+    Uint8List bytes, [
+    Endian endian = Endian.little,
+  ]) {
+    return AdditiveFrameRgb565.fromReader(
+      Reader(bytes, endian),
+      withType: true,
+    );
+  }
 }

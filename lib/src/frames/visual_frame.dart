@@ -86,31 +86,39 @@ class VisualFrame extends Frame {
     return writter.bytes;
   }
 
+  /// When [withType] is set to true, type will be also read from the [reader].
+  factory VisualFrame.fromReader(
+    Reader reader,
+    int pixelsCount, {
+    bool withType = true,
+  }) {
+    if (withType) {
+      final frameType = reader.readFrameType();
+      if (frameType != FrameType.VisualFrame) {
+        throw ArgumentError('Invalid frame type : ${frameType.name}');
+      }
+    }
+
+    final duration = reader.readDuration();
+
+    final pixels = List<Color>.filled(pixelsCount, Colors.black);
+
+    /// frame pixels
+    for (var i = 0; i < pixels.length; i++) {
+      pixels[i] = reader.readColor();
+    }
+    return VisualFrame(duration, pixels);
+  }
+
   factory VisualFrame.fromBytes(
     Uint8List bytes,
     int pixelsCount, [
     Endian endian = Endian.little,
   ]) {
-    var offset = 0;
-    if (bytes[offset] != FrameType.VisualFrame.value) {
-      throw ArgumentError('Invalid frame type : ${bytes[offset]}');
-    }
-
-    final dataView = ByteData.view(bytes.buffer);
-    final milliseconds = dataView.getUint16(++offset, endian);
-    offset += 2;
-    final pixels = List.filled(pixelsCount, Colors.black);
-
-    /// frame pixels
-    for (var i = 0; i < pixels.length; i++) {
-      pixels[i] = Color.fromARGB(
-        UINT_8_MAX_SIZE,
-        bytes[offset++],
-        bytes[offset++],
-        bytes[offset++],
-      );
-    }
-
-    return VisualFrame(Duration(milliseconds: milliseconds), pixels);
+    return VisualFrame.fromReader(
+      Reader(bytes, endian),
+      pixelsCount,
+      withType: true,
+    );
   }
 }
