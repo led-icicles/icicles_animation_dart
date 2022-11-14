@@ -68,7 +68,7 @@ class VisualFrame extends Frame {
 
     final pixels = [
       for (var i = 0; i < from.pixels.length; i++)
-        Color.lerp(from.pixels[i], to.pixels[i], progress)
+        Color.linearBlend(from.pixels[i], to.pixels[i], progress)
     ];
 
     return VisualFrame(duration ?? to.duration, pixels);

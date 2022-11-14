@@ -215,7 +215,7 @@ class Color {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  static Color lerp(Color a, Color b, double t) {
+  static Color linearBlend(Color a, Color b, double t) {
     return Color.fromARGB(
       _clampInt(_lerpInt(a.alpha, b.alpha, t).toInt(), 0, 255),
       _clampInt(_lerpInt(a.red, b.red, t).toInt(), 0, 255),
@@ -285,11 +285,19 @@ class Color {
 
 class Colors {
   Colors._();
-  static const black = Color(0xFF000000);
-  static const red = Color(0xFFFF0000);
-  static const green = Color(0xFF00FF00);
-  static const blue = Color(0xFF0000FF);
-  static const white = Color(0xFFFFFFFF);
+
+  static const green = Color.fromRGB(0, 255, 0);
+  static const red = Color.fromRGB(255, 0, 0);
+  static const blue = Color.fromRGB(0, 0, 255);
+  static const lightBlue = Color.fromRGB(0, 255, 255);
+  static const yellow = Color.fromRGB(255, 255, 0);
+  static const magenta = Color.fromRGB(255, 0, 255);
+  static const orange = Color.fromRGB(255, 51, 0);
+  static const violet = Color.fromRGB(60, 0, 100);
+  static const oceanBlue = Color.fromRGB(0, 255, 50);
+  static const lawnGreen = Color.fromRGB(80, 192, 0);
+  static const black = Color.fromRGB(0, 0, 0);
+  static const white = Color.fromRGB(255, 255, 255);
 }
 
 class IndexedColor implements Color {

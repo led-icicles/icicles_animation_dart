@@ -5,8 +5,60 @@ import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 import 'package:icicles_animation_dart/src/frames/additive_frame_rgb565.dart';
 import 'package:path/path.dart' as p;
 
-import 'animation_header.dart';
-import 'animation_view.dart';
+export 'animation_header.dart';
+export 'animation_view.dart';
+
+class ProgressBar {
+  final int size;
+
+  ProgressBar([this.size = 10]);
+
+  Stopwatch? stoper;
+
+  bool get isActive => stoper != null;
+
+  void render(double progress) {
+    if (!stdout.hasTerminal) return;
+
+    if (isActive) {
+      if (stoper!.elapsedMilliseconds < 100) {
+        return;
+      } else {
+        stoper!.reset();
+      }
+
+      for (var i = 0; i < stdout.terminalColumns; i++) {
+        stdout.writeCharCode(8); // output backspace
+      }
+    } else {
+      stoper = Stopwatch()..start();
+    }
+
+    final buffer = StringBuffer();
+    buffer.write('[');
+    final barSegments = (size * progress).floor();
+    for (var i = 0; i < barSegments; i++) {
+      buffer.write('#');
+    }
+    for (var i = 0; i < size - barSegments; i++) {
+      buffer.write('-');
+    }
+
+    buffer.write('] ');
+    final percent = (progress * 100).toStringAsFixed(2).padRight(5);
+    buffer.write(percent);
+    buffer.write('%');
+    stdout.write(buffer.toString());
+  }
+
+  void done() {
+    if (!stdout.hasTerminal) return;
+    render(1.0);
+    stdout.writeln();
+    stoper?.stop();
+    stoper = null;
+  }
+}
 
 class Animation {
   final _frames = <Frame>[];
@@ -129,14 +181,9 @@ class Animation {
                     .color; // panel index is shifted due to broadcast panel at index 0
         if (!isChanged) {
           if (newFrame.duration == Duration.zero) {
-            print('[OPTIMIZE] Skipping radio frame. '
-                'No color changes. '
-                'Size reduced by ${newFrame.size}B.');
             return;
           } else {
             final delayFrame = DelayFrame(newFrame.duration);
-            print(
-                '[OPTIMIZE] No changes, replacing radio frame with delay frame. Size reduced by ${newFrame.size - delayFrame.size}B.');
             _frames.add(delayFrame);
             return;
           }
@@ -251,20 +298,17 @@ class Animation {
 
     final sink = file.openWrite(mode: FileMode.write);
 
+    print('Writing ${_frames.length} frames...');
+    final bar = ProgressBar();
+    bar.render(0);
+
     try {
-      print('===== HEADER =====');
-      print('Writing header...');
       sink.add(_header.toBytes());
       await sink.flush();
 
-      print('Header written.');
-      print('=== END HEADER ===');
+      for (var i = 0; i < _frames.length; i++) {
+        final frame = _frames[i];
 
-      print('Writing ${_frames.length} frames...');
-
-      final framesWatch = Stopwatch()..start();
-
-      for (final frame in _frames) {
         final Uint8List bytes;
 
         if (useRgb565) {
@@ -280,23 +324,23 @@ class Animation {
         }
 
         sink.add(bytes);
+        bar.render(i / _frames.length);
       }
       await sink.flush();
       await sink.close();
-
-      framesWatch.stop();
-
-      print('All frames written in ${framesWatch.elapsedMilliseconds}ms.');
+      bar.done();
 
       toFileWatch.stop();
 
       print(
-          'frames count: ${_frames.length}, size: ${(size / 1000).toStringAsFixed(2)} KB');
-      print(
-          'File written in ${toFileWatch.elapsedMilliseconds}ms.  path="$targetPath".');
+        'Written ${_frames.length} frames of '
+        'size ${(size / 1000).toStringAsFixed(2)}KB '
+        'in ${toFileWatch.elapsedMilliseconds}ms.',
+      );
 
       return file;
     } catch (err) {
+      bar.done();
       await sink.close();
       await file.delete();
       rethrow;
