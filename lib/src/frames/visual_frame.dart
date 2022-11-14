@@ -10,8 +10,8 @@ class VisualFrame extends Frame {
 
   VisualFrame(
     super.duration,
-    this.pixels,
-  );
+    List<Color> pixels,
+  ) : pixels = List.unmodifiable(pixels);
 
   factory VisualFrame.filled(
     Duration duration,
@@ -19,7 +19,9 @@ class VisualFrame extends Frame {
     Color color,
   ) {
     return VisualFrame(
-        duration, List.unmodifiable((List.filled(pixels, color))));
+      duration,
+      List.filled(pixels, color),
+    );
   }
 
   /// Verify wether two visual frames are compatibility

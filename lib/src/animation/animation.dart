@@ -14,20 +14,17 @@ class Animation {
     return List.unmodifiable(_frames);
   }
 
+  AnimationHeader get header => _header;
   final AnimationHeader _header;
-  AnimationHeader get header {
-    return _header;
-  }
 
   /// Current pixels view
+  VisualFrame get currentView => _currentView;
   VisualFrame _currentView;
-  VisualFrame get currentView {
-    return _currentView;
-  }
 
   final bool optimize;
   final bool useRgb565;
 
+  List<RadioPanelView> get radioPanels => List.unmodifiable(_radioPanels);
   final List<RadioPanelView> _radioPanels;
 
   Iterable<AnimationView> play() sync* {
