@@ -106,6 +106,8 @@ class Color {
   /// The blue channel of this color in an 8 bit value.
   int get blue => (0x000000ff & value) >> 0;
 
+  bool get isOpaque => alpha == 255;
+
   /// Returns a new color that matches this color with the alpha channel
   /// replaced with `a` (which ranges from 0 to 255).
   ///
@@ -304,6 +306,9 @@ class IndexedColor implements Color {
 
   @override
   int get value => color.value;
+
+  @override
+  bool get isOpaque => color.isOpaque;
 
   @override
   IndexedColor withAlpha(int a) => IndexedColor(index, color.withAlpha(a));

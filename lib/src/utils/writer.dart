@@ -53,21 +53,25 @@ class Writer {
     writeUint16(duration.inMilliseconds);
   }
 
+  /// If a [color] has an opacity, it is converted to its opaque
+  /// representation by blending [color] with the black.
   void writeColor(Color color) {
-    writeUint8(color.red);
-    writeUint8(color.green);
-    writeUint8(color.blue);
+    final encodedColor =
+        color.isOpaque ? Color.alphaBlend(color, Colors.black) : color;
+
+    writeUint8(encodedColor.red);
+    writeUint8(encodedColor.green);
+    writeUint8(encodedColor.blue);
   }
 
   void writeColor565(Color color) {
     writeUint16(color.toRgb565());
   }
 
+  /// Uses the [writeColor] method, but an additional color index is written
   void writeIndexedColor(IndexedColor color) {
     writeUint16(color.index);
-    writeUint8(color.red);
-    writeUint8(color.green);
-    writeUint8(color.blue);
+    writeColor(color);
   }
 
   void writeIndexedColor565(IndexedColor color) {
