@@ -70,6 +70,7 @@ class VisualFrame extends Frame {
   /// Copy visual frame instance
   /// 
   /// It reuses the [pixels] list as it is immutable.
+  @override
   VisualFrame copyWith({
     Duration? duration,
     List<Color>? pixels,

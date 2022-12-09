@@ -22,6 +22,9 @@ class AdditiveFrameRgb565 extends AdditiveFrame {
     return AdditiveFrameRgb565(frame.duration, frame.changedPixels);
   }
 
+  AdditiveFrame toAdditiveFrame() =>
+      AdditiveFrameRgb565(duration, changedPixels);
+
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
     final writter = Writer(size, endian)

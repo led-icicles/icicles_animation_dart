@@ -21,6 +21,9 @@ class VisualFrameRgb565 extends VisualFrame {
     return VisualFrameRgb565(frame.duration, frame.pixels);
   }
 
+  /// Converts frame from the rgb565 to the rgb888
+  VisualFrame toVisualFrame() => VisualFrame(duration, pixels);
+
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
     final writter = Writer(size, endian)
