@@ -59,10 +59,16 @@ enum FrameType {
   }
 }
 
+/// Generic animation frame interface.
 @immutable
 abstract class Frame implements Encodable {
+  /// Constant describing the maximum possible duration of the frame.
   static const maxDuration = Duration(milliseconds: UINT_16_MAX_SIZE);
+
+  /// Frame type
   FrameType get type;
+
+  /// The frame duration.
   final Duration duration;
 
   Frame(this.duration) {
@@ -76,6 +82,7 @@ abstract class Frame implements Encodable {
   /// Frame size in bytes
   int get size;
 
+  /// Converts the following frame into its binary representation.
   @override
   Uint8List toBytes([Endian endian = Endian.little]);
 }
