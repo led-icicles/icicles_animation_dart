@@ -8,7 +8,7 @@ class VisualFrame extends Frame {
   FrameType get type => FrameType.VisualFrame;
   final List<Color> pixels;
 
-  void _isValidIndex(int index) {
+  void _assertValidPixelIndex(int index) {
     if (index >= pixels.length || index < 0) {
       throw RangeError.index(
         index,
@@ -19,9 +19,14 @@ class VisualFrame extends Frame {
     }
   }
 
+  /// Uses [header] configuration to transform the 2D [x], [y] cordinates into
+  /// 1D pixel index which is used internally by this [VisualFrame].
+  ///
+  /// Throws the [RangeError] if the provided
+  /// [x], [y] cordinates are out of range.
   int getPixelIndex(AnimationHeader header, int x, int y) {
     final index = x * header.yCount + y;
-    _isValidIndex(index);
+    _assertValidPixelIndex(index);
     return index;
   }
 
@@ -57,19 +62,21 @@ class VisualFrame extends Frame {
     }
   }
 
-  /// Copy visual frame instance
-  ///
-  /// This is slightly faster than the copyWith method as it
-  /// is reusing the [pixels] argument from the parent.
-  VisualFrame copy() => VisualFrame(duration, pixels);
+  /// Copy visual frame instance.
+  /// 
+  /// This is an alias for [copyWith] method without arguments.
+  VisualFrame copy() => copyWith();
 
+  /// Copy visual frame instance
+  /// 
+  /// It reuses the [pixels] list as it is immutable.
   VisualFrame copyWith({
     Duration? duration,
     List<Color>? pixels,
   }) =>
       VisualFrame(
         duration ?? this.duration,
-        pixels ?? List.unmodifiable(this.pixels),
+        pixels ?? this.pixels,
       );
 
   /// [(1)type][(2)duration][(ledsCount*3)pixels]
@@ -81,6 +88,9 @@ class VisualFrame extends Frame {
     return typeSize + durationSize + colorsSize;
   }
 
+  /// Blend [from] frame with [to] frame using [progress].
+  ///
+  /// The new frame will have the duration of [to] or [duration] if specified.
   static VisualFrame linearBlend(
     VisualFrame from,
     VisualFrame to,

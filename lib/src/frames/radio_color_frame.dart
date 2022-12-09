@@ -1,17 +1,26 @@
+import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 class RadioColorFrame extends Frame {
   static const maxPanelIndex = UINT_8_MAX_SIZE;
+  static const broadcastChannelIndex = 0;
+
   @override
   FrameType get type => FrameType.RadioColorFrame;
 
+  /// Panel index.
+  /// `0` - Stands for the broadcast (all panels). This is also described by the
+  /// [RadioColorFrame.broadcastChannelIndex] constant. Take a look at the
+  /// [isBroadcast] getter.
+  ///
+  /// Panel index cannot be larger than [RadioColorFrame.maxPanelIndex].
   final int panelIndex;
   final Color color;
 
   bool get isBroadcast {
-    return panelIndex == 0;
+    return panelIndex == broadcastChannelIndex;
   }
 
   RadioColorFrame(
@@ -21,7 +30,10 @@ class RadioColorFrame extends Frame {
   ) {
     if (panelIndex.isNegative || panelIndex > UINT_8_MAX_SIZE) {
       throw ArgumentError(
-          'Not valid panel index provided. Panel index should be larger or equal 0 (for broadcast) and smaller than [RadioColorFrame.maxPanelIndex].');
+        'Not valid panel index provided. '
+        'Panel index should be larger or equal 0 (for broadcast) '
+        'and smaller than [RadioColorFrame.maxPanelIndex].',
+      );
     }
   }
 
