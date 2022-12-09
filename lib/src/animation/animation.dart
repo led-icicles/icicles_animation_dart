@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 import 'package:icicles_animation_dart/src/frames/additive_frame_rgb565.dart';
 import 'package:icicles_animation_dart/src/utils/progress_bar.dart';
@@ -108,6 +109,171 @@ class Animation {
           Duration.zero,
           List.filled(xCount * yCount, Colors.black),
         );
+
+  @deprecated
+  void _assertSupportedFrame(Frame frame) {
+    final isSupported = frame is VisualFrame ||
+        frame is RadioColorFrame ||
+        frame is DelayFrame ||
+        frame is AdditiveFrame;
+
+    if (!isSupported) {
+      throw UnsupportedError(
+        'Provided frame type (${frame.runtimeType}) is not supported.',
+      );
+    }
+  }
+
+  /// Add frame to the animation without optimization
+  bool _addFrame(Frame frame) {
+    _frames.add(frame);
+    return true;
+  }
+
+  bool _addDelayFrame(Frame frame, {bool optimize = true}) {
+    if (optimize) {
+      /// Nothing to add
+      if (frame.duration == Duration.zero) {
+        return false;
+      }
+
+      final prevFrame = _frames.lastOrNull;
+
+      /// Previous frame does not exist
+      if (prevFrame == null) {
+        return _addFrame(frame);
+      }
+      final mergedDuration = frame.duration + prevFrame.duration;
+
+      /// It is not possible to increase the delay of the previous frame
+      if (mergedDuration > Frame.maxDuration) {
+        return _addFrame(frame);
+      }
+
+      final mergedFrame = prevFrame.copyWith(duration: mergedDuration);
+
+      /// Override the last frame with new merged one
+      _frames.last = mergedFrame;
+      return false;
+    } else {
+      return _addFrame(frame);
+    }
+  }
+
+  bool _addVisualFrame(VisualFrame frame, {bool optimize = true}) {
+    if (frame.pixels.length != _header.pixelsCount) {
+      throw ArgumentError(
+        'Unsupported frame length. '
+        'Current: ${frame.pixels.length}, '
+        'required: ${_header.pixelsCount}',
+      );
+    }
+
+    if (useRgb565 && frame is! VisualFrameRgb565) {
+      frame = VisualFrameRgb565.fromVisualFrame(frame);
+    } else if (!useRgb565 && frame is VisualFrameRgb565) {
+      frame = frame.toVisualFrame();
+    }
+
+    /// No optimization, just add the frame
+    if (!optimize) {
+      return _addFrame(frame);
+    }
+
+    final prevFrame = _frames.lastOrNull;
+    if (prevFrame == null) {
+      return _addFrame(frame);
+    }
+
+    final changedPixels = AdditiveFrame.getChangedPixelsFromFrames(
+      currentView,
+      frame,
+    );
+
+    /// No pixels are changed, add only a duration of this frame.
+    if (changedPixels.isEmpty) {
+      return _addDelayFrame(frame);
+    }
+
+    final additiveFrame = useRgb565
+        ? AdditiveFrameRgb565(
+            frame.duration,
+            changedPixels,
+          )
+        : AdditiveFrame(
+            frame.duration,
+            changedPixels,
+          );
+
+    final isAdditiveFrameSmaller = additiveFrame.size < frame.size;
+    if (isAdditiveFrameSmaller) {
+      return _addFrame(additiveFrame);
+    } else {
+      return _addFrame(frame);
+    }
+  }
+
+  bool _addAdditiveFrame(AdditiveFrame frame, {bool optimize = true}) {
+    if (useRgb565 && frame is! AdditiveFrameRgb565) {
+      frame = AdditiveFrameRgb565.fromAdditiveFrame(frame);
+    } else if (!useRgb565 && frame is AdditiveFrameRgb565) {
+      frame = frame.toAdditiveFrame();
+    }
+
+    if (!optimize) {
+      return _addFrame(frame);
+    }
+
+    final newView = frame.mergeOnto(currentView);
+
+    final changedPixels = AdditiveFrame.getChangedPixelsFromFrames(
+      currentView,
+      newView,
+    );
+
+    /// No visual changes, add the frame duration
+    if (changedPixels.isEmpty) {
+      return _addDelayFrame(frame);
+    }
+
+    /// Frame has larger duration than zero
+    if (frame.duration > Duration.zero) {
+      return _addFrame(frame);
+    }
+
+    final prevFrame = _frames.lastOrNull;
+
+    /// If prev frame is null, cannot optimize just push add the frame
+    if (prevFrame == null) {
+      return _addFrame(frame);
+    }
+
+    if (prevFrame is VisualFrame) {
+      _frames.last = frame.mergeOnto(prevFrame);
+      return false;
+    } else if (prevFrame is AdditiveFrame) {
+      
+    }
+  }
+
+  /// Returns true, when new frame was added.
+  bool addFrame2(Frame frame) {
+    if (frame is DelayFrame) {
+      return _addDelayFrame(frame, optimize: optimize);
+    } else if (frame is VisualFrame) {
+      return _addVisualFrame(frame, optimize: optimize);
+    } else if (frame is AdditiveFrame) {
+      return _addAdditiveFrame(frame);
+      // TODO:
+    } else if (frame is RadioColorFrame) {
+      return false;
+      // TODO:
+    } else {
+      throw UnsupportedError(
+        'Provided frame type (${frame.runtimeType}) is not supported.',
+      );
+    }
+  }
 
   void addFrame(Frame newFrame) {
     if (newFrame is DelayFrame) {

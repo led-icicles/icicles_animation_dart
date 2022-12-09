@@ -82,6 +82,8 @@ abstract class Frame implements Encodable {
   /// Frame size in bytes
   int get size;
 
+  Frame copyWith({Duration? duration});
+
   /// Converts the following frame into its binary representation.
   @override
   Uint8List toBytes([Endian endian = Endian.little]);

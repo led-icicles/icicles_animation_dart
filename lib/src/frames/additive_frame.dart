@@ -47,7 +47,15 @@ class AdditiveFrame extends Frame {
       pixels[changedPixel.index] = changedPixel.toColor();
     }
 
-    return VisualFrame(duration, pixels);
+    if (frame is VisualFrameRgb565) {
+      return VisualFrameRgb565(duration, pixels);
+    } else {
+      return VisualFrame(duration, pixels);
+    }
+  }
+
+  AdditiveFrame mergeWith(AdditiveFrame frame) {
+    // TODO:
   }
 
   factory AdditiveFrame.fromVisualFrames(
