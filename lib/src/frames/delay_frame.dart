@@ -48,4 +48,10 @@ class DelayFrame extends Frame {
       withType: true,
     );
   }
+
+  @override
+  DelayFrame copyWith({
+    Duration? duration,
+  }) =>
+      DelayFrame(duration ?? this.duration);
 }
