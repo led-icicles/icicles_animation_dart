@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
+import 'package:icicles_animation_dart/src/frames/additive_frame_rgb565.dart';
 
 class AdditiveFrame extends Frame {
   @override
@@ -54,8 +55,22 @@ class AdditiveFrame extends Frame {
     }
   }
 
+  /// The provided [frame] is placed **over** the current frame.
+  ///
+  /// If the this frame is [AdditiveFrameRgb565] the returned frame
+  /// will also be the [AdditiveFrameRgb565] - The returned frame will be
+  /// same type as this.
   AdditiveFrame mergeWith(AdditiveFrame frame) {
-    // TODO:
+    final pixels = <int, IndexedColor>{
+      for (final color in changedPixels) color.index: color,
+      for (final color in frame.changedPixels) color.index: color,
+    }.values.toList();
+
+    if (this is AdditiveFrameRgb565) {
+      return AdditiveFrameRgb565(duration, pixels);
+    } else {
+      return AdditiveFrame(duration, pixels);
+    }
   }
 
   factory AdditiveFrame.fromVisualFrames(
@@ -128,4 +143,14 @@ class AdditiveFrame extends Frame {
       withType: true,
     );
   }
+
+  @override
+  AdditiveFrame copyWith({
+    Duration? duration,
+    List<IndexedColor>? changedPixels,
+  }) =>
+      AdditiveFrame(
+        duration ?? this.duration,
+        changedPixels ?? this.changedPixels,
+      );
 }

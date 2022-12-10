@@ -72,4 +72,14 @@ class AdditiveFrameRgb565 extends AdditiveFrame {
       withType: true,
     );
   }
+
+  @override
+  AdditiveFrameRgb565 copyWith({
+    Duration? duration,
+    List<IndexedColor>? changedPixels,
+  }) =>
+      AdditiveFrameRgb565(
+        duration ?? this.duration,
+        changedPixels ?? this.changedPixels,
+      );
 }

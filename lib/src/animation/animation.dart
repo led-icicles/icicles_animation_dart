@@ -110,20 +110,6 @@ class Animation {
           List.filled(xCount * yCount, Colors.black),
         );
 
-  @deprecated
-  void _assertSupportedFrame(Frame frame) {
-    final isSupported = frame is VisualFrame ||
-        frame is RadioColorFrame ||
-        frame is DelayFrame ||
-        frame is AdditiveFrame;
-
-    if (!isSupported) {
-      throw UnsupportedError(
-        'Provided frame type (${frame.runtimeType}) is not supported.',
-      );
-    }
-  }
-
   /// Add frame to the animation without optimization
   bool _addFrame(Frame frame) {
     _frames.add(frame);
@@ -252,8 +238,94 @@ class Animation {
       _frames.last = frame.mergeOnto(prevFrame);
       return false;
     } else if (prevFrame is AdditiveFrame) {
-      
+      _frames.last = prevFrame.mergeWith(frame);
+      return false;
+    } else if (prevFrame is DelayFrame) {
+      final mergedDuration = prevFrame.duration + frame.duration;
+      if (mergedDuration > Frame.maxDuration) {
+        return _addFrame(frame);
+      }
+
+      final mergedFrame = frame.copyWith(duration: mergedDuration);
+      return _addFrame(mergedFrame);
+    } else {
+      return _addFrame(frame);
     }
+  }
+
+  bool _addRadioColorFrame(RadioColorFrame frame, {bool optimize = true}) {
+    if (frame.panelIndex > header.radioPanelsCount) {
+      throw ArgumentError(
+        'Invalid panel index (${frame.panelIndex}). '
+        'This animation supports "${header.radioPanelsCount}" radio panels.',
+      );
+    }
+
+    if (!optimize) {
+      return _addFrame(frame);
+    }
+
+    if (frame.isBroadcast) {
+      final isChanged = _radioPanels.any((p) => p.color != frame.color);
+
+      if (!isChanged) {
+        /// Colors not changed, add delay frame
+        return _addDelayFrame(frame);
+      } else {
+        /// Colors changed
+        return _addFrame(frame);
+      }
+    } else {
+      final radioPanelView = _radioPanels.firstWhere(
+        (p) => p.index == frame.panelIndex,
+        orElse: () => throw ArgumentError(
+          'Panel with provided index (${frame.panelIndex}) does not exist.',
+        ),
+      );
+      final isChanged = radioPanelView.color != frame.color;
+
+      if (!isChanged) {
+        /// Colors not changed, add delay frame
+        return _addDelayFrame(frame);
+      } else {
+        /// Colors changed
+        return _addFrame(frame);
+      }
+    }
+
+    // final isChanged = frame.isBroadcast
+    //     ? _radioPanels.any((p) => p.color != frame.color)
+    //     : _radioPanels
+    //             .firstWhere(
+    //               (p) => p.index == frame.panelIndex,
+    //               orElse: () => throw ArgumentError(
+    //                 'Panel with provided index (${frame.panelIndex}) does not exist.',
+    //               ),
+    //             )
+    //             .color !=
+    //         frame.color;
+
+    // if (!isChanged) {
+    //   if (frame.duration == Duration.zero) {
+    //     return false;
+    //   } else {
+    //     return _addDelayFrame(frame);
+    //   }
+    // } else {
+    //   if (frame.isBroadcast) {
+    //     for (var i = 0; i < _radioPanels.length; i++) {
+    //       _radioPanels[i] = _radioPanels[i].copyWith(
+    //         color: frame.color,
+    //       );
+    //     }
+    //   } else {
+    //     // shift index due to broadcast panel at 0
+    //     final localPanelIndex = frame.panelIndex - 1;
+    //     _radioPanels[localPanelIndex] =
+    //         _radioPanels[localPanelIndex].copyWith(color: frame.color);
+    //   }
+    //   return _addFrame(frame);
+    // }
   }
 
   /// Returns true, when new frame was added.
@@ -263,11 +335,9 @@ class Animation {
     } else if (frame is VisualFrame) {
       return _addVisualFrame(frame, optimize: optimize);
     } else if (frame is AdditiveFrame) {
-      return _addAdditiveFrame(frame);
-      // TODO:
+      return _addAdditiveFrame(frame, optimize: optimize);
     } else if (frame is RadioColorFrame) {
-      return false;
-      // TODO:
+      return _addRadioColorFrame(frame, optimize: optimize);
     } else {
       throw UnsupportedError(
         'Provided frame type (${frame.runtimeType}) is not supported.',

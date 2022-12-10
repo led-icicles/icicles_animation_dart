@@ -1,4 +1,3 @@
-import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
@@ -60,6 +59,7 @@ class RadioColorFrame extends Frame {
   /// Copy radio color frame instance
   RadioColorFrame copy() => RadioColorFrame(duration, panelIndex, color);
 
+  @override
   RadioColorFrame copyWith({
     Duration? duration,
     int? panelIndex,
