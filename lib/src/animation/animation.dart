@@ -128,6 +128,19 @@ class Animation {
       _currentView = frame;
     } else if (frame is AdditiveFrame) {
       _currentView = frame.mergeOnto(_currentView);
+    } else if (frame is RadioColorFrame) {
+      if (frame.isBroadcast) {
+        for (var i = 0; i < _radioPanels.length; i++) {
+          _radioPanels[i] = _radioPanels[i].copyWith(
+            color: frame.color,
+          );
+        }
+      } else {
+        final localIndex = frame.panelIndex - 1;
+        // shift index due to broadcast panel at 0
+        _radioPanels[localIndex] =
+            _radioPanels[localIndex].copyWith(color: frame.color);
+      }
     }
   }
 
