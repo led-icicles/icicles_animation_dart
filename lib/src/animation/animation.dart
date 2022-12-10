@@ -113,7 +113,22 @@ class Animation {
   /// Add frame to the animation without optimization
   bool _addFrame(Frame frame) {
     _frames.add(frame);
+    _updateView(frame);
     return true;
+  }
+
+  bool _replaceLastFrame(Frame frame) {
+    _frames.last = frame;
+    _updateView(frame);
+    return true;
+  }
+
+  void _updateView(Frame frame) {
+    if (frame is VisualFrame) {
+      _currentView = frame;
+    } else if (frame is AdditiveFrame) {
+      _currentView = frame.mergeOnto(_currentView);
+    }
   }
 
   bool _addDelayFrame(Frame frame, {bool optimize = true}) {
@@ -139,7 +154,7 @@ class Animation {
       final mergedFrame = prevFrame.copyWith(duration: mergedDuration);
 
       /// Override the last frame with new merged one
-      _frames.last = mergedFrame;
+      _replaceLastFrame(mergedFrame);
       return false;
     } else {
       return _addFrame(frame);
@@ -193,7 +208,7 @@ class Animation {
 
     final isAdditiveFrameSmaller = additiveFrame.size < frame.size;
     if (isAdditiveFrameSmaller) {
-      return _addFrame(additiveFrame);
+      return _addAdditiveFrame(additiveFrame);
     } else {
       return _addFrame(frame);
     }
@@ -235,10 +250,10 @@ class Animation {
     }
 
     if (prevFrame is VisualFrame) {
-      _frames.last = frame.mergeOnto(prevFrame);
+      _replaceLastFrame(frame.mergeOnto(prevFrame));
       return false;
     } else if (prevFrame is AdditiveFrame) {
-      _frames.last = prevFrame.mergeWith(frame);
+      _replaceLastFrame(prevFrame.mergeWith(frame));
       return false;
     } else if (prevFrame is DelayFrame) {
       final mergedDuration = prevFrame.duration + frame.duration;
@@ -292,44 +307,10 @@ class Animation {
         return _addFrame(frame);
       }
     }
-
-    // final isChanged = frame.isBroadcast
-    //     ? _radioPanels.any((p) => p.color != frame.color)
-    //     : _radioPanels
-    //             .firstWhere(
-    //               (p) => p.index == frame.panelIndex,
-    //               orElse: () => throw ArgumentError(
-    //                 'Panel with provided index (${frame.panelIndex}) does not exist.',
-    //               ),
-    //             )
-    //             .color !=
-    //         frame.color;
-
-    // if (!isChanged) {
-    //   if (frame.duration == Duration.zero) {
-    //     return false;
-    //   } else {
-    //     return _addDelayFrame(frame);
-    //   }
-    // } else {
-    //   if (frame.isBroadcast) {
-    //     for (var i = 0; i < _radioPanels.length; i++) {
-    //       _radioPanels[i] = _radioPanels[i].copyWith(
-    //         color: frame.color,
-    //       );
-    //     }
-    //   } else {
-    //     // shift index due to broadcast panel at 0
-    //     final localPanelIndex = frame.panelIndex - 1;
-    //     _radioPanels[localPanelIndex] =
-    //         _radioPanels[localPanelIndex].copyWith(color: frame.color);
-    //   }
-    //   return _addFrame(frame);
-    // }
   }
 
   /// Returns true, when new frame was added.
-  bool addFrame2(Frame frame) {
+  bool addFrame(Frame frame) {
     if (frame is DelayFrame) {
       return _addDelayFrame(frame, optimize: optimize);
     } else if (frame is VisualFrame) {
@@ -345,7 +326,8 @@ class Animation {
     }
   }
 
-  void addFrame(Frame newFrame) {
+  @deprecated
+  void addFrameLegacy(Frame newFrame) {
     if (newFrame is DelayFrame) {
       _frames.add(newFrame);
       return;
