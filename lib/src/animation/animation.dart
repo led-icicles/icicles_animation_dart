@@ -149,13 +149,13 @@ class Animation {
   }
 
   /// Add frame to the animation without optimization
-  bool _addFrame(Frame frame) {
+  bool _storeFrame(Frame frame) {
     _frames.add(frame);
     _updateView(frame);
     return true;
   }
 
-  bool _replaceLastFrame(Frame frame) {
+  bool _replaceLastStoredFrame(Frame frame) {
     _frames.last = frame;
     _updateView(frame);
     return true;
@@ -188,22 +188,22 @@ class Animation {
 
       /// Previous frame does not exist
       if (prevFrame == null) {
-        return _addFrame(frame);
+        return _storeFrame(frame);
       }
       final mergedDuration = frame.duration + prevFrame.duration;
 
       /// It is not possible to increase the delay of the previous frame
       if (mergedDuration > Frame.maxDuration) {
-        return _addFrame(frame);
+        return _storeFrame(frame);
       }
 
       final mergedFrame = prevFrame.copyWith(duration: mergedDuration);
 
       /// Override the last frame with new merged one
-      _replaceLastFrame(mergedFrame);
+      _replaceLastStoredFrame(mergedFrame);
       return false;
     } else {
-      return _addFrame(frame);
+      return _storeFrame(frame);
     }
   }
 
@@ -224,12 +224,12 @@ class Animation {
 
     /// No optimization, just add the frame
     if (!optimize) {
-      return _addFrame(frame);
+      return _storeFrame(frame);
     }
 
     final prevFrame = _frames.lastOrNull;
     if (prevFrame == null) {
-      return _addFrame(frame);
+      return _storeFrame(frame);
     }
 
     final changedPixels = AdditiveFrame.getChangedPixelsFromFrames(
@@ -256,7 +256,7 @@ class Animation {
     if (isAdditiveFrameSmaller) {
       return _addAdditiveFrame(additiveFrame);
     } else {
-      return _addFrame(frame);
+      return _storeFrame(frame);
     }
   }
 
@@ -268,7 +268,7 @@ class Animation {
     }
 
     if (!optimize) {
-      return _addFrame(frame);
+      return _storeFrame(frame);
     }
 
     final newView = frame.mergeOnto(currentView.frame);
@@ -285,32 +285,32 @@ class Animation {
 
     /// Frame has larger duration than zero
     if (frame.duration > Duration.zero) {
-      return _addFrame(frame);
+      return _storeFrame(frame);
     }
 
     final prevFrame = _frames.lastOrNull;
 
     /// If prev frame is null, cannot optimize just push add the frame
     if (prevFrame == null) {
-      return _addFrame(frame);
+      return _storeFrame(frame);
     }
 
     if (prevFrame is VisualFrame) {
-      _replaceLastFrame(frame.mergeOnto(prevFrame));
+      _replaceLastStoredFrame(frame.mergeOnto(prevFrame));
       return false;
     } else if (prevFrame is AdditiveFrame) {
-      _replaceLastFrame(prevFrame.mergeWith(frame));
+      _replaceLastStoredFrame(prevFrame.mergeWith(frame));
       return false;
     } else if (prevFrame is DelayFrame) {
       final mergedDuration = prevFrame.duration + frame.duration;
       if (mergedDuration > Frame.maxDuration) {
-        return _addFrame(frame);
+        return _storeFrame(frame);
       }
 
       final mergedFrame = frame.copyWith(duration: mergedDuration);
-      return _addFrame(mergedFrame);
+      return _storeFrame(mergedFrame);
     } else {
-      return _addFrame(frame);
+      return _storeFrame(frame);
     }
   }
 
@@ -323,7 +323,7 @@ class Animation {
     }
 
     if (!optimize) {
-      return _addFrame(frame);
+      return _storeFrame(frame);
     }
 
     if (frame.isBroadcast) {
@@ -336,7 +336,7 @@ class Animation {
         return _addDelayFrame(frame);
       } else {
         /// Colors changed
-        return _addFrame(frame);
+        return _storeFrame(frame);
       }
     } else {
       final radioPanelView = currentView.radioPanels.firstWhere(
@@ -352,7 +352,7 @@ class Animation {
         return _addDelayFrame(frame);
       } else {
         /// Colors changed
-        return _addFrame(frame);
+        return _storeFrame(frame);
       }
     }
   }
@@ -418,9 +418,8 @@ class Animation {
             view.radioPanels
                 .map((radioPanelView) => radioPanelView.toRadioColorFrame())
                 .forEach((radioFrame) => addFrame(radioFrame));
-            addFrame(view.frame.copyWith(duration: cumulativeDuration));
 
-            return null;
+            return view.frame.copyWith(duration: cumulativeDuration);
           }
         }
     }
@@ -430,19 +429,23 @@ class Animation {
   bool addFrame(Frame frame) {
     final acceptedFrame = _assertValidFramerate(frame);
 
-    if (acceptedFrame == null) {
-      _updateBufferedView(frame);
+    if (acceptedFrame != null) {
+      return _addFrameInternal(acceptedFrame);
+    } else {
       return false;
     }
+  }
 
-    if (acceptedFrame is DelayFrame) {
-      return _addDelayFrame(acceptedFrame, optimize: optimize);
-    } else if (acceptedFrame is VisualFrame) {
-      return _addVisualFrame(acceptedFrame, optimize: optimize);
-    } else if (acceptedFrame is AdditiveFrame) {
-      return _addAdditiveFrame(acceptedFrame, optimize: optimize);
-    } else if (acceptedFrame is RadioColorFrame) {
-      return _addRadioColorFrame(acceptedFrame, optimize: optimize);
+  /// Adds frame without checks
+  bool _addFrameInternal(Frame frame) {
+    if (frame is DelayFrame) {
+      return _addDelayFrame(frame, optimize: optimize);
+    } else if (frame is VisualFrame) {
+      return _addVisualFrame(frame, optimize: optimize);
+    } else if (frame is AdditiveFrame) {
+      return _addAdditiveFrame(frame, optimize: optimize);
+    } else if (frame is RadioColorFrame) {
+      return _addRadioColorFrame(frame, optimize: optimize);
     } else {
       throw UnsupportedError(
         'Provided frame type (${frame.runtimeType}) is not supported.',
