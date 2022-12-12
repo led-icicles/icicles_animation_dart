@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:equatable/equatable.dart';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 enum SerialMessageTypes {
@@ -19,7 +20,7 @@ enum SerialMessageTypes {
   const SerialMessageTypes(this.value);
 }
 
-class RadioPanelView {
+class RadioPanelView extends Equatable {
   final int index;
   final Color color;
 
@@ -30,18 +31,50 @@ class RadioPanelView {
     Color? color,
   }) =>
       RadioPanelView(index ?? this.index, color ?? this.color);
+
+  RadioColorFrame toRadioColorFrame([Duration duration = Duration.zero]) =>
+      RadioColorFrame(duration, index, color);
+
+  @override
+  List<Object?> get props => [index, color];
 }
 
 /// Class used for serial communication,
 /// represents the current icicles state
-class AnimationView {
+class AnimationView extends Equatable {
   final VisualFrame frame;
   final List<RadioPanelView> radioPanels;
 
   AnimationView(
     this.frame,
-    this.radioPanels,
-  );
+    List<RadioPanelView> radioPanels,
+  ) : radioPanels = List.unmodifiable(radioPanels);
+
+  AnimationView copyApplied(Frame newFrame) {
+    VisualFrame? updatedFrame;
+    final radioPanels = List.of(this.radioPanels);
+
+    if (newFrame is VisualFrame) {
+      updatedFrame = newFrame;
+    } else if (newFrame is AdditiveFrame) {
+      updatedFrame = newFrame.mergeOnto(frame);
+    } else if (newFrame is RadioColorFrame) {
+      if (newFrame.isBroadcast) {
+        for (var i = 0; i < radioPanels.length; i++) {
+          radioPanels[i] = radioPanels[i].copyWith(
+            color: newFrame.color,
+          );
+        }
+      } else {
+        final localIndex = newFrame.panelIndex - 1;
+        // shift index due to broadcast panel at 0
+        radioPanels[localIndex] =
+            radioPanels[localIndex].copyWith(color: newFrame.color);
+      }
+    }
+
+    return copyWith(frame: updatedFrame, radioPanels: radioPanels);
+  }
 
   AnimationView copyWith({
     VisualFrame? frame,
@@ -94,4 +127,7 @@ class AnimationView {
 
     return writter.bytes;
   }
+
+  @override
+  List<Object?> get props => [frame, radioPanels];
 }

@@ -63,12 +63,12 @@ class VisualFrame extends Frame {
   }
 
   /// Copy visual frame instance.
-  /// 
+  ///
   /// This is an alias for [copyWith] method without arguments.
   VisualFrame copy() => copyWith();
 
   /// Copy visual frame instance
-  /// 
+  ///
   /// It reuses the [pixels] list as it is immutable.
   @override
   VisualFrame copyWith({
@@ -157,4 +157,7 @@ class VisualFrame extends Frame {
       withType: true,
     );
   }
+
+  @override
+  List<Object?> get props => [type, duration, pixels];
 }

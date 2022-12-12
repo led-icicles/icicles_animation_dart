@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:equatable/equatable.dart';
 import 'package:icicles_animation_dart/src/utils/encodable.dart';
 import 'package:icicles_animation_dart/src/utils/size.dart';
 import 'package:meta/meta.dart';
@@ -61,7 +62,7 @@ enum FrameType {
 
 /// Generic animation frame interface.
 @immutable
-abstract class Frame implements Encodable {
+abstract class Frame extends Equatable implements Encodable {
   /// Constant describing the maximum possible duration of the frame.
   static const maxDuration = Duration(milliseconds: UINT_16_MAX_SIZE);
 

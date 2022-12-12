@@ -56,4 +56,7 @@ class DelayFrame extends Frame {
     Duration? duration,
   }) =>
       DelayFrame(duration ?? this.duration);
+
+  @override
+  List<Object?> get props => [type, duration];
 }

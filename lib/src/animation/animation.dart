@@ -43,16 +43,18 @@ class Animation {
   final AnimationHeader _header;
 
   /// Current pixels view
-  VisualFrame get currentView => _currentView;
-  VisualFrame _currentView;
+  AnimationView get currentView => _currentView;
+  AnimationView _currentView;
+
+  /// View that was buffered but not yet displayed
+  /// This is used together with [FramerateBehavior.drop].
+  AnimationView get bufferedView => _bufferedView;
+  AnimationView _bufferedView;
 
   final bool optimize;
   final bool useRgb565;
   final Framerate framerate;
   final FramerateBehavior framerateBehavior;
-
-  List<RadioPanelView> get radioPanels => List.unmodifiable(_radioPanels);
-  final List<RadioPanelView> _radioPanels;
 
   Iterable<AnimationView> play() sync* {
     final intialFrame = VisualFrame.filled(
@@ -125,17 +127,26 @@ class Animation {
           versionNumber: versionNumber,
           radioPanelsCount: radioPanelsCount,
         ),
-        _radioPanels = List<RadioPanelView>.generate(radioPanelsCount,
-            (index) => RadioPanelView(index + 1, Colors.black)),
 
         /// Before each animation leds are set to black color.
         /// But black color is not displayed. To set all pixels to black,
         /// you should add frame, even [DelayFrame]
-        _currentView = VisualFrame(
-          /// zero duration - this is just a placeholder
-          Duration.zero,
-          List.filled(xCount * yCount, Colors.black),
-        );
+        _currentView = _initView(xCount, yCount, radioPanelsCount),
+        _bufferedView = _initView(xCount, yCount, radioPanelsCount);
+
+  static AnimationView _initView(int xCount, int yCount, int radioPanelsCount) {
+    return AnimationView(
+      VisualFrame(
+        /// zero duration - this is just a placeholder
+        Duration.zero,
+        List.filled(xCount * yCount, Colors.black),
+      ),
+      List<RadioPanelView>.generate(
+        radioPanelsCount,
+        (index) => RadioPanelView(index + 1, Colors.black),
+      ),
+    );
+  }
 
   /// Add frame to the animation without optimization
   bool _addFrame(Frame frame) {
@@ -150,25 +161,14 @@ class Animation {
     return true;
   }
 
+  /// Updates [currentView] and the [bufferedView].
   void _updateView(Frame frame) {
-    if (frame is VisualFrame) {
-      _currentView = frame;
-    } else if (frame is AdditiveFrame) {
-      _currentView = frame.mergeOnto(_currentView);
-    } else if (frame is RadioColorFrame) {
-      if (frame.isBroadcast) {
-        for (var i = 0; i < _radioPanels.length; i++) {
-          _radioPanels[i] = _radioPanels[i].copyWith(
-            color: frame.color,
-          );
-        }
-      } else {
-        final localIndex = frame.panelIndex - 1;
-        // shift index due to broadcast panel at 0
-        _radioPanels[localIndex] =
-            _radioPanels[localIndex].copyWith(color: frame.color);
-      }
-    }
+    _currentView = _currentView.copyApplied(frame);
+    _bufferedView = _currentView;
+  }
+
+  void _updateBufferedView(Frame frame) {
+    _bufferedView = _bufferedView.copyApplied(frame);
   }
 
   bool _addDelayFrame(Frame frame, {bool optimize = true}) {
@@ -233,7 +233,7 @@ class Animation {
     }
 
     final changedPixels = AdditiveFrame.getChangedPixelsFromFrames(
-      currentView,
+      currentView.frame,
       frame,
     );
 
@@ -271,10 +271,10 @@ class Animation {
       return _addFrame(frame);
     }
 
-    final newView = frame.mergeOnto(currentView);
+    final newView = frame.mergeOnto(currentView.frame);
 
     final changedPixels = AdditiveFrame.getChangedPixelsFromFrames(
-      currentView,
+      currentView.frame,
       newView,
     );
 
@@ -327,7 +327,9 @@ class Animation {
     }
 
     if (frame.isBroadcast) {
-      final isChanged = _radioPanels.any((p) => p.color != frame.color);
+      final isChanged = currentView.radioPanels.any(
+        (p) => p.color != frame.color,
+      );
 
       if (!isChanged) {
         /// Colors not changed, add delay frame
@@ -337,7 +339,7 @@ class Animation {
         return _addFrame(frame);
       }
     } else {
-      final radioPanelView = _radioPanels.firstWhere(
+      final radioPanelView = currentView.radioPanels.firstWhere(
         (p) => p.index == frame.panelIndex,
         orElse: () => throw ArgumentError(
           'Panel with provided index (${frame.panelIndex}) does not exist.',
@@ -398,10 +400,28 @@ class Animation {
         if (!acceptFrame) {
           _durationFromPrevFrame += frame.duration;
 
+          /// The frame is dropped, but the current view must be updated
+          /// to properly display the animation.
+          _updateBufferedView(frame);
+
           return null;
         } else {
           _durationFromPrevFrame = Duration.zero;
-          return frame.copyWith(duration: cumulativeDuration);
+
+          if (bufferedView == currentView) {
+            return frame;
+          } else {
+            _updateBufferedView(frame);
+            final view = bufferedView;
+
+            /// Process buffered frame and add it instead of the current frame
+            view.radioPanels
+                .map((radioPanelView) => radioPanelView.toRadioColorFrame())
+                .forEach((radioFrame) => addFrame(radioFrame));
+            addFrame(view.frame.copyWith(duration: cumulativeDuration));
+
+            return null;
+          }
         }
     }
   }
@@ -411,9 +431,7 @@ class Animation {
     final acceptedFrame = _assertValidFramerate(frame);
 
     if (acceptedFrame == null) {
-      /// The frame is dropped, but the current view must be updated
-      /// to properly display the animation.
-      _updateView(frame);
+      _updateBufferedView(frame);
       return false;
     }
 
@@ -506,9 +524,12 @@ class Animation {
 
       toFileWatch.stop();
 
+      final duration = _frames.fold(Duration.zero, (s, e) => s + e.duration);
+
       debugPrint(
-        'Written ${_frames.length} frames with '
+        'Written ${_frames.length} frames with overall '
         'size of ${(size / 1000).toStringAsFixed(2)}KB '
+        'and duration of ${duration.inSeconds}s '
         'in ${toFileWatch.elapsedMilliseconds}ms.',
       );
 

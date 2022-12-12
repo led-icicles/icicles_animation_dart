@@ -16,7 +16,8 @@ class Icicles {
     return animation.header.yCount;
   }
 
-  Icicles(this.animation) : _pixels = List.of(animation.currentView.pixels);
+  Icicles(this.animation)
+      : _pixels = List.of(animation.currentView.frame.pixels);
 
   void _isValidIndex(int index) {
     if (index >= _pixels.length || index < 0) {

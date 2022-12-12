@@ -110,4 +110,7 @@ class RadioColorFrame extends Frame {
       withType: true,
     );
   }
+
+  @override
+  List<Object?> get props => [type, duration, panelIndex, color];
 }
