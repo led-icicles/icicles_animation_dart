@@ -3,7 +3,7 @@ import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 void main() async {
   /// Define the animation
   final animation = Animation(
-    // Animation name (UTF8) - can contains the polish characters
+    // Animation name (UTF8) - may contain Polish characters
     'Police',
     // Number of icicles
     xCount: 20,
