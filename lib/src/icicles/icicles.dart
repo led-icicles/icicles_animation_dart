@@ -8,6 +8,10 @@ class Icicles {
     return List.unmodifiable(_pixels);
   }
 
+  int get pixelsCount {
+    return _pixels.length;
+  }
+
   int get xCount {
     return animation.header.xCount;
   }
