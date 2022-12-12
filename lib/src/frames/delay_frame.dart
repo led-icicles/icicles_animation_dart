@@ -8,6 +8,8 @@ class DelayFrame extends Frame {
 
   DelayFrame(super.duration);
 
+  DelayFrame.fromFrame(Frame frame) : super(frame.duration);
+
   /// [(1)type][(2)duration]
   @override
   int get size {

@@ -10,6 +10,29 @@ import 'package:path/path.dart' as p;
 export 'animation_header.dart';
 export 'animation_view.dart';
 
+enum Framerate {
+  fps60(60),
+  fps30(30),
+  fps24(24);
+
+  final int framesPerSecond;
+
+  Duration get interFrameDuration =>
+      Duration(milliseconds: (1000 / framesPerSecond).floor());
+
+  const Framerate(this.framesPerSecond);
+}
+
+enum FramerateBehavior {
+  error,
+  drop,
+}
+
+void debugPrint(String msg) {
+  if (!stdout.hasTerminal) return;
+  print(msg);
+}
+
 class Animation {
   final _frames = <Frame>[];
   List<Frame> get frames {
@@ -25,6 +48,8 @@ class Animation {
 
   final bool optimize;
   final bool useRgb565;
+  final Framerate framerate;
+  final FramerateBehavior framerateBehavior;
 
   List<RadioPanelView> get radioPanels => List.unmodifiable(_radioPanels);
   final List<RadioPanelView> _radioPanels;
@@ -87,6 +112,8 @@ class Animation {
     required int yCount,
     this.optimize = true,
     this.useRgb565 = false,
+    this.framerate = Framerate.fps30,
+    this.framerateBehavior = FramerateBehavior.error,
     int loopsCount = 1,
     int versionNumber = NEWEST_ANIMATION_VERSION,
     int radioPanelsCount = 0,
@@ -145,6 +172,12 @@ class Animation {
   }
 
   bool _addDelayFrame(Frame frame, {bool optimize = true}) {
+    /// _addDelayFrame accepts all frames, therefore it is required
+    /// To convert the provided frame to the DelayFrame.
+    if (frame is! DelayFrame) {
+      frame = DelayFrame.fromFrame(frame);
+    }
+
     if (optimize) {
       /// Nothing to add
       if (frame.duration == Duration.zero) {
@@ -322,121 +355,81 @@ class Animation {
     }
   }
 
+  /// When [framerateBehavior] is set to [FramerateBehavior.drop], this
+  /// determines whether a frame can be accepted if its duration
+  /// is less than supported.
+  Duration _durationFromPrevFrame = Duration.zero;
+
+  /// Asserts valid framerate.
+  /// If [framerateBehavior] is set to [FramerateBehavior.error],
+  /// an error will be thrown if [framerate] is lower than the duration of
+  /// the interrupt.
+  ///
+  /// For [framerateBehavior] set to [FramerateBehavior.drop],
+  /// this method will return true if the frame can be saved,
+  /// or false for dropping it
+  Frame? _assertValidFramerate(Frame frame) {
+    /// Radio color frame with duration set to zero is changing the radio panels
+    /// color state without displaying it
+    if (frame is RadioColorFrame && frame.duration == Duration.zero) {
+      return frame;
+    }
+
+    final minInterframeDuration = framerate.interFrameDuration;
+
+    switch (framerateBehavior) {
+      case FramerateBehavior.error:
+        if (frame.duration < minInterframeDuration) {
+          throw UnsupportedError(
+            'The maximum animation framerate is set to ${framerate.name}, '
+            'therefore, the minimum animation display duration is '
+            '${minInterframeDuration.inMilliseconds}ms. '
+            'Construct an animation class with the "framerate" argument set to '
+            'a higher value, reduce the frame display duration or set the '
+            '"framerateBehavior" argument to [FramerateBehavior.drop] in order '
+            'to drop overframes.',
+          );
+        } else {
+          return frame;
+        }
+      case FramerateBehavior.drop:
+        final cumulativeDuration = _durationFromPrevFrame + frame.duration;
+        final acceptFrame = cumulativeDuration >= minInterframeDuration;
+        if (!acceptFrame) {
+          _durationFromPrevFrame += frame.duration;
+
+          return null;
+        } else {
+          _durationFromPrevFrame = Duration.zero;
+          return frame.copyWith(duration: cumulativeDuration);
+        }
+    }
+  }
+
   /// Returns true, when new frame was added.
   bool addFrame(Frame frame) {
-    if (frame is DelayFrame) {
-      return _addDelayFrame(frame, optimize: optimize);
-    } else if (frame is VisualFrame) {
-      return _addVisualFrame(frame, optimize: optimize);
-    } else if (frame is AdditiveFrame) {
-      return _addAdditiveFrame(frame, optimize: optimize);
-    } else if (frame is RadioColorFrame) {
-      return _addRadioColorFrame(frame, optimize: optimize);
+    final acceptedFrame = _assertValidFramerate(frame);
+
+    if (acceptedFrame == null) {
+      /// The frame is dropped, but the current view must be updated
+      /// to properly display the animation.
+      _updateView(frame);
+      return false;
+    }
+
+    if (acceptedFrame is DelayFrame) {
+      return _addDelayFrame(acceptedFrame, optimize: optimize);
+    } else if (acceptedFrame is VisualFrame) {
+      return _addVisualFrame(acceptedFrame, optimize: optimize);
+    } else if (acceptedFrame is AdditiveFrame) {
+      return _addAdditiveFrame(acceptedFrame, optimize: optimize);
+    } else if (acceptedFrame is RadioColorFrame) {
+      return _addRadioColorFrame(acceptedFrame, optimize: optimize);
     } else {
       throw UnsupportedError(
         'Provided frame type (${frame.runtimeType}) is not supported.',
       );
     }
-  }
-
-  @deprecated
-  void addFrameLegacy(Frame newFrame) {
-    if (newFrame is DelayFrame) {
-      _frames.add(newFrame);
-      return;
-    } else if (newFrame is RadioColorFrame) {
-      if (newFrame.panelIndex > header.radioPanelsCount) {
-        throw ArgumentError('Invalid panel index (${newFrame.panelIndex}). '
-            'This animation supports "${header.radioPanelsCount}" radio panels.');
-      }
-      if (optimize) {
-        final isChanged = newFrame.isBroadcast
-            ? _radioPanels.any((p) => p.color != newFrame.color)
-            : _radioPanels
-                    .firstWhere((p) => p.index == newFrame.panelIndex,
-                        orElse: () => throw ArgumentError(
-                            'Panel with provided index (${newFrame.panelIndex}) does not exist.'))
-                    .color !=
-                newFrame
-                    .color; // panel index is shifted due to broadcast panel at index 0
-        if (!isChanged) {
-          if (newFrame.duration == Duration.zero) {
-            return;
-          } else {
-            final delayFrame = DelayFrame(newFrame.duration);
-            _frames.add(delayFrame);
-            return;
-          }
-        } else {
-          if (newFrame.isBroadcast) {
-            for (var i = 0; i < _radioPanels.length; i++) {
-              _radioPanels[i] = _radioPanels[i].copyWith(
-                color: newFrame.color,
-              );
-            }
-          } else {
-            // shift index due to broadcast panel at 0
-            _radioPanels[newFrame.panelIndex - 1] =
-                _radioPanels[newFrame.panelIndex - 1]
-                    .copyWith(color: newFrame.color);
-          }
-          _frames.add(newFrame);
-          return;
-        }
-      } else {
-        _frames.add(newFrame);
-      }
-      return;
-    } else if (newFrame.duration < const Duration(milliseconds: 16)) {
-      throw ArgumentError(
-          'The animation can\'t run faster than 60 FPS (preferred: 30 FPS). '
-          'Therefore, the inter-frame delay cannot be less than 16ms.');
-    } else if (newFrame is AdditiveFrameRgb565 ||
-        newFrame is VisualFrameRgb565) {
-      // TODO: optimize
-      _frames.add(newFrame);
-      return;
-    } else if (newFrame is AdditiveFrame) {
-      // TODO: optimize
-      _frames.add(newFrame);
-      return;
-    } else if (newFrame is! VisualFrame) {
-      throw ArgumentError('Unsupported frame type.');
-    } else if (newFrame.pixels.length != _header.pixelsCount) {
-      throw ArgumentError('Unsupported frame length. '
-          'Current: ${newFrame.pixels.length}, '
-          'required: ${_header.pixelsCount}');
-    }
-
-    if (optimize) {
-      final changedPixels = AdditiveFrame.getChangedPixelsFromFrames(
-        _currentView,
-        newFrame,
-      );
-
-      final noPixelsChanges = changedPixels.isEmpty;
-
-      if (noPixelsChanges) {
-        /// TODO: We can then merge delay frames if possible.
-        _frames.add(DelayFrame(newFrame.duration));
-      } else {
-        final additiveFrame = AdditiveFrame(
-          newFrame.duration,
-          changedPixels,
-        );
-        final isAdditiveFrameSmaller = additiveFrame.size < newFrame.size;
-        if (isAdditiveFrameSmaller) {
-          _frames.add(additiveFrame);
-        } else {
-          _frames.add(newFrame);
-        }
-      }
-    } else {
-      _frames.add(newFrame);
-    }
-
-    /// set current view
-    _currentView = newFrame;
   }
 
   /// Animation duration - loops are not included
@@ -470,7 +463,7 @@ class Animation {
 
   Future<File> toFile(String path) async {
     final toFileWatch = Stopwatch()..start();
-    print('Creating animation file: optimize=$optimize');
+    debugPrint('Creating animation file: optimize=$optimize');
 
     final targetPath = p.absolute(path);
 
@@ -478,7 +471,7 @@ class Animation {
 
     final sink = file.openWrite(mode: FileMode.write);
 
-    print('Encoding ${_frames.length} frames...');
+    debugPrint('Encoding ${_frames.length} frames...');
     final bar = ProgressBar();
     bar.render(0);
 
@@ -507,13 +500,13 @@ class Animation {
         bar.render(i / _frames.length);
       }
       bar.done();
-      print('Writing to file...');
+      debugPrint('Writing to file...');
       await sink.flush();
       await sink.close();
 
       toFileWatch.stop();
 
-      print(
+      debugPrint(
         'Written ${_frames.length} frames with '
         'size of ${(size / 1000).toStringAsFixed(2)}KB '
         'in ${toFileWatch.elapsedMilliseconds}ms.',
@@ -607,7 +600,7 @@ class Animation {
 
     startWatch.stop();
 
-    print(
+    debugPrint(
       'Decoded ${animation._frames.length} frames '
       'of size ${(animation.size / 1000).toStringAsFixed(2)}KB in ${startWatch.elapsedMilliseconds}ms',
     );
