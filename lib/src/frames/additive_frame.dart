@@ -153,4 +153,7 @@ class AdditiveFrame extends Frame {
         duration ?? this.duration,
         changedPixels ?? this.changedPixels,
       );
+
+  @override
+  List<Object?> get props => [type, duration, changedPixels];
 }
