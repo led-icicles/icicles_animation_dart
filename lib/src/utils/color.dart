@@ -91,6 +91,58 @@ class Color {
                 ((b & 0xff) << 0)) &
             0xFFFFFFFF;
 
+  /// [alpha], from 0.0 to 1.0. The describes the transparency of the color.
+  /// A value of 0.0 is fully transparent, and 1.0 is fully opaque.
+  ///
+  /// [hue], from 0.0 to 360.0. Describes which color of the spectrum is
+  /// represented. A value of 0.0 represents red, as does 360.0. Values in
+  /// between go through all the hues representable in RGB. You can think of
+  /// this as selecting which color filter is placed over a light.
+  ///
+  /// [saturation], from 0.0 to 1.0. This describes how colorful the color is.
+  /// 0.0 implies a shade of grey (i.e. no pigment), and 1.0 implies a color as
+  /// vibrant as that hue gets. You can think of this as the purity of the
+  /// color filter over the light.
+  ///
+  /// [lightness], from 0.0 to 1.0. The lightness of a color describes how bright
+  /// a color is. A value of 0.0 indicates black, and 1.0 indicates white. You
+  /// can think of this as the intensity of the light behind the filter. As the
+  /// lightness approaches 0.5, the colors get brighter and appear more
+  /// saturated, and over 0.5, the colors start to become less saturated and
+  /// approach white at 1.0.
+  factory Color.fromAHSL(
+      double alpha, double hue, double saturation, double lightness) {
+    final chroma = saturation * lightness;
+    final secondary = chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
+    final match = lightness - chroma;
+
+    return _colorFromHue(alpha, hue, chroma, secondary, match);
+  }
+
+  /// [hue], from 0.0 to 360.0. Describes which color of the spectrum is
+  /// represented. A value of 0.0 represents red, as does 360.0. Values in
+  /// between go through all the hues representable in RGB. You can think of
+  /// this as selecting which color filter is placed over a light.
+  ///
+  /// [saturation], from 0.0 to 1.0. This describes how colorful the color is.
+  /// 0.0 implies a shade of grey (i.e. no pigment), and 1.0 implies a color as
+  /// vibrant as that hue gets. You can think of this as the purity of the
+  /// color filter over the light.
+  ///
+  /// [lightness], from 0.0 to 1.0. The lightness of a color describes how bright
+  /// a color is. A value of 0.0 indicates black, and 1.0 indicates white. You
+  /// can think of this as the intensity of the light behind the filter. As the
+  /// lightness approaches 0.5, the colors get brighter and appear more
+  /// saturated, and over 0.5, the colors start to become less saturated and
+  /// approach white at 1.0.
+  factory Color.fromHSL(double hue, double saturation, double lightness) {
+    final chroma = (1.0 - (2.0 * lightness - 1.0).abs()) * saturation;
+    final secondary = chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
+    final match = lightness - chroma / 2.0;
+
+    return _colorFromHue(1.0, hue, chroma, secondary, match);
+  }
+
   /// A 32 bit value representing this color.
   ///
   /// The bits are assigned as follows:
@@ -366,4 +418,43 @@ class IndexedColor implements Color {
 
   @override
   int get hashCode => Object.hash(index, value);
+}
+
+Color _colorFromHue(
+  double alpha,
+  double hue,
+  double chroma,
+  double secondary,
+  double match,
+) {
+  double red;
+  double green;
+  double blue;
+  if (hue < 60.0) {
+    red = chroma;
+    green = secondary;
+    blue = 0.0;
+  } else if (hue < 120.0) {
+    red = secondary;
+    green = chroma;
+    blue = 0.0;
+  } else if (hue < 180.0) {
+    red = 0.0;
+    green = chroma;
+    blue = secondary;
+  } else if (hue < 240.0) {
+    red = 0.0;
+    green = secondary;
+    blue = chroma;
+  } else if (hue < 300.0) {
+    red = secondary;
+    green = 0.0;
+    blue = chroma;
+  } else {
+    red = chroma;
+    green = 0.0;
+    blue = secondary;
+  }
+  return Color.fromARGB((alpha * 0xFF).round(), ((red + match) * 0xFF).round(),
+      ((green + match) * 0xFF).round(), ((blue + match) * 0xFF).round());
 }
