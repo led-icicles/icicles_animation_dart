@@ -11,8 +11,15 @@ export 'animation_header.dart';
 export 'animation_view.dart';
 
 enum Framerate {
+  /// This is commonly used for games.
   fps60(60),
+
+  /// Represents a frame rate of 30 fps.
+  ///
+  /// This is the preferred frame rate for icicles animations.
   fps30(30),
+
+  /// This is the common frame rate for film.
   fps24(24);
 
   final int framesPerSecond;
@@ -23,8 +30,14 @@ enum Framerate {
   const Framerate(this.framesPerSecond);
 }
 
+/// Describes the behavior of [Animation.addFrame] method when frame with
+/// higher interframe duration (frame rate) than supported is provided.
 enum FramerateBehavior {
+  /// Throws the [UnsupportedError] for frames with higher interframe
+  /// duration (frame rate) than supported.
   error,
+
+  /// Drops frames with higher interframe duration (frame rate) than supported.
   drop,
 }
 
@@ -149,7 +162,7 @@ class Animation {
   }
 
   /// Add frame to the animation without optimization
-  bool _storeFrame(Frame frame) {
+  bool _saveFrame(Frame frame) {
     _frames.add(frame);
     _updateView(frame);
     return true;
@@ -188,13 +201,13 @@ class Animation {
 
       /// Previous frame does not exist
       if (prevFrame == null) {
-        return _storeFrame(frame);
+        return _saveFrame(frame);
       }
       final mergedDuration = frame.duration + prevFrame.duration;
 
       /// It is not possible to increase the delay of the previous frame
       if (mergedDuration > Frame.maxDuration) {
-        return _storeFrame(frame);
+        return _saveFrame(frame);
       }
 
       final mergedFrame = prevFrame.copyWith(duration: mergedDuration);
@@ -203,7 +216,7 @@ class Animation {
       _replaceLastStoredFrame(mergedFrame);
       return false;
     } else {
-      return _storeFrame(frame);
+      return _saveFrame(frame);
     }
   }
 
@@ -224,12 +237,12 @@ class Animation {
 
     /// No optimization, just add the frame
     if (!optimize) {
-      return _storeFrame(frame);
+      return _saveFrame(frame);
     }
 
     final prevFrame = _frames.lastOrNull;
     if (prevFrame == null) {
-      return _storeFrame(frame);
+      return _saveFrame(frame);
     }
 
     final changedPixels = AdditiveFrame.getChangedPixelsFromFrames(
@@ -256,7 +269,7 @@ class Animation {
     if (isAdditiveFrameSmaller) {
       return _addAdditiveFrame(additiveFrame);
     } else {
-      return _storeFrame(frame);
+      return _saveFrame(frame);
     }
   }
 
@@ -268,7 +281,7 @@ class Animation {
     }
 
     if (!optimize) {
-      return _storeFrame(frame);
+      return _saveFrame(frame);
     }
 
     final newView = frame.mergeOnto(currentView.frame);
@@ -285,14 +298,14 @@ class Animation {
 
     /// Frame has larger duration than zero
     if (frame.duration > Duration.zero) {
-      return _storeFrame(frame);
+      return _saveFrame(frame);
     }
 
     final prevFrame = _frames.lastOrNull;
 
     /// If prev frame is null, cannot optimize just push add the frame
     if (prevFrame == null) {
-      return _storeFrame(frame);
+      return _saveFrame(frame);
     }
 
     if (prevFrame is VisualFrame) {
@@ -304,13 +317,13 @@ class Animation {
     } else if (prevFrame is DelayFrame) {
       final mergedDuration = prevFrame.duration + frame.duration;
       if (mergedDuration > Frame.maxDuration) {
-        return _storeFrame(frame);
+        return _saveFrame(frame);
       }
 
       final mergedFrame = frame.copyWith(duration: mergedDuration);
-      return _storeFrame(mergedFrame);
+      return _saveFrame(mergedFrame);
     } else {
-      return _storeFrame(frame);
+      return _saveFrame(frame);
     }
   }
 
@@ -323,7 +336,7 @@ class Animation {
     }
 
     if (!optimize) {
-      return _storeFrame(frame);
+      return _saveFrame(frame);
     }
 
     if (frame.isBroadcast) {
@@ -336,7 +349,7 @@ class Animation {
         return _addDelayFrame(frame);
       } else {
         /// Colors changed
-        return _storeFrame(frame);
+        return _saveFrame(frame);
       }
     } else {
       final radioPanelView = currentView.radioPanels.firstWhere(
@@ -352,7 +365,7 @@ class Animation {
         return _addDelayFrame(frame);
       } else {
         /// Colors changed
-        return _storeFrame(frame);
+        return _saveFrame(frame);
       }
     }
   }
