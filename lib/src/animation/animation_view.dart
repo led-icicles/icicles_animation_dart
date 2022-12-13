@@ -91,6 +91,18 @@ class AnimationView extends Equatable {
     return panelIndexSize + color;
   }
 
+  List<RadioColorFrame> getRadioColorFrames(
+      [Duration duration = Duration.zero]) {
+    final allPanelsSameColor = radioPanels.isNotEmpty &&
+        radioPanels.every((panel) => panel.color == radioPanels.first.color);
+    if (allPanelsSameColor) {
+      /// We can set colors of all panels via single frame
+      return [RadioColorFrame(duration, 0, radioPanels.first.color)];
+    } else {
+      return radioPanels.map((panel) => panel.toRadioColorFrame()).toList();
+    }
+  }
+
   int getFrameSize() {
     final colorsSize = frame.pixels.length * 3;
     // During serial communication frame duration and type is redundant;

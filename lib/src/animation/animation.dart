@@ -168,7 +168,7 @@ class Animation {
     return true;
   }
 
-  bool _replaceLastStoredFrame(Frame frame) {
+  bool _replaceLastSavedFrame(Frame frame) {
     _frames.last = frame;
     _updateView(frame);
     return true;
@@ -213,7 +213,7 @@ class Animation {
       final mergedFrame = prevFrame.copyWith(duration: mergedDuration);
 
       /// Override the last frame with new merged one
-      _replaceLastStoredFrame(mergedFrame);
+      _replaceLastSavedFrame(mergedFrame);
       return false;
     } else {
       return _saveFrame(frame);
@@ -309,10 +309,10 @@ class Animation {
     }
 
     if (prevFrame is VisualFrame) {
-      _replaceLastStoredFrame(frame.mergeOnto(prevFrame));
+      _replaceLastSavedFrame(frame.mergeOnto(prevFrame));
       return false;
     } else if (prevFrame is AdditiveFrame) {
-      _replaceLastStoredFrame(prevFrame.mergeWith(frame));
+      _replaceLastSavedFrame(prevFrame.mergeWith(frame));
       return false;
     } else if (prevFrame is DelayFrame) {
       final mergedDuration = prevFrame.duration + frame.duration;
@@ -349,7 +349,13 @@ class Animation {
         return _addDelayFrame(frame);
       } else {
         /// Colors changed
-        return _saveFrame(frame);
+        final lastFrame = _frames.lastOrNull;
+        if (lastFrame is RadioColorFrame &&
+            lastFrame.duration == Duration.zero) {
+          return _replaceLastSavedFrame(frame);
+        } else {
+          return _saveFrame(frame);
+        }
       }
     } else {
       final radioPanelView = currentView.radioPanels.firstWhere(
@@ -365,7 +371,15 @@ class Animation {
         return _addDelayFrame(frame);
       } else {
         /// Colors changed
-        return _saveFrame(frame);
+
+        final lastFrame = _frames.lastOrNull;
+        if (lastFrame is RadioColorFrame &&
+            lastFrame.duration == Duration.zero &&
+            lastFrame.panelIndex == frame.panelIndex) {
+          return _replaceLastSavedFrame(frame);
+        } else {
+          return _saveFrame(frame);
+        }
       }
     }
   }
@@ -384,16 +398,17 @@ class Animation {
   /// this method will return true if the frame can be saved,
   /// or false for dropping it
   Frame? _assertValidFramerate(Frame frame) {
-    /// Radio color frame with duration set to zero is changing the radio panels
-    /// color state without displaying it
-    if (frame is RadioColorFrame && frame.duration == Duration.zero) {
-      return frame;
-    }
-
     final minInterframeDuration = framerate.interFrameDuration;
 
     switch (framerateBehavior) {
       case FramerateBehavior.error:
+
+        /// Radio color frame with duration set to zero is changing the radio panels
+        /// color state without displaying it
+        if (frame is RadioColorFrame && frame.duration == Duration.zero) {
+          return frame;
+        }
+
         if (frame.duration < minInterframeDuration) {
           throw UnsupportedError(
             'The maximum animation framerate is set to ${framerate.name}, '
@@ -428,9 +443,9 @@ class Animation {
             final view = bufferedView;
 
             /// Process buffered frame and add it instead of the current frame
-            view.radioPanels
-                .map((radioPanelView) => radioPanelView.toRadioColorFrame())
-                .forEach((radioFrame) => addFrame(radioFrame));
+            view
+                .getRadioColorFrames()
+                .forEach((frame) => _addFrameInternal(frame));
 
             return view.frame.copyWith(duration: cumulativeDuration);
           }
@@ -505,7 +520,6 @@ class Animation {
 
     final sink = file.openWrite(mode: FileMode.write);
 
-    debugPrint('Encoding ${_frames.length} frames...');
     final bar = ProgressBar();
     bar.render(0);
 
@@ -534,7 +548,6 @@ class Animation {
         bar.render(i / _frames.length);
       }
       bar.done();
-      debugPrint('Writing to file...');
       await sink.flush();
       await sink.close();
 
