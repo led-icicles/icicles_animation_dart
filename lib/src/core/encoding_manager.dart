@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:icicles_animation_dart/src/animation/animation_view.dart';
+import 'package:icicles_animation_dart/src/core/core.dart';
 import 'package:icicles_animation_dart/src/frames/frame.dart';
-import 'package:icicles_animation_dart/src/utils/encodable.dart';
-import 'package:icicles_animation_dart/src/utils/utils.dart';
 
 abstract class EncodingManager {
   Endian get endian;

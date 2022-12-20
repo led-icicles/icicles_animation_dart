@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
-import 'package:icicles_animation_dart/src/utils/encodable.dart';
-import 'package:icicles_animation_dart/src/utils/size.dart';
+import 'package:icicles_animation_dart/src/core/encodable.dart';
+import 'package:icicles_animation_dart/src/core/size.dart';
 import 'package:meta/meta.dart';
 
 enum FrameType {

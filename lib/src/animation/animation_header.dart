@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
-import 'package:icicles_animation_dart/src/utils/encodable.dart';
 
 const NEWEST_ANIMATION_VERSION = 1;
 const MIN_ANIMATION_VERSION = 1;

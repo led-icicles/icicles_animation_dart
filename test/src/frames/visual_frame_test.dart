@@ -1,5 +1,5 @@
 import 'package:icicles_animation_dart/src/frames/visual_frame.dart';
-import 'package:icicles_animation_dart/src/utils/color.dart';
+import 'package:icicles_animation_dart/src/core/color.dart';
 import 'package:test/test.dart';
 
 void main() {

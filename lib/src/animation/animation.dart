@@ -5,7 +5,6 @@ import 'package:collection/collection.dart';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 import 'package:icicles_animation_dart/src/frames/additive_frame_rgb565.dart';
 import 'package:icicles_animation_dart/src/utils/progress_bar.dart';
-import 'package:path/path.dart' as p;
 
 export 'animation_header.dart';
 export 'animation_view.dart';
@@ -514,9 +513,7 @@ class Animation {
     final toFileWatch = Stopwatch()..start();
     debugPrint('Creating animation file: optimize=$optimize');
 
-    final targetPath = p.absolute(path);
-
-    final file = await File(targetPath).create(recursive: true);
+    final file = await File(path).create(recursive: true);
 
     final sink = file.openWrite(mode: FileMode.write);
 
