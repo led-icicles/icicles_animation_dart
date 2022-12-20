@@ -34,7 +34,13 @@ class Curves {
 
   /// Sin
 
-  static const Curve sinInCurve = SinInCurve();
-  static const Curve sinOutCurve = SinOutCurve();
-  static const Curve sinInOutCurve = SinInOutCurve();
+  static const Curve sinIn = SinInCurve();
+  static const Curve sinOut = SinOutCurve();
+  static const Curve sinInOut = SinInOutCurve();
+
+  /// Cubic
+
+  static const Curve cubicIn = CubicInCurve();
+  static const Curve cubicOut = CubicOutCurve();
+  static const Curve cubicInOut = CubicInOutCurve();
 }
