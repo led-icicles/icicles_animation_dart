@@ -1,6 +1,4 @@
-import 'package:icicles_animation_dart/src/utils/curves/bounce.dart';
-
-import 'back.dart';
+import 'curves.dart';
 
 abstract class Curve {
   const Curve();
@@ -23,4 +21,10 @@ class Curves {
   static const Curve bounceInCurve = BounceInCurve();
   static const Curve bounceOutCurve = BounceOutCurve();
   static const Curve bounceInOutCurve = BounceInOutCurve();
+
+  /// Elastic
+
+  static const Curve elasticInCurve = ElasticInCurve();
+  static const Curve elasticOutCurve = ElasticOutCurve();
+  static const Curve elasticInOutCurve = ElasticInOutCurve();
 }
