@@ -43,4 +43,10 @@ class Curves {
   static const Curve cubicIn = CubicInCurve();
   static const Curve cubicOut = CubicOutCurve();
   static const Curve cubicInOut = CubicInOutCurve();
+
+  /// Exp
+
+  static const Curve expIn = ExpInCurve();
+  static const Curve expOut = ExpOutCurve();
+  static const Curve expInOut = ExpInOutCurve();
 }
