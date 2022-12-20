@@ -55,4 +55,10 @@ class Curves {
   static const Curve polyIn = PolyInCurve();
   static const Curve polyOut = PolyOutCurve();
   static const Curve polyInOut = PolyInOutCurve();
+
+  /// Circle 
+
+  static const Curve circleIn = CircleInCurve();
+  static const Curve circleOut = CircleOutCurve();
+  static const Curve circleInOut = CircleInOutCurve();
 }

@@ -1,5 +1,6 @@
 export 'back.dart';
 export 'bounce.dart';
+export 'circle.dart';
 export 'cubic.dart';
 export 'curve.dart';
 export 'elastic.dart';
