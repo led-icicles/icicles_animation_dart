@@ -1,25 +1,42 @@
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
+/// An abstraction of icicles, which allows for the simple
+/// creation of animations.
 class Icicles {
+  /// Current definition of animation.
   final Animation animation;
 
   final List<Color> _pixels;
+
+  /// Returns the current animation pixels.
+  ///
+  /// The returned list cannot be modified.
   List<Color> get pixels {
     return List.unmodifiable(_pixels);
   }
 
+  /// Returns the total number of pixels that are supported by this animation
   int get pixelsCount {
     return _pixels.length;
   }
 
+  /// Returns the number of radio panels that are supported by this animation
+  int get radioPanelsCount {
+    return animation.header.radioPanelsCount;
+  }
+
+  /// Returns the number of columns (icicles)
   int get xCount {
     return animation.header.xCount;
   }
 
+  /// Returns the number of rows (pixels per icicle)
   int get yCount {
     return animation.header.yCount;
   }
 
+  /// Constructs an abstraction of icicles,
+  /// which allows for the simple creation of animations.
   Icicles(this.animation)
       : _pixels = List.of(animation.currentView.frame.pixels);
 
@@ -30,28 +47,57 @@ class Icicles {
     }
   }
 
+  /// Converts two-dimensional x,y coordinates into
+  /// a one-dimensional pixel index.
+  ///
+  /// This can be helpful for some animations.
+  /// However, if you want to read the color of a pixel at the specified
+  /// location, use the [getPixelColor] method instead.
   int getPixelIndex(int x, int y) {
     final index = x * yCount + y;
     _isValidIndex(index);
     return index;
   }
 
+  /// Returns the current color of the pixel in the given [x], [y] coordinates.
+  ///
+  /// This method is equivalent to:
+  /// ```
+  /// final color = icicles.pixels[getPixelIndex(x, y)];
+  /// ```
   Color getPixelColor(int x, int y) {
     final index = getPixelIndex(x, y);
     return _pixels[index];
   }
 
+  /// Returns the current color of the pixel in the given [index].
+  ///
+  /// This method is similar to the [getPixelColor] method,
+  /// but uses one-dimensional indexes.
+  ///
+  /// This method is equivalent to:
+  /// ```
+  /// final color = icicles.pixels[index];
+  /// ```
   Color getPixelColorAtIndex(int index) {
     _isValidIndex(index);
 
     return _pixels[index];
   }
 
+  /// Sets [color] under the specified [x], [y] coordinates.
   void setPixelColor(int x, int y, Color color) {
     final index = getPixelIndex(x, y);
     _pixels[index] = color;
   }
 
+  /// Sets [color] under the specified [index].
+  void setPixelColorAtIndex(int index, Color color) {
+    _isValidIndex(index);
+    _pixels[index] = color;
+  }
+
+  /// Sets the [x] column to the specified [color].
   void setColumnColor(int x, Color color) {
     final index = getPixelIndex(x, 0);
     for (var i = index; i < index + yCount; i++) {
@@ -59,6 +105,7 @@ class Icicles {
     }
   }
 
+  /// Sets the [y] row to the specified [color].
   void setRowColor(int y, Color color) {
     for (var x = 0; x < xCount; x += yCount) {
       // const index = this.getPixelIndex(x, y);
@@ -66,18 +113,14 @@ class Icicles {
     }
   }
 
-  void setPixelColorAtIndex(int index, Color color) {
-    _isValidIndex(index);
-
-    _pixels[index] = color;
-  }
-
+  /// Sets all pixels to the specified [color].
   void setAllPixelsColor(Color color) {
     for (var i = 0; i < _pixels.length; i++) {
       _pixels[i] = color;
     }
   }
 
+  /// Replaces all pixels with the specified [pixels].
   void setPixels(List<Color> pixels) {
     if (_pixels.length != pixels.length) {
       throw ArgumentError.value(
@@ -91,6 +134,10 @@ class Icicles {
     }
   }
 
+  /// Converts the current pixel state to [VisualFrame].
+  ///
+  /// This method is used internally by the [show] method
+  /// to add a new frame to the [animation].
   VisualFrame toFrame(Duration duration) {
     return VisualFrame(duration, _pixels);
   }
