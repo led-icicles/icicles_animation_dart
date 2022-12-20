@@ -1,5 +1,3 @@
-import 'package:icicles_animation_dart/src/utils/curves/linear.dart';
-
 import 'curves.dart';
 
 abstract class Curve {
@@ -33,4 +31,10 @@ class Curves {
   static const Curve elasticIn = ElasticInCurve();
   static const Curve elasticOut = ElasticOutCurve();
   static const Curve elasticInOut = ElasticInOutCurve();
+
+  /// Sin
+
+  static const Curve sinInCurve = SinInCurve();
+  static const Curve sinOutCurve = SinOutCurve();
+  static const Curve sinInOutCurve = SinInOutCurve();
 }
