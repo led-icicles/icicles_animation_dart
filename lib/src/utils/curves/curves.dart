@@ -7,4 +7,5 @@ export 'elastic.dart';
 export 'exp.dart';
 export 'linear.dart';
 export 'poly.dart';
+export 'quad.dart';
 export 'sin.dart';
