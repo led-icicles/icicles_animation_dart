@@ -49,4 +49,10 @@ class Curves {
   static const Curve expIn = ExpInCurve();
   static const Curve expOut = ExpOutCurve();
   static const Curve expInOut = ExpInOutCurve();
+
+  /// Poly
+
+  static const Curve polyIn = PolyInCurve();
+  static const Curve polyOut = PolyOutCurve();
+  static const Curve polyInOut = PolyInOutCurve();
 }

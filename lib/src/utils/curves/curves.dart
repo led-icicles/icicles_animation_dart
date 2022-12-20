@@ -5,4 +5,5 @@ export 'curve.dart';
 export 'elastic.dart';
 export 'exp.dart';
 export 'linear.dart';
+export 'poly.dart';
 export 'sin.dart';
