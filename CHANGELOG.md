@@ -4,6 +4,7 @@
 - Added abstract _Curve_ class.
 - Added _Curves_ class and implemented basic curves.
 - Fixed _Icicles.setRowColor_ method.
+- Added _Framerate.fps45_ value.
 
 ## 1.2.0
 
