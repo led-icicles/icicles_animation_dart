@@ -1,11 +1,11 @@
-import 'curve.dart';
+part of 'curve.dart';
 
 abstract class QuadCurve extends Curve {
   const QuadCurve();
 }
 
-class QuadInCurve extends QuadCurve {
-  const QuadInCurve();
+class _QuadInCurve extends QuadCurve {
+  const _QuadInCurve();
 
   @override
   double transform(double progress) {
@@ -13,8 +13,8 @@ class QuadInCurve extends QuadCurve {
   }
 }
 
-class QuadOutCurve extends QuadCurve {
-  const QuadOutCurve();
+class _QuadOutCurve extends QuadCurve {
+  const _QuadOutCurve();
 
   @override
   double transform(double progress) {
@@ -22,8 +22,8 @@ class QuadOutCurve extends QuadCurve {
   }
 }
 
-class QuadInOutCurve extends QuadCurve {
-  const QuadInOutCurve();
+class _QuadInOutCurve extends QuadCurve {
+  const _QuadInOutCurve();
 
   @override
   double transform(double progress) {

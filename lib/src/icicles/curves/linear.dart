@@ -1,4 +1,4 @@
-import 'package:icicles_animation_dart/icicles_animation_dart.dart';
+part of 'curve.dart';
 
 class LinearCurve extends Curve {
   const LinearCurve();

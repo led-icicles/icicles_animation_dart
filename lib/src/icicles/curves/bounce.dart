@@ -1,4 +1,4 @@
-import 'package:icicles_animation_dart/icicles_animation_dart.dart';
+part of 'curve.dart';
 
 double _bounce(double t) {
   const b1 = 4 / 11,
@@ -25,8 +25,8 @@ abstract class BounceCurve extends Curve {
   const BounceCurve();
 }
 
-class BounceInCurve extends BounceCurve {
-  const BounceInCurve();
+class _BounceInCurve extends BounceCurve {
+  const _BounceInCurve();
 
   @override
   double transform(double progress) {
@@ -34,8 +34,8 @@ class BounceInCurve extends BounceCurve {
   }
 }
 
-class BounceOutCurve extends BounceCurve {
-  const BounceOutCurve();
+class _BounceOutCurve extends BounceCurve {
+  const _BounceOutCurve();
 
   @override
   double transform(double progress) {
@@ -43,8 +43,8 @@ class BounceOutCurve extends BounceCurve {
   }
 }
 
-class BounceInOutCurve extends BounceCurve {
-  const BounceInOutCurve();
+class _BounceInOutCurve extends BounceCurve {
+  const _BounceInOutCurve();
 
   @override
   double transform(double progress) {

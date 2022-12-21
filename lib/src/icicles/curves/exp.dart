@@ -1,5 +1,4 @@
-import 'curve.dart';
-import 'dart:math' as math;
+part of 'curve.dart';
 
 /// tpmt is two power minus ten times t scaled to [0,1]
 double _tpmt(double x) {
@@ -10,8 +9,8 @@ abstract class ExpCurve extends Curve {
   const ExpCurve();
 }
 
-class ExpInCurve extends ExpCurve {
-  const ExpInCurve();
+class _ExpInCurve extends ExpCurve {
+  const _ExpInCurve();
 
   @override
   double transform(double progress) {
@@ -19,8 +18,8 @@ class ExpInCurve extends ExpCurve {
   }
 }
 
-class ExpOutCurve extends ExpCurve {
-  const ExpOutCurve();
+class _ExpOutCurve extends ExpCurve {
+  const _ExpOutCurve();
 
   @override
   double transform(double progress) {
@@ -28,8 +27,8 @@ class ExpOutCurve extends ExpCurve {
   }
 }
 
-class ExpInOutCurve extends ExpCurve {
-  const ExpInOutCurve();
+class _ExpInOutCurve extends ExpCurve {
+  const _ExpInOutCurve();
 
   @override
   double transform(double progress) {

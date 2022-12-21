@@ -1,5 +1,4 @@
-import 'curve.dart';
-import 'dart:math' as math;
+part of 'curve.dart';
 
 abstract class ElacticCurve extends Curve {
   const ElacticCurve({this.period = 0.4});
@@ -8,9 +7,9 @@ abstract class ElacticCurve extends Curve {
   final double period;
 }
 
-class ElasticInCurve extends ElacticCurve {
+class _ElasticInCurve extends ElacticCurve {
   /// Creates an elastic-in curve.
-  const ElasticInCurve({super.period});
+  const _ElasticInCurve({super.period});
 
   @override
   double transform(double t) {
@@ -21,9 +20,9 @@ class ElasticInCurve extends ElacticCurve {
   }
 }
 
-class ElasticOutCurve extends ElacticCurve {
+class _ElasticOutCurve extends ElacticCurve {
   /// Creates an elastic-out curve.
-  const ElasticOutCurve({super.period});
+  const _ElasticOutCurve({super.period});
 
   @override
   double transform(double t) {
@@ -34,9 +33,9 @@ class ElasticOutCurve extends ElacticCurve {
   }
 }
 
-class ElasticInOutCurve extends ElacticCurve {
+class _ElasticInOutCurve extends ElacticCurve {
   /// Creates an elastic-in-out curve.
-  const ElasticInOutCurve({super.period});
+  const _ElasticInOutCurve({super.period});
 
   @override
   double transform(double t) {

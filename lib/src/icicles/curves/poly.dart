@@ -1,5 +1,4 @@
-import 'curve.dart';
-import 'dart:math' as math;
+part of 'curve.dart';
 
 abstract class PolyCurve extends Curve {
   final double exponent;
@@ -7,8 +6,8 @@ abstract class PolyCurve extends Curve {
   const PolyCurve({this.exponent = 3.0});
 }
 
-class PolyInCurve extends PolyCurve {
-  const PolyInCurve();
+class _PolyInCurve extends PolyCurve {
+  const _PolyInCurve();
 
   @override
   double transform(double progress) {
@@ -16,8 +15,8 @@ class PolyInCurve extends PolyCurve {
   }
 }
 
-class PolyOutCurve extends PolyCurve {
-  const PolyOutCurve();
+class _PolyOutCurve extends PolyCurve {
+  const _PolyOutCurve();
 
   @override
   double transform(double progress) {
@@ -25,8 +24,8 @@ class PolyOutCurve extends PolyCurve {
   }
 }
 
-class PolyInOutCurve extends PolyCurve {
-  const PolyInOutCurve();
+class _PolyInOutCurve extends PolyCurve {
+  const _PolyInOutCurve();
 
   @override
   double transform(double progress) {

@@ -1,4 +1,4 @@
-export 'curves/curve.dart';
+export '../icicles/curves/curve.dart';
 export 'debug_log.dart';
 export 'progress_bar.dart';
-export 'tween.dart';
+export '../icicles/tweens/tween.dart';

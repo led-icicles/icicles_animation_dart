@@ -1,12 +1,11 @@
-import 'curve.dart';
-import 'dart:math' as math;
+part of 'curve.dart';
 
 abstract class CircleCurve extends Curve {
   const CircleCurve();
 }
 
-class CircleInCurve extends CircleCurve {
-  const CircleInCurve();
+class _CircleInCurve extends CircleCurve {
+  const _CircleInCurve();
 
   @override
   double transform(double progress) {
@@ -14,8 +13,8 @@ class CircleInCurve extends CircleCurve {
   }
 }
 
-class CircleOutCurve extends CircleCurve {
-  const CircleOutCurve();
+class _CircleOutCurve extends CircleCurve {
+  const _CircleOutCurve();
 
   @override
   double transform(double progress) {
@@ -23,8 +22,8 @@ class CircleOutCurve extends CircleCurve {
   }
 }
 
-class CircleInOutCurve extends CircleCurve {
-  const CircleInOutCurve();
+class _CircleInOutCurve extends CircleCurve {
+  const _CircleInOutCurve();
 
   @override
   double transform(double progress) {

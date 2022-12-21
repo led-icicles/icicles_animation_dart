@@ -1,4 +1,4 @@
-import 'package:icicles_animation_dart/icicles_animation_dart.dart';
+part of 'curve.dart';
 
 abstract class BackCurve extends Curve {
   final double overshoot;
@@ -6,8 +6,8 @@ abstract class BackCurve extends Curve {
   const BackCurve({this.overshoot = 1.70158});
 }
 
-class BackInCurve extends BackCurve {
-  const BackInCurve({super.overshoot});
+class _BackInCurve extends BackCurve {
+  const _BackInCurve({super.overshoot});
 
   @override
   double transform(double t) {
@@ -24,8 +24,8 @@ class BackOutCurve extends BackCurve {
   }
 }
 
-class BackInOutCurve extends BackCurve {
-  const BackInOutCurve({super.overshoot});
+class _BackInOutCurve extends BackCurve {
+  const _BackInOutCurve({super.overshoot});
 
   @override
   double transform(double t) {

@@ -1,5 +1,4 @@
-import 'curve.dart';
-import 'dart:math' as math;
+part of 'curve.dart';
 
 const _halfPi = math.pi / 2;
 
@@ -7,8 +6,8 @@ abstract class SinCurve extends Curve {
   const SinCurve();
 }
 
-class SinInCurve extends SinCurve {
-  const SinInCurve();
+class _SinInCurve extends SinCurve {
+  const _SinInCurve();
 
   @override
   double transform(double progress) {
@@ -16,8 +15,8 @@ class SinInCurve extends SinCurve {
   }
 }
 
-class SinOutCurve extends SinCurve {
-  const SinOutCurve();
+class _SinOutCurve extends SinCurve {
+  const _SinOutCurve();
 
   @override
   double transform(double progress) {
@@ -25,8 +24,8 @@ class SinOutCurve extends SinCurve {
   }
 }
 
-class SinInOutCurve extends SinCurve {
-  const SinInOutCurve();
+class _SinInOutCurve extends SinCurve {
+  const _SinInOutCurve();
 
   @override
   double transform(double progress) {
