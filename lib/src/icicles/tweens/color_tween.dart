@@ -1,6 +1,4 @@
-import 'package:icicles_animation_dart/src/core/core.dart';
-
-import 'tween.dart';
+part of 'tween.dart';
 
 class ColorTween implements Tween<Color> {
   @override

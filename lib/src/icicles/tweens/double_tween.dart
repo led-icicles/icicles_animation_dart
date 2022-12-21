@@ -1,4 +1,4 @@
-import 'tween.dart';
+part of 'tween.dart';
 
 class DoubleTween implements Tween<double> {
   @override
