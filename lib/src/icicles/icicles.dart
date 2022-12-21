@@ -109,9 +109,9 @@ class Icicles {
 
   /// Sets the [y] row to the specified [color].
   void setRowColor(int y, Color color) {
-    for (var x = 0; x < xCount; x += yCount) {
-      // const index = this.getPixelIndex(x, y);
-      _pixels[x] = color;
+    final index = getPixelIndex(0, y);
+    for (var i = index, x = 0; x < xCount; i += yCount, x++) {
+      _pixels[i] = color;
     }
   }
 

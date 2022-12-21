@@ -1,16 +1,16 @@
 part of 'tween.dart';
 
-class DoubleTween implements Tween<double> {
+class NumberTween implements Tween<num> {
   @override
-  final double begin;
+  final num begin;
 
   @override
-  final double end;
+  final num end;
 
-  const DoubleTween({required this.begin, required this.end});
+  const NumberTween({required this.begin, required this.end});
 
   @override
-  double transform(double progress) {
+  num transform(double progress) {
     if (progress == 0.0) {
       return begin;
     } else if (progress == 1.0) {

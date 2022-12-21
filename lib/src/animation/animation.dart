@@ -23,7 +23,7 @@ enum Framerate {
 
   final int framesPerSecond;
 
-  Duration get interFrameDuration =>
+  Duration get minFrameDuration =>
       Duration(milliseconds: (1000 / framesPerSecond).floor());
 
   const Framerate(this.framesPerSecond);
@@ -397,7 +397,7 @@ class Animation {
   /// this method will return true if the frame can be saved,
   /// or false for dropping it
   Frame? _assertValidFramerate(Frame frame) {
-    final minInterframeDuration = framerate.interFrameDuration;
+    final minInterframeDuration = framerate.minFrameDuration;
 
     switch (framerateBehavior) {
       case FramerateBehavior.error:

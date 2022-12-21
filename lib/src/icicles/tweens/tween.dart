@@ -3,17 +3,17 @@ import 'package:icicles_animation_dart/src/core/core.dart';
 import 'package:icicles_animation_dart/src/icicles/tweens/curve_tween.dart';
 
 part 'color_tween.dart';
-part 'double_tween.dart';
+part 'number_tween.dart';
 
 abstract class Tween<T> {
   const Tween._();
 
-  /// Interpolation between two double numbers.
-  static DoubleTween number({
-    required double begin,
-    required double end,
+  /// Interpolation between two numbers.
+  static NumberTween number({
+    required num begin,
+    required num end,
   }) =>
-      DoubleTween(begin: begin, end: end);
+      NumberTween(begin: begin, end: end);
 
   /// Interpolation between two colors.
   static ColorTween color({
