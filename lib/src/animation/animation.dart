@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 import 'package:icicles_animation_dart/src/frames/additive_frame_rgb565.dart';
-import 'package:icicles_animation_dart/src/utils/progress_bar.dart';
 
 export 'animation_header.dart';
 export 'animation_view.dart';
@@ -22,7 +21,17 @@ enum Framerate {
   fps30(30),
 
   /// This is the common frame rate for film.
-  fps24(24);
+  fps24(24),
+
+  /// There is no limit.
+  ///
+  /// The [minFrameDuration] getter will return [Duration.zero].
+  ///
+  /// Using this setting is not recommended for generators, as disabling
+  /// validation may cause errors, and the animation
+  /// itself may not be playable. Use it only when you are absolutely
+  /// sure what you are doing.
+  unlimited(10000);
 
   final int framesPerSecond;
 
@@ -595,6 +604,7 @@ class Animation {
       optimize: false,
       useRgb565: false,
       versionNumber: header.versionNumber,
+      framerate: Framerate.unlimited,
     );
 
     final pixelsCount = header.pixelsCount;
