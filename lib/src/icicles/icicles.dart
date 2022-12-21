@@ -144,17 +144,36 @@ class Icicles {
     return VisualFrame(duration, _pixels);
   }
 
+  /// Sets the color of the radio panel specified by the [panelIndex].
+  ///
   /// When setting `duration` to any value other than 0ms, the panel color will be displayed
   /// immediately and the next frame will be delayed by the specified time.
   ///
   /// Skipping the `duration` will cause the radio panel colors to be displayed
   /// together with the `show` method invocation.
+  ///
+  /// Panel indexes start from 1, setting [panelIndex] to `0` will update
+  /// all available radio panels.
   void setRadioPanelColor(
     int panelIndex,
     Color color, [
     Duration duration = Duration.zero,
   ]) {
     animation.addFrame(RadioColorFrame(duration, panelIndex, color));
+  }
+
+  /// Sets the colors of all available radio panels.
+  ///
+  /// When setting `duration` to any value other than 0ms, the panel color will be displayed
+  /// immediately and the next frame will be delayed by the specified time.
+  ///
+  /// Skipping the `duration` will cause the radio panel colors to be displayed
+  /// together with the `show` method invocation.
+  void setAllRadioPanelsColor(
+    Color color, [
+    Duration duration = Duration.zero,
+  ]) {
+    animation.addFrame(RadioColorFrame(duration, 0, color));
   }
 
   /// Displays the current icicles state for a provided [duration]

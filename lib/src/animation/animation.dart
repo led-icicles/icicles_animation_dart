@@ -13,6 +13,9 @@ enum Framerate {
   /// This is commonly used for games.
   fps60(60),
 
+  /// Default ESP32 animation framerate.
+  fps45(45),
+
   /// Represents a frame rate of 30 fps.
   ///
   /// This is the preferred frame rate for icicles animations.
@@ -126,7 +129,7 @@ class Animation {
     required int yCount,
     this.optimize = true,
     this.useRgb565 = false,
-    this.framerate = Framerate.fps30,
+    this.framerate = Framerate.fps45,
     this.framerateBehavior = FramerateBehavior.error,
     int loopsCount = 1,
     int versionNumber = NEWEST_ANIMATION_VERSION,

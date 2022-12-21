@@ -30,7 +30,7 @@ class _BounceInCurve extends BounceCurve {
 
   @override
   double transform(double progress) {
-    return 1 - _bounce(1 - progress);
+    return 1.0 - _bounce(1.0 - progress);
   }
 }
 
@@ -48,9 +48,10 @@ class _BounceInOutCurve extends BounceCurve {
 
   @override
   double transform(double progress) {
-    return ((progress *= 2) <= 1
-            ? 1 - _bounce(1 - progress)
-            : _bounce(progress - 1) + 1) /
-        2;
+    if (progress < 0.5) {
+      return (1.0 - _bounce(1.0 - progress * 2.0)) * 0.5;
+    } else {
+      return _bounce(progress * 2.0 - 1.0) * 0.5 + 0.5;
+    }
   }
 }

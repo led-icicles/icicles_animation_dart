@@ -7,7 +7,7 @@ void main() async {
     yCount: 30,
     radioPanelsCount: 2,
     loopsCount: 10,
-    framerate: Framerate.fps30,
+    framerate: Framerate.fps45,
     framerateBehavior: FramerateBehavior.drop,
     useRgb565: false,
     optimize: true,
@@ -22,13 +22,43 @@ void main() async {
     ),
   );
 
-  for (double i = 0; i < 1; i += 0.05) {
-    icicles.setAllPixelsColor(Colors.black);
-    final turnedOnCount = tween.transform(i);
-    for (int y = 0; y < turnedOnCount; y++) {
-      icicles.setRowColor(y, Colors.orange);
+  void bounce(List<Color> colors) {
+    Color radioPanelsColor = Colors.black;
+    Color backgroundColor = Colors.black;
+    for (final foregroundColor in colors) {
+      for (double i = 0; i < 1; i += 0.015) {
+        icicles.setAllPixelsColor(backgroundColor);
+        final turnedOnCount = tween.transform(i);
+        for (int y = 0; y < turnedOnCount; y++) {
+          icicles.setRowColor(y, foregroundColor);
+        }
+        icicles.setAllRadioPanelsColor(
+          Color.linearBlend(
+            radioPanelsColor,
+            backgroundColor,
+            Curves.bounceOut.transform(i),
+          ),
+        );
+        icicles.show(Framerate.fps45.minFrameDuration);
+      }
+      radioPanelsColor = backgroundColor;
+      backgroundColor = foregroundColor;
     }
-    icicles.show(Duration(milliseconds: 60));
   }
+
+  final colors = [
+    Colors.black,
+    Colors.orange,
+    Colors.oceanBlue,
+    Colors.magenta,
+    Colors.green,
+    Colors.lightBlue,
+    Colors.violet,
+    Colors.black,
+    Colors.black
+  ];
+
+  bounce(colors);
+
   await animation.toFile('./generated/bouncing-color.anim');
 }
