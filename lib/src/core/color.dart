@@ -335,7 +335,7 @@ class Color {
   String toString() => 'Color(0x${value.toRadixString(16).padLeft(8, '0')})';
 }
 
-class Colors {
+class Colors extends Iterable<Color> {
   Colors._();
 
   static const green = Color.fromRGB(0, 255, 0);
@@ -350,6 +350,28 @@ class Colors {
   static const lawnGreen = Color.fromRGB(80, 192, 0);
   static const black = Color.fromRGB(0, 0, 0);
   static const white = Color.fromRGB(255, 255, 255);
+
+  /// Array of all [Colors] without the [black] and [white] color.
+  static const all = [
+    green,
+    red,
+    blue,
+    lightBlue,
+    yellow,
+    magenta,
+    orange,
+    violet,
+    oceanBlue,
+    lawnGreen
+  ];
+
+  /// Returns a random color from the [all] colors array.
+  Color random() {
+    return all[math.Random().nextInt(all.length)];
+  }
+
+  @override
+  Iterator<Color> get iterator => all.iterator;
 }
 
 class IndexedColor implements Color {

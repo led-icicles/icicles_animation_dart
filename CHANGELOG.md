@@ -1,3 +1,8 @@
+## 1.3.1
+
+Added _Colors.all_ getter.
+Added _Colors.random()_ method.
+
 ## 1.3.0
 
 - Added _Tween_, _ColorTween_, _NumberTween_ and _CurveTween_ interpolation classes.
