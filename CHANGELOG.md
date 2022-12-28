@@ -2,6 +2,7 @@
 
 Added _Colors.all_ getter.
 Added _Colors.random()_ method.
+Added check for empty animation when calling _Animation.toFile_ method.
 
 ## 1.3.0
 

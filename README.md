@@ -55,7 +55,7 @@ void main() async {
   ///
   /// The `.anim` extension is not required,
   /// but is required by most controllers.
-  await animation.toFile('./generated/police.anim');
+  await animation.tocFile('./generated/police.anim');
 }
 ```
 

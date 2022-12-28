@@ -522,6 +522,13 @@ class Animation {
   }
 
   Future<File> toFile(String path) async {
+    if (_frames.isEmpty) {
+      throw StateError(
+        'You cannot save an animation without frames. '
+        'Try adding at least one frame.',
+      );
+    }
+
     final toFileWatch = Stopwatch()..start();
     debugPrint('Creating animation file: optimize=$optimize');
 
