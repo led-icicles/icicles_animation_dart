@@ -366,7 +366,7 @@ class Colors extends Iterable<Color> {
   ];
 
   /// Returns a random color from the [all] colors array.
-  Color random() {
+  static Color random() {
     return all[math.Random().nextInt(all.length)];
   }
 
