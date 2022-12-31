@@ -1,8 +1,12 @@
+## 1.3.2
+
+- Added _blendAllPixels_, _darken_ and _lighten_ methods to the _Icicles_ class.
+- Added _darken_ and _lighten_ method to the _Color_ class.
 ## 1.3.1
 
-Added _Colors.all_ getter.
-Added _Colors.random()_ method.
-Added check for empty animation when calling _Animation.toFile_ method.
+- Added _Colors.all_ getter.
+- Added _Colors.random()_ method.
+- Added check for empty animation when calling _Animation.toFile_ method.
 
 ## 1.3.0
 

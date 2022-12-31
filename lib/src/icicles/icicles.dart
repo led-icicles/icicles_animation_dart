@@ -136,6 +136,33 @@ class Icicles {
     }
   }
 
+  /// Blends all [pixels] colors with the supplied [color]
+  /// by the given [progress].
+  ///
+  /// Example:
+  /// ```
+  /// icicles.blendAllPixels(Colors.black, 0.5);
+  /// ```
+  void blendAllPixels(Color color, double progress) {
+    for (var i = 0; i < _pixels.length; i++) {
+      _pixels[i] = Color.linearBlend(_pixels[i], color, progress);
+    }
+  }
+
+  /// Lighten all [pixels] colors by [progress] amount (`1.0` = white)
+  void lightenAllPixels(double progress, {bool lightenRadioPanels = false}) {
+    for (var i = 0; i < _pixels.length; i++) {
+      _pixels[i] = _pixels[i].lighten(progress);
+    }
+  }
+
+  /// Darken all [pixels] colors by [progress] amount (`1.0` = black)
+  void darkenAllPixels(double progress, {bool darkenRadioPanels = false}) {
+    for (var i = 0; i < _pixels.length; i++) {
+      _pixels[i] = _pixels[i].lighten(progress);
+    }
+  }
+
   /// Converts the current pixel state to [VisualFrame].
   ///
   /// This method is used internally by the [show] method

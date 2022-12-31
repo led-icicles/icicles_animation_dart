@@ -245,6 +245,25 @@ class Color {
     return 0.2126 * R + 0.7152 * G + 0.0722 * B;
   }
 
+  /// Darken a color by [progress] amount (`1.0` = black)
+  Color darken(double progress) {
+    assert(0.0 <= progress && progress <= 1.0);
+    var f = 1 - progress;
+    return Color.fromARGB(
+        alpha, (red * f).round(), (green * f).round(), (blue * f).round());
+  }
+
+  /// Lighten a color by [progress] amount (`1.0` = white)
+  Color lighten(double progress) {
+    assert(0.0 <= progress && progress <= 1.0);
+
+    return Color.fromARGB(
+        alpha,
+        red + ((255 - red) * progress).round(),
+        green + ((255 - green) * progress).round(),
+        blue + ((255 - blue) * progress).round());
+  }
+
   /// Linearly interpolate between two colors.
   ///
   /// This is intended to be fast but as a result may be ugly. Consider
@@ -428,6 +447,13 @@ class IndexedColor implements Color {
 
   @override
   int toRgb565() => color.toRgb565();
+
+  @override
+  Color darken(double progress) => IndexedColor(index, color.darken(progress));
+
+  @override
+  Color lighten(double progress) =>
+      IndexedColor(index, color.lighten(progress));
 
   @override
   bool operator ==(Object other) {
