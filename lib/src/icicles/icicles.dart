@@ -159,7 +159,7 @@ class Icicles {
   /// Darken all [pixels] colors by [progress] amount (`1.0` = black)
   void darkenAllPixels(double progress, {bool darkenRadioPanels = false}) {
     for (var i = 0; i < _pixels.length; i++) {
-      _pixels[i] = _pixels[i].lighten(progress);
+      _pixels[i] = _pixels[i].darken(progress);
     }
   }
 
