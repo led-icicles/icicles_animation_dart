@@ -264,6 +264,11 @@ class Color {
         blue + ((255 - blue) * progress).round());
   }
 
+  /// Blend this with the [color] by [progress].
+  Color blend(Color color, double progress) {
+    return Color.linearBlend(this, color, progress);
+  }
+
   /// Linearly interpolate between two colors.
   ///
   /// This is intended to be fast but as a result may be ugly. Consider
@@ -454,6 +459,10 @@ class IndexedColor implements Color {
   @override
   Color lighten(double progress) =>
       IndexedColor(index, color.lighten(progress));
+
+  @override
+  Color blend(Color color, double progress) =>
+      IndexedColor(index, color.blend(color, progress));
 
   @override
   bool operator ==(Object other) {

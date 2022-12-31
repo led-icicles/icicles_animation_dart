@@ -1,7 +1,8 @@
 ## 1.3.2
 
 - Added _blendAllPixels_, _darken_ and _lighten_ methods to the _Icicles_ class.
-- Added _darken_ and _lighten_ method to the _Color_ class.
+- Added _darken_, _lighten_ and _blend_ method to the _Color_ class.
+
 ## 1.3.1
 
 - Added _Colors.all_ getter.

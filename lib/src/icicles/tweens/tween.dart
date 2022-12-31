@@ -1,5 +1,4 @@
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
-import 'package:icicles_animation_dart/src/core/core.dart';
 import 'package:icicles_animation_dart/src/icicles/tweens/curve_tween.dart';
 
 part 'color_tween.dart';

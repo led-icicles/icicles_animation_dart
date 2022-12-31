@@ -143,9 +143,22 @@ class Icicles {
   /// ```
   /// icicles.blendAllPixels(Colors.black, 0.5);
   /// ```
-  void blendAllPixels(Color color, double progress) {
+  void blendAllPixels(
+    Color color,
+    double progress, {
+    bool blendRadioPanels = false,
+  }) {
     for (var i = 0; i < _pixels.length; i++) {
       _pixels[i] = Color.linearBlend(_pixels[i], color, progress);
+    }
+    if (blendRadioPanels) {
+      for (final radioPanel in animation.currentView.radioPanels) {
+        animation.addFrame(RadioColorFrame(
+          Duration.zero,
+          radioPanel.index,
+          radioPanel.color.blend(color, progress),
+        ));
+      }
     }
   }
 
@@ -154,12 +167,30 @@ class Icicles {
     for (var i = 0; i < _pixels.length; i++) {
       _pixels[i] = _pixels[i].lighten(progress);
     }
+    if (lightenRadioPanels) {
+      for (final radioPanel in animation.currentView.radioPanels) {
+        animation.addFrame(RadioColorFrame(
+          Duration.zero,
+          radioPanel.index,
+          radioPanel.color.lighten(progress),
+        ));
+      }
+    }
   }
 
   /// Darken all [pixels] colors by [progress] amount (`1.0` = black)
   void darkenAllPixels(double progress, {bool darkenRadioPanels = false}) {
     for (var i = 0; i < _pixels.length; i++) {
       _pixels[i] = _pixels[i].darken(progress);
+    }
+    if (darkenRadioPanels) {
+      for (final radioPanel in animation.currentView.radioPanels) {
+        animation.addFrame(RadioColorFrame(
+          Duration.zero,
+          radioPanel.index,
+          radioPanel.color.darken(progress),
+        ));
+      }
     }
   }
 
