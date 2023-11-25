@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 class RadioColorFrame extends Frame {
-  static const maxPanelIndex = UINT_8_MAX_SIZE;
+  static const maxPanelIndex = uint8MaxSize;
   static const broadcastChannelIndex = 0;
 
   @override
@@ -27,7 +27,7 @@ class RadioColorFrame extends Frame {
     this.panelIndex,
     this.color,
   ) {
-    if (panelIndex.isNegative || panelIndex > UINT_8_MAX_SIZE) {
+    if (panelIndex.isNegative || panelIndex > uint8MaxSize) {
       throw ArgumentError(
         'Not valid panel index provided. '
         'Panel index should be larger or equal 0 (for broadcast) '
@@ -39,19 +39,14 @@ class RadioColorFrame extends Frame {
   /// [(uint8)type][(uint16)duration][(uint8)panelIndex][(uint8)red][(uint8)green][(uint8)blue]
   @override
   int get size {
-    const frameTypeSize = UINT_8_SIZE_IN_BYTES;
-    const durationSize = UINT_16_SIZE_IN_BYTES;
-    const panelIndexSize = UINT_8_SIZE_IN_BYTES;
-    const redSize = UINT_8_SIZE_IN_BYTES;
-    const greenSize = UINT_8_SIZE_IN_BYTES;
-    const blueSize = UINT_8_SIZE_IN_BYTES;
+    const frameTypeSize = uint8SizeInBytes;
+    const durationSize = uint16SizeInBytes;
+    const panelIndexSize = uint8SizeInBytes;
+    const redSize = uint8SizeInBytes;
+    const greenSize = uint8SizeInBytes;
+    const blueSize = uint8SizeInBytes;
 
-    const size = (frameTypeSize +
-        durationSize +
-        panelIndexSize +
-        redSize +
-        greenSize +
-        blueSize);
+    const size = (frameTypeSize + durationSize + panelIndexSize + redSize + greenSize + blueSize);
 
     return size;
   }

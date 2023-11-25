@@ -1,3 +1,8 @@
+## 1.3.3
+
+- Updated package dependencies
+- Improved constant naming
+
 ## 1.3.2
 
 - Added _blendAllPixels_, _darken_ and _lighten_ methods to the _Icicles_ class.

@@ -71,8 +71,7 @@ class Writer extends EncodingManager {
   ///
   /// Color occupies 24bits in the [bytes] array
   void writeColor(Color color) {
-    final encodedColor =
-        color.isOpaque ? Color.alphaBlend(color, Colors.black) : color;
+    final encodedColor = color.isOpaque ? Color.alphaBlend(color, Colors.black) : color;
 
     writeUint8(encodedColor.red);
     writeUint8(encodedColor.green);
@@ -104,7 +103,7 @@ class Writer extends EncodingManager {
   ]) {
     final encoded = encoder.convert(value);
     writeBytes(encoded);
-    writeUint8(NULL_CHAR);
+    writeUint8(nullChar);
   }
 
   void writeEncodable(Encodable encodable) {
@@ -168,7 +167,7 @@ class Reader extends EncodingManager {
   String readString([
     Converter<List<int>, String> decoder = const Utf8Decoder(),
   ]) {
-    final endIndex = bytes.indexOf(NULL_CHAR, pointer);
+    final endIndex = bytes.indexOf(nullChar, pointer);
     final encodedString = Uint8List.sublistView(bytes, pointer, endIndex);
 
     final decodedString = decoder.convert(encodedString);

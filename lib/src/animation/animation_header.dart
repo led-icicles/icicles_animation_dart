@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
-const NEWEST_ANIMATION_VERSION = 1;
-const MIN_ANIMATION_VERSION = 1;
+const newestAnimationVersion = 1;
+const minAnimationVersion = 1;
 
 class AnimationHeader implements Encodable {
   /// **uint16** max number: `65535` */
@@ -41,15 +41,15 @@ class AnimationHeader implements Encodable {
   AnimationHeader({
     required this.xCount,
     required this.yCount,
-    this.versionNumber = NEWEST_ANIMATION_VERSION, // version
+    this.versionNumber = newestAnimationVersion, // version
     required this.name,
     this.loopsCount = 1, //loops
     this.radioPanelsCount = 0,
   }) {
-    if (xCount > UINT_8_MAX_SIZE) {
+    if (xCount > uint8MaxSize) {
       throw ArgumentError('Only 255 leds in X axis are supported.');
     }
-    if (yCount > UINT_8_MAX_SIZE) {
+    if (yCount > uint8MaxSize) {
       throw ArgumentError('Only 255 leds in Y axis are supported.');
     }
     if (xCount <= 0) {
@@ -59,34 +59,31 @@ class AnimationHeader implements Encodable {
       throw ArgumentError('At least 1 led is required for Y axis.');
     }
 
-    if (radioPanelsCount > UINT_8_MAX_SIZE || radioPanelsCount < 0) {
-      throw ArgumentError(
-          'Value of radioPanelsCount must be between 0 and 255.');
+    if (radioPanelsCount > uint8MaxSize || radioPanelsCount < 0) {
+      throw ArgumentError('Value of radioPanelsCount must be between 0 and 255.');
     }
 
-    if ((versionNumber < MIN_ANIMATION_VERSION ||
-        versionNumber > NEWEST_ANIMATION_VERSION)) {
+    if ((versionNumber < minAnimationVersion || versionNumber > newestAnimationVersion)) {
       throw ArgumentError('Unsupported version provided. '
           'Supported versions are in between: '
-          '"$MIN_ANIMATION_VERSION" and "$NEWEST_ANIMATION_VERSION".');
+          '"$minAnimationVersion" and "$newestAnimationVersion".');
     }
 
-    if ((loopsCount < 0 || loopsCount > UINT_16_MAX_SIZE)) {
+    if ((loopsCount < 0 || loopsCount > uint16MaxSize)) {
       throw ArgumentError('Unsupported loops count provided. '
-          'Currently supported loops count is between "0" (for infinite/device maximum loops) and $UINT_16_MAX_SIZE.');
+          'Currently supported loops count is between "0" (for infinite/device maximum loops) and $uint16MaxSize.');
     }
   }
 
   int get size {
     /// NULL CHAR IS USED AS THE SEPARATOR
 
-    const versionSize = UINT_16_SIZE_IN_BYTES;
-    final animationNameSize =
-        utf8.encode(name).length + NULL_CHAR_SIZE_IN_BYTES;
-    const xCountSize = UINT_8_SIZE_IN_BYTES;
-    const yCountSize = UINT_8_SIZE_IN_BYTES;
-    const loopsSize = UINT_16_SIZE_IN_BYTES;
-    const radioPanelsCountSize = UINT_8_SIZE_IN_BYTES;
+    const versionSize = uint16SizeInBytes;
+    final animationNameSize = utf8.encode(name).length + nullCharSizeInBytes;
+    const xCountSize = uint8SizeInBytes;
+    const yCountSize = uint8SizeInBytes;
+    const loopsSize = uint16SizeInBytes;
+    const radioPanelsCountSize = uint8SizeInBytes;
 
     return [
       versionSize,

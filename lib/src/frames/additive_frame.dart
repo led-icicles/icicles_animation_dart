@@ -6,7 +6,7 @@ import 'package:icicles_animation_dart/src/frames/additive_frame_rgb565.dart';
 class AdditiveFrame extends Frame {
   @override
   FrameType get type => FrameType.AdditiveFrame;
-  static const maxChangedPixelIndex = UINT_16_MAX_SIZE;
+  static const maxChangedPixelIndex = uint16MaxSize;
   final List<IndexedColor> changedPixels;
 
   AdditiveFrame(

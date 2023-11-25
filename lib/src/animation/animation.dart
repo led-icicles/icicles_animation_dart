@@ -35,8 +35,7 @@ enum Framerate {
 
   final int framesPerSecond;
 
-  Duration get minFrameDuration =>
-      Duration(milliseconds: (1000 / framesPerSecond).floor());
+  Duration get minFrameDuration => Duration(milliseconds: (1000 / framesPerSecond).floor());
 
   const Framerate(this.framesPerSecond);
 }
@@ -88,8 +87,8 @@ class Animation {
     );
 
     // radio panels indexes starts from 1 (0 is a broadcast channel)
-    final radioPanels = List<RadioPanelView>.generate(header.radioPanelsCount,
-        (index) => RadioPanelView(index + 1, Colors.black));
+    final radioPanels =
+        List<RadioPanelView>.generate(header.radioPanelsCount, (index) => RadioPanelView(index + 1, Colors.black));
 
     var loop = 0;
     while (loop++ < header.loopsCount) {
@@ -141,7 +140,7 @@ class Animation {
     this.framerate = Framerate.fps45,
     this.framerateBehavior = FramerateBehavior.error,
     int loopsCount = 1,
-    int versionNumber = NEWEST_ANIMATION_VERSION,
+    int versionNumber = newestAnimationVersion,
     int radioPanelsCount = 0,
   })  : _header = AnimationHeader(
           name: name,
@@ -361,8 +360,7 @@ class Animation {
       } else {
         /// Colors changed
         final lastFrame = _frames.lastOrNull;
-        if (lastFrame is RadioColorFrame &&
-            lastFrame.duration == Duration.zero) {
+        if (lastFrame is RadioColorFrame && lastFrame.duration == Duration.zero) {
           return _replaceLastSavedFrame(frame);
         } else {
           return _saveFrame(frame);
@@ -454,9 +452,7 @@ class Animation {
             final view = bufferedView;
 
             /// Process buffered frame and add it instead of the current frame
-            view
-                .getRadioColorFrames()
-                .forEach((frame) => _addFrameInternal(frame));
+            view.getRadioColorFrames().forEach((frame) => _addFrameInternal(frame));
 
             return view.frame.copyWith(duration: cumulativeDuration);
           }
@@ -504,8 +500,7 @@ class Animation {
 
   /// Animation size in bytes
   int get size {
-    return _frames.fold(
-        header.size, (currentSize, frame) => currentSize + frame.size);
+    return _frames.fold(header.size, (currentSize, frame) => currentSize + frame.size);
   }
 
   Uint8List toBytes([Endian endian = Endian.little]) {

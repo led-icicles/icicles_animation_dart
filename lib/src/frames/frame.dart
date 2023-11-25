@@ -64,7 +64,7 @@ enum FrameType {
 @immutable
 abstract class Frame extends Equatable implements Encodable {
   /// Constant describing the maximum possible duration of the frame.
-  static const maxDuration = Duration(milliseconds: UINT_16_MAX_SIZE);
+  static const maxDuration = Duration(milliseconds: uint16MaxSize);
 
   /// Frame type
   FrameType get type;

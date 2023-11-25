@@ -32,8 +32,7 @@ class RadioPanelView extends Equatable {
   }) =>
       RadioPanelView(index ?? this.index, color ?? this.color);
 
-  RadioColorFrame toRadioColorFrame([Duration duration = Duration.zero]) =>
-      RadioColorFrame(duration, index, color);
+  RadioColorFrame toRadioColorFrame([Duration duration = Duration.zero]) => RadioColorFrame(duration, index, color);
 
   @override
   List<Object?> get props => [index, color];
@@ -68,8 +67,7 @@ class AnimationView extends Equatable {
       } else {
         final localIndex = newFrame.panelIndex - 1;
         // shift index due to broadcast panel at 0
-        radioPanels[localIndex] =
-            radioPanels[localIndex].copyWith(color: newFrame.color);
+        radioPanels[localIndex] = radioPanels[localIndex].copyWith(color: newFrame.color);
       }
     }
 
@@ -86,15 +84,14 @@ class AnimationView extends Equatable {
       );
 
   int getRadioPanelSize() {
-    const panelIndexSize = UINT_8_SIZE_IN_BYTES;
-    const color = UINT_8_SIZE_IN_BYTES * 3;
+    const panelIndexSize = uint8SizeInBytes;
+    const color = uint8SizeInBytes * 3;
     return panelIndexSize + color;
   }
 
-  List<RadioColorFrame> getRadioColorFrames(
-      [Duration duration = Duration.zero]) {
-    final allPanelsSameColor = radioPanels.isNotEmpty &&
-        radioPanels.every((panel) => panel.color == radioPanels.first.color);
+  List<RadioColorFrame> getRadioColorFrames([Duration duration = Duration.zero]) {
+    final allPanelsSameColor =
+        radioPanels.isNotEmpty && radioPanels.every((panel) => panel.color == radioPanels.first.color);
     if (allPanelsSameColor) {
       /// We can set colors of all panels via single frame
       return [RadioColorFrame(duration, 0, radioPanels.first.color)];
@@ -114,7 +111,7 @@ class AnimationView extends Equatable {
     final radioPanelSize = getRadioPanelSize();
     final radioPanelsSize = radioPanelSize * radioPanels.length;
     final frameSize = getFrameSize();
-    final messageTypeSize = UINT_8_SIZE_IN_BYTES;
+    final messageTypeSize = uint8SizeInBytes;
     final viewSize = messageTypeSize + frameSize + radioPanelsSize;
 
     final writter = Writer(viewSize, endian);

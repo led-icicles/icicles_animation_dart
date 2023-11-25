@@ -1,9 +1,9 @@
-const INT_16_MAX_SIZE = 32767;
-const UINT_16_MAX_SIZE = 65535;
-const UINT_16_SIZE_IN_BYTES = 2;
+const int16MaxSize = 32767;
+const uint16MaxSize = 65535;
+const uint16SizeInBytes = 2;
 
-const UINT_8_MAX_SIZE = 255;
-const UINT_8_SIZE_IN_BYTES = 1;
+const uint8MaxSize = 255;
+const uint8SizeInBytes = 1;
 
-const NULL_CHAR = 0;
-const NULL_CHAR_SIZE_IN_BYTES = 1;
+const nullChar = 0;
+const nullCharSizeInBytes = 1;
