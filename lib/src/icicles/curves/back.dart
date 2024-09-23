@@ -4,6 +4,10 @@ abstract class BackCurve extends Curve {
   final double overshoot;
 
   const BackCurve({this.overshoot = 1.70158});
+
+  const factory BackCurve.backIn({double overshoot}) = _BackInCurve;
+  const factory BackCurve.backOut({double overshoot}) = _BackOutCurve;
+  const factory BackCurve.backInOut({double overshoot}) = _BackInOutCurve;
 }
 
 class _BackInCurve extends BackCurve {
@@ -15,8 +19,8 @@ class _BackInCurve extends BackCurve {
   }
 }
 
-class BackOutCurve extends BackCurve {
-  const BackOutCurve({super.overshoot});
+class _BackOutCurve extends BackCurve {
+  const _BackOutCurve({super.overshoot});
 
   @override
   double transform(double t) {

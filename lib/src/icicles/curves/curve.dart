@@ -28,7 +28,7 @@ class Curves {
   /// Back
 
   static const Curve backIn = _BackInCurve();
-  static const Curve backOut = BackOutCurve();
+  static const Curve backOut = _BackOutCurve();
   static const Curve backInOut = _BackInOutCurve();
 
   /// Bounce
