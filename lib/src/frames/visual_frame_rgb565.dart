@@ -4,7 +4,7 @@ import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 class VisualFrameRgb565 extends VisualFrame {
   @override
-  FrameType get type => FrameType.VisualFrameRgb565;
+  FrameType get type => FrameType.visualRgb565;
 
   /// [(1)type][(2)duration][(ledsCount*2)pixels]
   @override
@@ -26,16 +26,12 @@ class VisualFrameRgb565 extends VisualFrame {
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
-    final writter = Writer(size, endian)
+    final writer = Writer(size, endian)
       ..writeFrameType(type)
-      ..writeDuration(duration);
+      ..writeDuration(duration)
+      ..writeAllColors565(pixels);
 
-    /// frame pixels
-    for (var i = 0; i < pixels.length; i++) {
-      writter.writeColor565(pixels[i]);
-    }
-
-    return writter.bytes;
+    return writer.bytes;
   }
 
   /// When [withType] is set to true, type will be also read from the [reader].
@@ -46,7 +42,7 @@ class VisualFrameRgb565 extends VisualFrame {
   }) {
     if (withType) {
       final frameType = reader.readFrameType();
-      if (frameType != FrameType.VisualFrameRgb565) {
+      if (frameType != FrameType.visualRgb565) {
         throw ArgumentError('Invalid frame type : ${frameType.name}');
       }
     }

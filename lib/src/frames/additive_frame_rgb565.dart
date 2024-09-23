@@ -4,7 +4,7 @@ import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 class AdditiveFrameRgb565 extends AdditiveFrame {
   @override
-  final FrameType type = FrameType.AdditiveFrameRgb565;
+  final FrameType type = FrameType.additiveRgb565;
 
   // [(1 - uint8)type][(2 - uint16)duration][(2 - uint16)size][(x * 5)changedPixels]
   @override
@@ -27,17 +27,17 @@ class AdditiveFrameRgb565 extends AdditiveFrame {
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
-    final writter = Writer(size, endian)
+    final writer = Writer(size, endian)
       ..writeFrameType(type)
       ..writeDuration(duration)
       ..writeUint16(changedPixels.length);
 
     /// frame pixels
     for (var i = 0; i < changedPixels.length; i++) {
-      writter.writeIndexedColor565(changedPixels[i]);
+      writer.writeIndexedColor565(changedPixels[i]);
     }
 
-    return writter.bytes;
+    return writer.bytes;
   }
 
   /// When [withType] is set to true, type will be also read from the [reader].
@@ -47,7 +47,7 @@ class AdditiveFrameRgb565 extends AdditiveFrame {
   }) {
     if (withType) {
       final frameType = reader.readFrameType();
-      if (frameType != FrameType.AdditiveFrameRgb565) {
+      if (frameType != FrameType.additiveRgb565) {
         throw ArgumentError('Invalid frame type : ${frameType.name}');
       }
     }

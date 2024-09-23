@@ -12,7 +12,10 @@ enum Framerate {
   /// This is commonly used for games.
   fps60(60),
 
-  /// Default ESP32 animation framerate.
+  /// Default ESP8266 animation framerate.
+  ///
+  /// It is possible to exceed this value, but this is not recommended
+  /// for most microcontrollers due to the hardware limitations.
   fps45(45),
 
   /// Represents a frame rate of 30 fps.
@@ -33,9 +36,11 @@ enum Framerate {
   /// sure what you are doing.
   unlimited(10000);
 
+  /// Number of frames displayed per second
   final int framesPerSecond;
 
-  Duration get minFrameDuration => Duration(milliseconds: (1000 / framesPerSecond).floor());
+  Duration get minFrameDuration =>
+      Duration(milliseconds: (1000 / framesPerSecond).floor());
 
   const Framerate(this.framesPerSecond);
 }
@@ -80,19 +85,19 @@ class Animation {
   final FramerateBehavior framerateBehavior;
 
   Iterable<AnimationView> play() sync* {
-    final intialFrame = VisualFrame.filled(
+    final initialFrame = VisualFrame.filled(
       Duration.zero,
       header.pixelsCount,
       Colors.black,
     );
 
     // radio panels indexes starts from 1 (0 is a broadcast channel)
-    final radioPanels =
-        List<RadioPanelView>.generate(header.radioPanelsCount, (index) => RadioPanelView(index + 1, Colors.black));
+    final radioPanels = List<RadioPanelView>.generate(header.radioPanelsCount,
+        (index) => RadioPanelView(index + 1, Colors.black));
 
     var loop = 0;
     while (loop++ < header.loopsCount) {
-      var view = AnimationView(intialFrame, radioPanels);
+      var view = AnimationView(initialFrame, radioPanels);
 
       for (final frame in _frames) {
         if (frame is VisualFrame) {
@@ -128,7 +133,7 @@ class Animation {
         }
       }
     }
-    yield AnimationView(intialFrame, radioPanels);
+    yield AnimationView(initialFrame, radioPanels);
   }
 
   Animation(
@@ -360,7 +365,8 @@ class Animation {
       } else {
         /// Colors changed
         final lastFrame = _frames.lastOrNull;
-        if (lastFrame is RadioColorFrame && lastFrame.duration == Duration.zero) {
+        if (lastFrame is RadioColorFrame &&
+            lastFrame.duration == Duration.zero) {
           return _replaceLastSavedFrame(frame);
         } else {
           return _saveFrame(frame);
@@ -452,7 +458,9 @@ class Animation {
             final view = bufferedView;
 
             /// Process buffered frame and add it instead of the current frame
-            view.getRadioColorFrames().forEach((frame) => _addFrameInternal(frame));
+            view
+                .getRadioColorFrames()
+                .forEach((frame) => _addFrameInternal(frame));
 
             return view.frame.copyWith(duration: cumulativeDuration);
           }
@@ -500,20 +508,19 @@ class Animation {
 
   /// Animation size in bytes
   int get size {
-    return _frames.fold(header.size, (currentSize, frame) => currentSize + frame.size);
+    return _frames.fold(
+        header.size, (currentSize, frame) => currentSize + frame.size);
   }
 
   Uint8List toBytes([Endian endian = Endian.little]) {
     if (_frames.isEmpty) {
       throw StateError('Animation is empty.');
     }
-    final writter = Writer(size, endian)..writeEncodable(_header);
+    final writer = Writer(size, endian)
+      ..writeEncodable(_header)
+      ..writeAllEncodable(_frames);
 
-    for (final frame in _frames) {
-      writter.writeEncodable(frame);
-    }
-
-    return writter.bytes;
+    return writer.bytes;
   }
 
   Future<File> toFile(String path) async {
@@ -614,7 +621,7 @@ class Animation {
     while (reader.hasMoreData) {
       final frameType = reader.readFrameType();
       switch (frameType) {
-        case FrameType.VisualFrame:
+        case FrameType.visual:
           animation.addFrame(VisualFrame.fromReader(
             reader,
             pixelsCount,
@@ -622,7 +629,7 @@ class Animation {
           ));
 
           break;
-        case FrameType.VisualFrameRgb565:
+        case FrameType.visualRgb565:
           animation.addFrame(VisualFrameRgb565.fromReader(
             reader,
             pixelsCount,
@@ -630,26 +637,26 @@ class Animation {
           ));
 
           break;
-        case FrameType.DelayFrame:
+        case FrameType.delay:
           animation.addFrame(DelayFrame.fromReader(
             reader,
             withType: false,
           ));
 
           break;
-        case FrameType.RadioColorFrame:
+        case FrameType.radioColor:
           animation.addFrame(RadioColorFrame.fromReader(
             reader,
             withType: false,
           ));
           break;
-        case FrameType.AdditiveFrame:
+        case FrameType.additive:
           animation.addFrame(AdditiveFrame.fromReader(
             reader,
             withType: false,
           ));
           break;
-        case FrameType.AdditiveFrameRgb565:
+        case FrameType.additiveRgb565:
           animation.addFrame(AdditiveFrameRgb565.fromReader(
             reader,
             withType: false,

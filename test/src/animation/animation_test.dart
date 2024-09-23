@@ -23,9 +23,9 @@ void main() {
     expect(animation.header.xCount, 20);
     expect(animation.header.yCount, 30);
 
-    final readedBytes = await File(animationFilePath).readAsBytes();
+    final readBytes = await File(animationFilePath).readAsBytes();
     final encodedBytes = animation.toBytes();
 
-    expect(readedBytes, orderedEquals(encodedBytes));
+    expect(readBytes, orderedEquals(encodedBytes));
   });
 }

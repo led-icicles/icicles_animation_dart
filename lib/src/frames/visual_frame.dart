@@ -1,11 +1,12 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 /// This frame does not support opacity when converted to bytes
 class VisualFrame extends Frame {
   @override
-  FrameType get type => FrameType.VisualFrame;
+  FrameType get type => FrameType.visual;
   final List<Color> pixels;
 
   void _assertValidPixelIndex(int index) {
@@ -19,11 +20,11 @@ class VisualFrame extends Frame {
     }
   }
 
-  /// Uses [header] configuration to transform the 2D [x], [y] cordinates into
+  /// Uses [header] configuration to transform the 2D [x], [y] coordinates into
   /// 1D pixel index which is used internally by this [VisualFrame].
   ///
   /// Throws the [RangeError] if the provided
-  /// [x], [y] cordinates are out of range.
+  /// [x], [y] coordinates are out of range.
   int getPixelIndex(AnimationHeader header, int x, int y) {
     final index = x * header.yCount + y;
     _assertValidPixelIndex(index);
@@ -52,17 +53,19 @@ class VisualFrame extends Frame {
     );
   }
 
-  /// Verify wether two visual frames are compatibility
+  /// Verify wether two visual frames are compatible.
   static void assertVisualFramesCompatibility(
-      Frame prevFrame, Frame nextFrame) {
-    if (!(prevFrame is VisualFrame) || !(nextFrame is VisualFrame)) {
+    Frame prevFrame,
+    Frame nextFrame,
+  ) {
+    if (prevFrame is! VisualFrame || nextFrame is! VisualFrame) {
       throw ArgumentError('Bad frame type.');
     } else if (prevFrame.size != nextFrame.size) {
       throw ArgumentError('Frames cannot have different sizes.');
     }
   }
 
-  /// Copy visual frame instance.
+  /// Copies visual frame.
   ///
   /// This is an alias for [copyWith] method without arguments.
   VisualFrame copy() => copyWith();
@@ -110,16 +113,12 @@ class VisualFrame extends Frame {
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
-    final writter = Writer(size, endian)
+    final writer = Writer(size, endian)
       ..writeFrameType(type)
-      ..writeDuration(duration);
+      ..writeDuration(duration)
+      ..writeAllColors(pixels);
 
-    /// frame pixels
-    for (var i = 0; i < pixels.length; i++) {
-      writter.writeColor(pixels[i]);
-    }
-
-    return writter.bytes;
+    return writer.bytes;
   }
 
   /// When [withType] is set to true, type will be also read from the [reader].
@@ -130,7 +129,7 @@ class VisualFrame extends Frame {
   }) {
     if (withType) {
       final frameType = reader.readFrameType();
-      if (frameType != FrameType.VisualFrame) {
+      if (frameType != FrameType.visual) {
         throw ArgumentError('Invalid frame type : ${frameType.name}');
       }
     }
@@ -159,5 +158,19 @@ class VisualFrame extends Frame {
   }
 
   @override
-  List<Object?> get props => [type, duration, pixels];
+  int get hashCode => Object.hash(
+        type,
+        duration,
+        Object.hashAllUnordered(pixels),
+      );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(other, this)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is AdditiveFrame &&
+        other.type == type &&
+        other.duration == duration &&
+        const UnorderedIterableEquality().equals(pixels, other.changedPixels);
+  }
 }

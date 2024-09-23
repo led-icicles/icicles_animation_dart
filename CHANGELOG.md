@@ -1,3 +1,11 @@
+## 1.4.0
+
+- Updated package dependencies
+- Added helper methods.
+- Improved types naming.
+- Exposed _BackCurve_ and _ElasticCurve_ constructors.
+- Removed equatable package.
+
 ## 1.3.3
 
 - Updated package dependencies

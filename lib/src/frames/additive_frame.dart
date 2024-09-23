@@ -1,11 +1,12 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 import 'package:icicles_animation_dart/src/frames/additive_frame_rgb565.dart';
 
 class AdditiveFrame extends Frame {
   @override
-  FrameType get type => FrameType.AdditiveFrame;
+  FrameType get type => FrameType.additive;
   static const maxChangedPixelIndex = uint16MaxSize;
   final List<IndexedColor> changedPixels;
 
@@ -15,7 +16,7 @@ class AdditiveFrame extends Frame {
   ) {
     if (changedPixels.length > AdditiveFrame.maxChangedPixelIndex) {
       throw ArgumentError(
-          'Provided more chnaged pixels than maximum allowed. Check [AdditiveFrame.maxChangedPixelIndex].');
+          'Provided more changed pixels than maximum allowed. Check [AdditiveFrame.maxChangedPixelIndex].');
     }
   }
 
@@ -98,17 +99,17 @@ class AdditiveFrame extends Frame {
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
-    final writter = Writer(size, endian)
+    final writer = Writer(size, endian)
       ..writeFrameType(type)
       ..writeDuration(duration)
       ..writeUint16(changedPixels.length);
 
     /// frame pixels
     for (var i = 0; i < changedPixels.length; i++) {
-      writter.writeIndexedColor(changedPixels[i]);
+      writer.writeIndexedColor(changedPixels[i]);
     }
 
-    return writter.bytes;
+    return writer.bytes;
   }
 
   /// When [withType] is set to true, type will be also read from the [reader].
@@ -118,7 +119,7 @@ class AdditiveFrame extends Frame {
   }) {
     if (withType) {
       final frameType = reader.readFrameType();
-      if (frameType != FrameType.AdditiveFrame) {
+      if (frameType != FrameType.additive) {
         throw ArgumentError('Invalid frame type : ${frameType.name}');
       }
     }
@@ -155,5 +156,19 @@ class AdditiveFrame extends Frame {
       );
 
   @override
-  List<Object?> get props => [type, duration, changedPixels];
+  int get hashCode => Object.hash(
+        type,
+        duration,
+        Object.hashAllUnordered(changedPixels),
+      );
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) return false;
+    return other is AdditiveFrame &&
+        other.type == type &&
+        other.duration == duration &&
+        const UnorderedIterableEquality()
+            .equals(changedPixels, other.changedPixels);
+  }
 }

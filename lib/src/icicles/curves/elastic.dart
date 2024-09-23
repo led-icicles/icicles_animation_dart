@@ -1,13 +1,17 @@
 part of 'curve.dart';
 
-abstract class ElacticCurve extends Curve {
-  const ElacticCurve({this.period = 0.4});
+abstract class ElasticCurve extends Curve {
+  const ElasticCurve({this.period = 0.4});
 
   /// The duration of the oscillation.
   final double period;
+
+  const factory ElasticCurve.elasticIn({double period}) = _ElasticInCurve;
+  const factory ElasticCurve.elasticOut({double period}) = _ElasticOutCurve;
+  const factory ElasticCurve.elasticInOut({double period}) = _ElasticInOutCurve;
 }
 
-class _ElasticInCurve extends ElacticCurve {
+class _ElasticInCurve extends ElasticCurve {
   /// Creates an elastic-in curve.
   const _ElasticInCurve({super.period});
 
@@ -20,7 +24,7 @@ class _ElasticInCurve extends ElacticCurve {
   }
 }
 
-class _ElasticOutCurve extends ElacticCurve {
+class _ElasticOutCurve extends ElasticCurve {
   /// Creates an elastic-out curve.
   const _ElasticOutCurve({super.period});
 
@@ -33,7 +37,7 @@ class _ElasticOutCurve extends ElacticCurve {
   }
 }
 
-class _ElasticInOutCurve extends ElacticCurve {
+class _ElasticInOutCurve extends ElasticCurve {
   /// Creates an elastic-in-out curve.
   const _ElasticInOutCurve({super.period});
 

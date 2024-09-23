@@ -71,15 +71,31 @@ class Writer extends EncodingManager {
   ///
   /// Color occupies 24bits in the [bytes] array
   void writeColor(Color color) {
-    final encodedColor = color.isOpaque ? Color.alphaBlend(color, Colors.black) : color;
+    final encodedColor =
+        color.isOpaque ? Color.alphaBlend(color, Colors.black) : color;
 
     writeUint8(encodedColor.red);
     writeUint8(encodedColor.green);
     writeUint8(encodedColor.blue);
   }
 
+  /// Write all colors
+  void writeAllColors(Iterable<Color> colors) {
+    for (final color in colors) {
+      writeColor(color);
+    }
+  }
+
+  /// Converts the color to rgb565 and writes it.
   void writeColor565(Color color) {
     writeUint16(color.toRgb565());
+  }
+
+  /// Encode all colors to rgb565 and write.
+  void writeAllColors565(Iterable<Color> colors) {
+    for (final color in colors) {
+      writeColor565(color);
+    }
   }
 
   /// Uses the [writeColor] method, but an additional color index is written
@@ -109,6 +125,12 @@ class Writer extends EncodingManager {
   void writeEncodable(Encodable encodable) {
     final encoded = encodable.toBytes(endian);
     writeBytes(encoded);
+  }
+
+  void writeAllEncodable(Iterable<Encodable> encodables) {
+    for (final encodable in encodables) {
+      writeEncodable(encodable);
+    }
   }
 }
 
@@ -174,7 +196,7 @@ class Reader extends EncodingManager {
 
     // Adding 1 additional character in order to skip the [NULL_CHAR].
     // It is important to add [encodedString] length as decoded can have a
-    // different lenght.
+    // different length.
     _pointer += encodedString.length + 1;
     return decodedString;
   }

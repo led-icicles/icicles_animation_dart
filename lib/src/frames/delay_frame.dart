@@ -4,7 +4,7 @@ import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 class DelayFrame extends Frame {
   @override
-  final FrameType type = FrameType.DelayFrame;
+  final FrameType type = FrameType.delay;
 
   DelayFrame(super.duration);
 
@@ -20,11 +20,11 @@ class DelayFrame extends Frame {
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
-    final writter = Writer(size, endian)
+    final writer = Writer(size, endian)
       ..writeFrameType(type)
       ..writeDuration(duration);
 
-    return writter.bytes;
+    return writer.bytes;
   }
 
   /// When [withType] is set to true, type will be also read from the [reader].
@@ -34,7 +34,7 @@ class DelayFrame extends Frame {
   }) {
     if (withType) {
       final frameType = reader.readFrameType();
-      if (frameType != FrameType.DelayFrame) {
+      if (frameType != FrameType.delay) {
         throw ArgumentError('Invalid frame type : ${frameType.name}');
       }
     }
@@ -58,5 +58,13 @@ class DelayFrame extends Frame {
       DelayFrame(duration ?? this.duration);
 
   @override
-  List<Object?> get props => [type, duration];
+  int get hashCode => Object.hash(type, duration);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) return false;
+    return other is DelayFrame &&
+        other.type == type &&
+        other.duration == duration;
+  }
 }

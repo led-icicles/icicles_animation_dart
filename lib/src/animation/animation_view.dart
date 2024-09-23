@@ -1,15 +1,15 @@
 import 'dart:typed_data';
 
-import 'package:equatable/equatable.dart';
+import 'package:collection/collection.dart';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 enum SerialMessageTypes {
-  /// Keep leds aware of ongoing serial communication.
+  /// Keep LEDs aware of ongoing serial communication.
   ///
   /// Built-in animations are stopped.
   ping(0),
 
-  /// display following frame
+  /// Display following frame
   displayView(1),
 
   /// End serial communication and start playing built-in animations
@@ -20,7 +20,7 @@ enum SerialMessageTypes {
   const SerialMessageTypes(this.value);
 }
 
-class RadioPanelView extends Equatable {
+class RadioPanelView {
   final int index;
   final Color color;
 
@@ -32,15 +32,23 @@ class RadioPanelView extends Equatable {
   }) =>
       RadioPanelView(index ?? this.index, color ?? this.color);
 
-  RadioColorFrame toRadioColorFrame([Duration duration = Duration.zero]) => RadioColorFrame(duration, index, color);
+  RadioColorFrame toRadioColorFrame([Duration duration = Duration.zero]) =>
+      RadioColorFrame(duration, index, color);
 
   @override
-  List<Object?> get props => [index, color];
+  int get hashCode => Object.hash(index, color.value);
+
+  @override
+  bool operator ==(Object other) {
+    return other is RadioPanelView &&
+        other.index == index &&
+        other.color.value == color.value;
+  }
 }
 
 /// Class used for serial communication,
 /// represents the current icicles state
-class AnimationView extends Equatable {
+class AnimationView {
   final VisualFrame frame;
   final List<RadioPanelView> radioPanels;
 
@@ -67,7 +75,8 @@ class AnimationView extends Equatable {
       } else {
         final localIndex = newFrame.panelIndex - 1;
         // shift index due to broadcast panel at 0
-        radioPanels[localIndex] = radioPanels[localIndex].copyWith(color: newFrame.color);
+        radioPanels[localIndex] =
+            radioPanels[localIndex].copyWith(color: newFrame.color);
       }
     }
 
@@ -89,9 +98,10 @@ class AnimationView extends Equatable {
     return panelIndexSize + color;
   }
 
-  List<RadioColorFrame> getRadioColorFrames([Duration duration = Duration.zero]) {
-    final allPanelsSameColor =
-        radioPanels.isNotEmpty && radioPanels.every((panel) => panel.color == radioPanels.first.color);
+  List<RadioColorFrame> getRadioColorFrames(
+      [Duration duration = Duration.zero]) {
+    final allPanelsSameColor = radioPanels.isNotEmpty &&
+        radioPanels.every((panel) => panel.color == radioPanels.first.color);
     if (allPanelsSameColor) {
       /// We can set colors of all panels via single frame
       return [RadioColorFrame(duration, 0, radioPanels.first.color)];
@@ -114,29 +124,37 @@ class AnimationView extends Equatable {
     final messageTypeSize = uint8SizeInBytes;
     final viewSize = messageTypeSize + frameSize + radioPanelsSize;
 
-    final writter = Writer(viewSize, endian);
+    final writer = Writer(viewSize, endian);
 
     // Set message type
-    writter.writeSerialMessageType(SerialMessageTypes.displayView);
+    writer.writeSerialMessageType(SerialMessageTypes.displayView);
 
     /// frame pixels
     final pixels = frame.pixels;
     for (var i = 0; i < pixels.length; i++) {
-      writter.writeColor(pixels[i]);
+      writer.writeColor(pixels[i]);
     }
 
     /// encode radio panels
     for (var i = 0; i < radioPanels.length; i++) {
       final radioPanelView = radioPanels[i];
 
-      writter
+      writer
         ..writeUint8(radioPanelView.index)
         ..writeColor(radioPanelView.color);
     }
 
-    return writter.bytes;
+    return writer.bytes;
   }
 
   @override
-  List<Object?> get props => [frame, radioPanels];
+  int get hashCode => Object.hash(frame, Object.hashAllUnordered(radioPanels));
+
+  @override
+  bool operator ==(Object other) {
+    return other is AnimationView &&
+        other.frame == frame &&
+        const UnorderedIterableEquality()
+            .equals(radioPanels, other.radioPanels);
+  }
 }

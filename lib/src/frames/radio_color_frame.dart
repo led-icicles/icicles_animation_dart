@@ -7,7 +7,7 @@ class RadioColorFrame extends Frame {
   static const broadcastChannelIndex = 0;
 
   @override
-  FrameType get type => FrameType.RadioColorFrame;
+  FrameType get type => FrameType.radioColor;
 
   /// Panel index.
   /// `0` - Stands for the broadcast (all panels). This is also described by the
@@ -46,7 +46,12 @@ class RadioColorFrame extends Frame {
     const greenSize = uint8SizeInBytes;
     const blueSize = uint8SizeInBytes;
 
-    const size = (frameTypeSize + durationSize + panelIndexSize + redSize + greenSize + blueSize);
+    const size = (frameTypeSize +
+        durationSize +
+        panelIndexSize +
+        redSize +
+        greenSize +
+        blueSize);
 
     return size;
   }
@@ -68,13 +73,13 @@ class RadioColorFrame extends Frame {
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
-    final writter = Writer(size, endian)
+    final writer = Writer(size, endian)
       ..writeFrameType(type)
       ..writeDuration(duration)
       ..writeUint8(panelIndex)
       ..writeColor(color);
 
-    return writter.bytes;
+    return writer.bytes;
   }
 
   /// When [withType] is set to true, type will be also read from the [reader].
@@ -84,7 +89,7 @@ class RadioColorFrame extends Frame {
   }) {
     if (withType) {
       final frameType = reader.readFrameType();
-      if (frameType != FrameType.RadioColorFrame) {
+      if (frameType != FrameType.radioColor) {
         throw ArgumentError('Invalid frame type : ${frameType.name}');
       }
     }
@@ -107,5 +112,15 @@ class RadioColorFrame extends Frame {
   }
 
   @override
-  List<Object?> get props => [type, duration, panelIndex, color];
+  int get hashCode => Object.hash(type, duration, panelIndex, color);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) return false;
+    return other is RadioColorFrame &&
+        other.type == type &&
+        other.duration == duration &&
+        other.panelIndex == panelIndex &&
+        other.color == color;
+  }
 }
