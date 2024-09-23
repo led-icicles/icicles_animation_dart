@@ -168,9 +168,9 @@ class VisualFrame extends Frame {
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
     if (other.runtimeType != runtimeType) return false;
-    return other is AdditiveFrame &&
+    return other is VisualFrame &&
         other.type == type &&
         other.duration == duration &&
-        const UnorderedIterableEquality().equals(pixels, other.changedPixels);
+        const ListEquality().equals(pixels, other.pixels);
   }
 }

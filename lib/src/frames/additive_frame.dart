@@ -145,6 +145,8 @@ class AdditiveFrame extends Frame {
     );
   }
 
+  AdditiveFrame copy() => copyWith();
+
   @override
   AdditiveFrame copyWith({
     Duration? duration,
