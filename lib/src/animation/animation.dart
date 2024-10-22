@@ -524,9 +524,9 @@ class Animation {
     switch (framerateBehavior) {
       case FramerateBehavior.error:
 
-        /// Radio color frame with duration set to zero is changing the radio panels
+        /// Radio frame with duration set to zero is changing the radio panels
         /// color state without displaying it
-        if (frame is RadioColorFrame && frame.duration == Duration.zero) {
+        if (frame is RadioFrame && frame.duration == Duration.zero) {
           return frame;
         }
 

@@ -15,13 +15,13 @@ void main() async {
   );
 
   final icicles = Icicles(animation);
-  final tween = Tween.curve(
-    curve: Curves.bounceOut,
-    parent: Tween.number(
-      begin: 0.0,
-      end: 1.0,
-    ),
-  );
+  // final tween = Tween.curve(
+  //   curve: Curves.bounceOut,
+  //   parent: Tween.number(
+  //     begin: 0.0,
+  //     end: 1.0,
+  //   ),
+  // );
 
   void bounce(List<Color> colors) {
     Color backgroundColor = Colors.black;
@@ -30,7 +30,7 @@ void main() async {
         icicles
           ..setAllPixelsColor(backgroundColor)
           ..setAllRadioPanelsColor(backgroundColor);
-        final progress = tween.transform(i);
+        final progress = i;
         final turnedOnCount = (progress * animation.header.yCount).round();
         for (int y = 0; y < turnedOnCount; y++) {
           icicles.setRowColor(y, foregroundColor);
@@ -41,6 +41,7 @@ void main() async {
 
         for (final panel in animation.currentView.radioPanels) {
           for (int i = 0; i < radioTurnedOnCount; i++) {
+            print("P: ${panel.index} I: $i");
             icicles.setRadioPanelPixelColor(panel.index, i, foregroundColor);
           }
         }

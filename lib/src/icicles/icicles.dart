@@ -285,7 +285,7 @@ class Icicles {
   /// It creates and adds a frame to the [animation] class.
   void show(Duration duration) {
     for (int i = 0; i < _radioPanels.length; i++) {
-      animation.addFrame(RadioVisualFrame(duration, i + 1, _radioPanels[i]));
+      animation.addFrame(RadioVisualFrame(Duration.zero, i + 1, _radioPanels[i]));
     }
     animation.addFrame(toFrame(duration));
   }
