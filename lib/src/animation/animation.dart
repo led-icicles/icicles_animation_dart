@@ -702,6 +702,7 @@ class Animation {
       yCount: header.yCount,
       loopsCount: header.loopsCount,
       radioPanelsCount: header.radioPanelsCount,
+      radioPanelPixelCount: header.radioPanelPixelCount,
       optimize: false,
       useRgb565: false,
       version: header.version,
