@@ -29,6 +29,13 @@ class RadioVisualFrame extends RadioFrame {
     return size;
   }
 
+  /// Return true when all colors stored inside the [RadioVisualFrame]
+  /// are identical.
+  bool checkAllColorsIdentical() {
+    final firstColor = colors.first;
+    return colors.every((color) => color == firstColor);
+  }
+
   /// Copy radio color frame instance
   RadioVisualFrame copy() => RadioVisualFrame(duration, panelIndex, colors);
 

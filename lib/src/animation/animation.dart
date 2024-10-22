@@ -390,8 +390,7 @@ class Animation {
       } else {
         /// Colors changed
         final lastFrame = _frames.lastOrNull;
-        if (lastFrame is RadioColorFrame &&
-            lastFrame.duration == Duration.zero) {
+        if (lastFrame is RadioFrame && lastFrame.duration == Duration.zero) {
           return _replaceLastSavedFrame(frame);
         } else {
           return _saveFrame(frame);
@@ -414,7 +413,74 @@ class Animation {
         /// Colors changed
 
         final lastFrame = _frames.lastOrNull;
-        if (lastFrame is RadioColorFrame &&
+        if (lastFrame is RadioFrame &&
+            lastFrame.duration == Duration.zero &&
+            lastFrame.panelIndex == frame.panelIndex) {
+          return _replaceLastSavedFrame(frame);
+        } else {
+          return _saveFrame(frame);
+        }
+      }
+    }
+  }
+
+  bool _addRadioVisualFrame(RadioVisualFrame frame, {bool optimize = true}) {
+    if (frame.panelIndex > header.radioPanelsCount) {
+      throw ArgumentError(
+        'Invalid panel index (${frame.panelIndex}). '
+        'This animation supports "${header.radioPanelsCount}" radio panels.',
+      );
+    }
+
+    if (!optimize) {
+      return _saveFrame(frame);
+    }
+
+    // If all the colors of this frame are the same,
+    //the RadioColorFrame can be used
+    if (frame.checkAllColorsIdentical()) {
+      return _addRadioColorFrame(
+        RadioColorFrame(frame.duration, frame.panelIndex, frame.colors.first),
+        optimize: optimize,
+      );
+    }
+
+    if (frame.isBroadcast) {
+      final isChanged = currentView.radioPanels.any(
+        (radioPanel) =>
+            !const ListEquality().equals(radioPanel.colors, frame.colors),
+      );
+
+      if (!isChanged) {
+        /// Colors not changed, add delay frame
+        return _addDelayFrame(frame);
+      } else {
+        /// Colors changed
+        final lastFrame = _frames.lastOrNull;
+        if (lastFrame is RadioFrame && lastFrame.duration == Duration.zero) {
+          return _replaceLastSavedFrame(frame);
+        } else {
+          return _saveFrame(frame);
+        }
+      }
+    } else {
+      final radioPanelView = currentView.radioPanels.firstWhere(
+        (radioPanel) => radioPanel.index == frame.panelIndex,
+        orElse: () => throw ArgumentError(
+          'Panel with provided index (${frame.panelIndex}) does not exist.',
+        ),
+      );
+      final isChanged =
+          !const ListEquality().equals(radioPanelView.colors, frame.colors);
+
+      if (!isChanged) {
+        /// Colors not changed, add delay frame
+        return _addDelayFrame(frame);
+      } else {
+        /// Colors changed
+
+        final lastFrame = _frames.lastOrNull;
+        if (lastFrame is RadioFrame &&
             lastFrame.duration == Duration.zero &&
             lastFrame.panelIndex == frame.panelIndex) {
           return _replaceLastSavedFrame(frame);
@@ -513,6 +579,8 @@ class Animation {
       return _addAdditiveFrame(frame, optimize: optimize);
     } else if (frame is RadioColorFrame) {
       return _addRadioColorFrame(frame, optimize: optimize);
+    } else if (frame is RadioVisualFrame) {
+      return _addRadioVisualFrame(frame, optimize: optimize);
     } else {
       throw UnsupportedError(
         'Provided frame type (${frame.runtimeType}) is not supported.',
@@ -671,6 +739,20 @@ class Animation {
         case FrameType.radioColor:
           animation.addFrame(RadioColorFrame.fromReader(
             reader,
+            withType: false,
+          ));
+          break;
+        case FrameType.radioVisualFrame:
+          if (!animation.header.version.supportsRadioVisualFrames) {
+            throw StateError(
+              'Unsupported frame type: The current animation version does not '
+              'support RadioVisualFrame, but such a frame '
+              'is present in the animation data.',
+            );
+          }
+          animation.addFrame(RadioVisualFrame.fromReader(
+            reader,
+            header.radioPanelPixelCount,
             withType: false,
           ));
           break;
