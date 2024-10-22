@@ -133,6 +133,20 @@ class Animation {
           if (frame.duration != Duration.zero) {
             yield view;
           }
+        } else if (frame is RadioVisualFrame) {
+          view = view.copyWith(
+            frame: view.frame.copyWith(duration: frame.duration),
+            radioPanels: view.radioPanels.map((panel) {
+              if (frame.isBroadcast || frame.panelIndex == panel.index) {
+                return panel.copyWith(colors: frame.colors);
+              } else {
+                return panel;
+              }
+            }).toList(),
+          );
+          if (frame.duration != Duration.zero) {
+            yield view;
+          }
         } else {
           throw UnsupportedError('Unsupported frame type: "${frame.type}"');
         }
