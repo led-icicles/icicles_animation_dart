@@ -1,5 +1,4 @@
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
-import 'package:meta/meta.dart';
 
 abstract class RadioFrame extends Frame {
   static const maxPanelIndex = uint8MaxSize;

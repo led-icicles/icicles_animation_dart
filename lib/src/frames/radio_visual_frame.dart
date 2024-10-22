@@ -5,7 +5,7 @@ import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
 class RadioVisualFrame extends RadioFrame {
   @override
-  FrameType get type => FrameType.radioColor;
+  FrameType get type => FrameType.radioVisualFrame;
 
   final List<Color> colors;
 

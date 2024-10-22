@@ -359,7 +359,7 @@ class Color {
   String toString() => 'Color(0x${value.toRadixString(16).padLeft(8, '0')})';
 }
 
-class Colors extends Iterable<Color> {
+final class Colors extends Iterable<Color> {
   Colors._();
 
   static const green = Color.fromRGB(0, 255, 0);
