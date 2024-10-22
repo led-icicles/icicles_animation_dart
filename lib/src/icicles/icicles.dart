@@ -261,6 +261,25 @@ class Icicles {
     }
   }
 
+  /// Sets the colors of all available radio panels.
+  ///
+  /// To display it use the [show] method.
+  void setAllRadioPanelsColors(List<Color> colors) {
+    if (_radioPanels.isEmpty) {
+      throw StateError("This animation do not support radio panels.");
+    }
+    if (_radioPanels.first.length != colors.length) {
+      throw ArgumentError(
+        'Invalid colors list length: Provided ${colors.length} colors, '
+            'but the expected length is ${_radioPanels.first.length}.',
+        'colors',
+      );
+    }
+    for (int i = 0; i < _radioPanels.length; i++) {
+      _radioPanels[i] = colors;
+    }
+  }
+
   /// Displays the current icicles state for a provided [duration]
   ///
   /// It creates and adds a frame to the [animation] class.
