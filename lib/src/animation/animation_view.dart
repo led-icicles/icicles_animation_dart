@@ -22,27 +22,65 @@ enum SerialMessageTypes {
 
 class RadioPanelView {
   final int index;
-  final Color color;
+  final List<Color> colors;
 
-  RadioPanelView(this.index, this.color);
+  const RadioPanelView(this.index, this.colors)
+      : assert(
+          colors.length > 0,
+          'The color list must include at least one color.',
+        );
 
   RadioPanelView copyWith({
     int? index,
-    Color? color,
+    List<Color>? colors,
   }) =>
-      RadioPanelView(index ?? this.index, color ?? this.color);
+      RadioPanelView(
+        index ?? this.index,
+        colors ?? this.colors,
+      );
 
-  RadioColorFrame toRadioColorFrame([Duration duration = Duration.zero]) =>
-      RadioColorFrame(duration, index, color);
+  RadioPanelView copyWithColor(Color color) => RadioPanelView(
+        index,
+        List.filled(colors.length, color),
+      );
+
+  /// Return true when all colors stored inside the [RadioPanelView]
+  /// are identical.
+  bool hasAllColorsIdentical() {
+    final firstColor = colors.first;
+    return colors.every((color) => color == firstColor);
+  }
+
+  /// Converts this [RadioPanelView] to [RadioColorFrame].
+  ///
+  /// When [hasAllColorsIdentical] returns false, then [UnsupportedError]
+  /// is thrown.
+  RadioColorFrame toRadioColorFrame([Duration duration = Duration.zero]) {
+    if (colors.length == 1) {
+      return RadioColorFrame(duration, index, colors.first);
+    } else if (hasAllColorsIdentical()) {
+      return RadioColorFrame(duration, index, colors.first);
+    } else {
+      throw StateError(
+        'Cannot convert to RadioColorFrame. '
+        'All colors must be identical.',
+      );
+    }
+  }
+
+  /// Converts this [RadioPanelView] to [RadioVisualFrame].
+  RadioVisualFrame toRadioVisualFrame([Duration duration = Duration.zero]) {
+    return RadioVisualFrame(duration, index, colors);
+  }
 
   @override
-  int get hashCode => Object.hash(index, color.value);
+  int get hashCode => Object.hash(index, Object.hashAll(colors));
 
   @override
   bool operator ==(Object other) {
     return other is RadioPanelView &&
         other.index == index &&
-        other.color.value == color.value;
+        const ListEquality().equals(colors, other.colors);
   }
 }
 
@@ -68,15 +106,15 @@ class AnimationView {
     } else if (newFrame is RadioColorFrame) {
       if (newFrame.isBroadcast) {
         for (var i = 0; i < radioPanels.length; i++) {
-          radioPanels[i] = radioPanels[i].copyWith(
-            color: newFrame.color,
+          radioPanels[i] = radioPanels[i].copyWithColor(
+            newFrame.color,
           );
         }
       } else {
         final localIndex = newFrame.panelIndex - 1;
         // shift index due to broadcast panel at 0
         radioPanels[localIndex] =
-            radioPanels[localIndex].copyWith(color: newFrame.color);
+            radioPanels[localIndex].copyWithColor(newFrame.color);
       }
     }
 
@@ -98,15 +136,42 @@ class AnimationView {
     return panelIndexSize + color;
   }
 
-  List<RadioColorFrame> getRadioColorFrames(
-      [Duration duration = Duration.zero]) {
-    final allPanelsSameColor = radioPanels.isNotEmpty &&
-        radioPanels.every((panel) => panel.color == radioPanels.first.color);
-    if (allPanelsSameColor) {
-      /// We can set colors of all panels via single frame
-      return [RadioColorFrame(duration, 0, radioPanels.first.color)];
+  /// Converts the current view into most valid [RadioFrame].
+  ///
+  /// - If there are no radio panels, an empty list will be returned.
+  /// - If all radio panels have the same state (colors), one frame will be
+  /// returned - [RadioColorFrame] or [RadioVisualFrame] depending
+  /// on the frame content.
+  /// - If the radio panels have different states (colors),
+  /// a [RadioColorFrame] or [RadioVisualFrame] will be generated
+  /// for each panel.
+  List<RadioFrame> getRadioFrames([Duration duration = Duration.zero]) {
+    if (radioPanels.isEmpty) return [];
+
+    final hasPanelsWithSameColors = radioPanels.isNotEmpty &&
+        radioPanels.every((panel) => const ListEquality()
+            .equals(panel.colors, radioPanels.first.colors));
+
+    if (hasPanelsWithSameColors) {
+      if (radioPanels.first.hasAllColorsIdentical()) {
+        return [
+          RadioColorFrame(
+            duration,
+            RadioFrame.broadcastChannelIndex,
+            radioPanels.first.colors.first,
+          )
+        ];
+      } else {
+        return [
+          RadioVisualFrame(
+            duration,
+            RadioFrame.broadcastChannelIndex,
+            radioPanels.first.colors,
+          ),
+        ];
+      }
     } else {
-      return radioPanels.map((panel) => panel.toRadioColorFrame()).toList();
+      return radioPanels.map((panel) => panel.toRadioVisualFrame()).toList();
     }
   }
 
@@ -130,10 +195,7 @@ class AnimationView {
     writer.writeSerialMessageType(SerialMessageTypes.displayView);
 
     /// frame pixels
-    final pixels = frame.pixels;
-    for (var i = 0; i < pixels.length; i++) {
-      writer.writeColor(pixels[i]);
-    }
+    writer.writeAllColors(frame.pixels);
 
     /// encode radio panels
     for (var i = 0; i < radioPanels.length; i++) {
@@ -141,7 +203,7 @@ class AnimationView {
 
       writer
         ..writeUint8(radioPanelView.index)
-        ..writeColor(radioPanelView.color);
+        ..writeAllColors(radioPanelView.colors);
     }
 
     return writer.bytes;

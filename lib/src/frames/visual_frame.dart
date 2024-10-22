@@ -161,7 +161,7 @@ class VisualFrame extends Frame {
   int get hashCode => Object.hash(
         type,
         duration,
-        Object.hashAllUnordered(pixels),
+        Object.hashAll(pixels),
       );
 
   @override

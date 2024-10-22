@@ -166,6 +166,16 @@ class Reader extends EncodingManager {
     return Color.fromRGB(readUint8(), readUint8(), readUint8());
   }
 
+  List<Color> readColors(int count) {
+    final colors = List<Color>.filled(count, Colors.black);
+
+    /// frame pixels
+    for (var i = 0; i < colors.length; i++) {
+      colors[i] = readColor();
+    }
+    return colors;
+  }
+
   Color readColor565() {
     final encoded = readUint16();
     final r5 = (encoded >> 11) & 0x1f;

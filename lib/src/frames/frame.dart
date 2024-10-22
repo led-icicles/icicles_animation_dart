@@ -29,7 +29,8 @@ enum FrameType {
   additiveRgb565(13),
 
   /// [(uint8)type][(uint16)duration][(uint8)panelIndex][(uint8)red][(uint8)green][(uint8)blue]
-  radioColor(100);
+  radioColor(100),
+  radioVisualFrame(101);
 
   final int value;
 

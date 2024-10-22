@@ -92,8 +92,13 @@ class Animation {
     );
 
     // radio panels indexes starts from 1 (0 is a broadcast channel)
-    final radioPanels = List<RadioPanelView>.generate(header.radioPanelsCount,
-        (index) => RadioPanelView(index + 1, Colors.black));
+    final radioPanels = List<RadioPanelView>.generate(
+      header.radioPanelsCount,
+      (index) => RadioPanelView(
+        index + 1,
+        List.filled(header.radioPanelPixelCount, Colors.black),
+      ),
+    );
 
     var loop = 0;
     while (loop++ < header.loopsCount) {
@@ -119,7 +124,7 @@ class Animation {
             frame: view.frame.copyWith(duration: frame.duration),
             radioPanels: view.radioPanels.map((panel) {
               if (frame.isBroadcast || frame.panelIndex == panel.index) {
-                return panel.copyWith(color: frame.color);
+                return panel.copyWithColor(frame.color);
               } else {
                 return panel;
               }
@@ -145,24 +150,41 @@ class Animation {
     this.framerate = Framerate.fps45,
     this.framerateBehavior = FramerateBehavior.error,
     int loopsCount = 1,
-    int versionNumber = newestAnimationVersion,
+    AnimationVersion version = AnimationVersion.v2,
     int radioPanelsCount = 0,
+    int radioPanelPixelCount = 1,
   })  : _header = AnimationHeader(
           name: name,
           xCount: xCount,
           yCount: yCount,
           loopsCount: loopsCount,
-          versionNumber: versionNumber,
+          version: version,
           radioPanelsCount: radioPanelsCount,
+          radioPanelPixelCount: radioPanelPixelCount,
         ),
 
         /// Before each animation leds are set to black color.
         /// But black color is not displayed. To set all pixels to black,
         /// you should add frame, even [DelayFrame]
-        _currentView = _initView(xCount, yCount, radioPanelsCount),
-        _bufferedView = _initView(xCount, yCount, radioPanelsCount);
+        _currentView = _initView(
+          xCount: xCount,
+          yCount: yCount,
+          radioPanelsCount: radioPanelsCount,
+          radioPanelPixelCount: radioPanelPixelCount,
+        ),
+        _bufferedView = _initView(
+          xCount: xCount,
+          yCount: yCount,
+          radioPanelsCount: radioPanelsCount,
+          radioPanelPixelCount: radioPanelPixelCount,
+        );
 
-  static AnimationView _initView(int xCount, int yCount, int radioPanelsCount) {
+  static AnimationView _initView({
+    required int xCount,
+    required int yCount,
+    required int radioPanelsCount,
+    required int radioPanelPixelCount,
+  }) {
     return AnimationView(
       VisualFrame(
         /// zero duration - this is just a placeholder
@@ -171,7 +193,10 @@ class Animation {
       ),
       List<RadioPanelView>.generate(
         radioPanelsCount,
-        (index) => RadioPanelView(index + 1, Colors.black),
+        (index) => RadioPanelView(
+          index + 1,
+          List.filled(radioPanelPixelCount, Colors.black),
+        ),
       ),
     );
   }
@@ -356,7 +381,7 @@ class Animation {
 
     if (frame.isBroadcast) {
       final isChanged = currentView.radioPanels.any(
-        (p) => p.color != frame.color,
+        (radioPanel) => radioPanel.colors.any((color) => color != frame.color),
       );
 
       if (!isChanged) {
@@ -374,12 +399,13 @@ class Animation {
       }
     } else {
       final radioPanelView = currentView.radioPanels.firstWhere(
-        (p) => p.index == frame.panelIndex,
+        (radioPanel) => radioPanel.index == frame.panelIndex,
         orElse: () => throw ArgumentError(
           'Panel with provided index (${frame.panelIndex}) does not exist.',
         ),
       );
-      final isChanged = radioPanelView.color != frame.color;
+      final isChanged =
+          radioPanelView.colors.any((color) => color != frame.color);
 
       if (!isChanged) {
         /// Colors not changed, add delay frame
@@ -458,9 +484,7 @@ class Animation {
             final view = bufferedView;
 
             /// Process buffered frame and add it instead of the current frame
-            view
-                .getRadioColorFrames()
-                .forEach((frame) => _addFrameInternal(frame));
+            view.getRadioFrames().forEach((frame) => _addFrameInternal(frame));
 
             return view.frame.copyWith(duration: cumulativeDuration);
           }
@@ -612,7 +636,7 @@ class Animation {
       radioPanelsCount: header.radioPanelsCount,
       optimize: false,
       useRgb565: false,
-      versionNumber: header.versionNumber,
+      version: header.version,
       framerate: Framerate.unlimited,
     );
 

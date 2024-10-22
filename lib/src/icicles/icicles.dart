@@ -153,11 +153,19 @@ class Icicles {
     }
     if (blendRadioPanels) {
       for (final radioPanel in animation.currentView.radioPanels) {
-        animation.addFrame(RadioColorFrame(
-          Duration.zero,
-          radioPanel.index,
-          radioPanel.color.blend(color, progress),
-        ));
+        if (radioPanel.hasAllColorsIdentical()) {
+          animation.addFrame(RadioColorFrame(
+            Duration.zero,
+            radioPanel.index,
+            radioPanel.colors.first.blend(color, progress),
+          ));
+        } else {
+          animation.addFrame(RadioVisualFrame(
+            Duration.zero,
+            radioPanel.index,
+            radioPanel.colors.map((c) => c.blend(color, progress)).toList(),
+          ));
+        }
       }
     }
   }
@@ -169,11 +177,19 @@ class Icicles {
     }
     if (lightenRadioPanels) {
       for (final radioPanel in animation.currentView.radioPanels) {
-        animation.addFrame(RadioColorFrame(
-          Duration.zero,
-          radioPanel.index,
-          radioPanel.color.lighten(progress),
-        ));
+        if (radioPanel.hasAllColorsIdentical()) {
+          animation.addFrame(RadioColorFrame(
+            Duration.zero,
+            radioPanel.index,
+            radioPanel.colors.first.lighten(progress),
+          ));
+        } else {
+          animation.addFrame(RadioVisualFrame(
+            Duration.zero,
+            radioPanel.index,
+            radioPanel.colors.map((color) => color.lighten(progress)).toList(),
+          ));
+        }
       }
     }
   }
@@ -185,11 +201,19 @@ class Icicles {
     }
     if (darkenRadioPanels) {
       for (final radioPanel in animation.currentView.radioPanels) {
-        animation.addFrame(RadioColorFrame(
-          Duration.zero,
-          radioPanel.index,
-          radioPanel.color.darken(progress),
-        ));
+        if (radioPanel.hasAllColorsIdentical()) {
+          animation.addFrame(RadioColorFrame(
+            Duration.zero,
+            radioPanel.index,
+            radioPanel.colors.first.darken(progress),
+          ));
+        } else {
+          animation.addFrame(RadioVisualFrame(
+            Duration.zero,
+            radioPanel.index,
+            radioPanel.colors.map((color) => color.darken(progress)).toList(),
+          ));
+        }
       }
     }
   }

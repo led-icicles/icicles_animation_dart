@@ -1,6 +1,8 @@
 export 'additive_frame.dart';
 export 'delay_frame.dart';
 export 'frame.dart';
+export 'radio_frame.dart';
+export 'radio_visual_frame.dart';
 export 'radio_color_frame.dart';
 export 'visual_frame.dart';
 export 'visual_frame_rgb565.dart';

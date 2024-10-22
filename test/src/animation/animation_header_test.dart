@@ -4,9 +4,9 @@ import 'package:icicles_animation_dart/src/animation/animation_header.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('AnimationHeader - Encode and decode', () async {
+  test('AnimationHeader - v1 - Encode and decode', () async {
     final name = 'Example: żółć';
-    final versionNumber = 1;
+    final version = AnimationVersion.v1;
     const xCount = 20;
     const yCount = 30;
     const radioPanelsCount = 2;
@@ -14,7 +14,7 @@ void main() {
 
     final header = AnimationHeader(
       name: name,
-      versionNumber: versionNumber,
+      version: version,
       xCount: xCount,
       yCount: yCount,
       radioPanelsCount: radioPanelsCount,
@@ -25,7 +25,35 @@ void main() {
 
     final decodedHeader = AnimationHeader.fromBytes(encoded);
     expect(decodedHeader.name, equals(name));
-    expect(decodedHeader.versionNumber, equals(versionNumber));
+    expect(decodedHeader.version, equals(version));
+    expect(decodedHeader.xCount, equals(xCount));
+    expect(decodedHeader.yCount, equals(yCount));
+    expect(decodedHeader.radioPanelsCount, equals(radioPanelsCount));
+    expect(decodedHeader.loopsCount, equals(loopsCount));
+  });
+
+  test('AnimationHeader - v2 - Encode and decode', () async {
+    final name = 'Example: żółć';
+    final version = AnimationVersion.v2;
+    const xCount = 20;
+    const yCount = 30;
+    const radioPanelsCount = 2;
+    const loopsCount = 2;
+
+    final header = AnimationHeader(
+      name: name,
+      version: version,
+      xCount: xCount,
+      yCount: yCount,
+      radioPanelsCount: radioPanelsCount,
+      loopsCount: loopsCount,
+    );
+
+    final encoded = header.toBytes();
+
+    final decodedHeader = AnimationHeader.fromBytes(encoded);
+    expect(decodedHeader.name, equals(name));
+    expect(decodedHeader.version, equals(version));
     expect(decodedHeader.xCount, equals(xCount));
     expect(decodedHeader.yCount, equals(yCount));
     expect(decodedHeader.radioPanelsCount, equals(radioPanelsCount));
@@ -38,7 +66,7 @@ void main() {
 
     final decodedHeader = AnimationHeader.fromBytes(bytes);
     expect(decodedHeader.name, equals('Darkening'));
-    expect(decodedHeader.versionNumber, equals(1));
+    expect(decodedHeader.version, equals(AnimationVersion.v1));
     expect(decodedHeader.xCount, equals(20));
     expect(decodedHeader.yCount, equals(30));
     expect(decodedHeader.radioPanelsCount, equals(2));

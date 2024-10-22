@@ -19,7 +19,7 @@ void main() {
     expect(animation.header.pixelsCount, 600);
     expect(animation.header.radioPanelsCount, 2);
     expect(animation.header.size, 17);
-    expect(animation.header.versionNumber, 1);
+    expect(animation.header.version, AnimationVersion.v1);
     expect(animation.header.xCount, 20);
     expect(animation.header.yCount, 30);
 

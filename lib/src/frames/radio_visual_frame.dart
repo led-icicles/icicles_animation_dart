@@ -1,17 +1,18 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
-class RadioColorFrame extends RadioFrame {
+class RadioVisualFrame extends RadioFrame {
   @override
   FrameType get type => FrameType.radioColor;
 
-  final Color color;
+  final List<Color> colors;
 
-  RadioColorFrame(
+  RadioVisualFrame(
     super.duration,
     super.panelIndex,
-    this.color,
+    this.colors,
   );
 
   /// [(uint8)type][(uint16)duration][(uint8)panelIndex][(uint8)red][(uint8)green][(uint8)blue]
@@ -20,33 +21,27 @@ class RadioColorFrame extends RadioFrame {
     const frameTypeSize = uint8SizeInBytes;
     const durationSize = uint16SizeInBytes;
     const panelIndexSize = uint8SizeInBytes;
-    const redSize = uint8SizeInBytes;
-    const greenSize = uint8SizeInBytes;
-    const blueSize = uint8SizeInBytes;
 
-    final size = (frameTypeSize +
-        durationSize +
-        panelIndexSize +
-        redSize +
-        greenSize +
-        blueSize);
+    final colorsSize = uint8SizeInBytes * 3 * colors.length;
+
+    final size = (frameTypeSize + durationSize + panelIndexSize + colorsSize);
 
     return size;
   }
 
   /// Copy radio color frame instance
-  RadioColorFrame copy() => RadioColorFrame(duration, panelIndex, color);
+  RadioVisualFrame copy() => RadioVisualFrame(duration, panelIndex, colors);
 
   @override
-  RadioColorFrame copyWith({
+  RadioVisualFrame copyWith({
     Duration? duration,
     int? panelIndex,
-    Color? color,
+    List<Color>? colors,
   }) =>
-      RadioColorFrame(
+      RadioVisualFrame(
         duration ?? this.duration,
         panelIndex ?? this.panelIndex,
-        color ?? this.color,
+        colors ?? this.colors,
       );
 
   @override
@@ -55,50 +50,58 @@ class RadioColorFrame extends RadioFrame {
       ..writeFrameType(type)
       ..writeDuration(duration)
       ..writeUint8(panelIndex)
-      ..writeColor(color);
+      ..writeAllColors(colors);
 
     return writer.bytes;
   }
 
   /// When [withType] is set to true, type will be also read from the [reader].
-  factory RadioColorFrame.fromReader(
-    Reader reader, {
+  factory RadioVisualFrame.fromReader(
+    Reader reader,
+    int colorsCount, {
     bool withType = true,
   }) {
     if (withType) {
       final frameType = reader.readFrameType();
-      if (frameType != FrameType.radioColor) {
+      if (frameType != FrameType.radioVisualFrame) {
         throw ArgumentError('Invalid frame type : ${frameType.name}');
       }
     }
 
-    return RadioColorFrame(
+    return RadioVisualFrame(
       reader.readDuration(),
       reader.readUint8(),
-      reader.readColor(),
+      reader.readColors(colorsCount),
     );
   }
 
-  factory RadioColorFrame.fromBytes(
-    Uint8List bytes, [
+  factory RadioVisualFrame.fromBytes(
+    Uint8List bytes,
+    int colorsCount, [
     Endian endian = Endian.little,
   ]) {
-    return RadioColorFrame.fromReader(
+    return RadioVisualFrame.fromReader(
       Reader(bytes, endian),
+      colorsCount,
       withType: true,
     );
   }
 
   @override
-  int get hashCode => Object.hash(type, duration, panelIndex, color);
+  int get hashCode => Object.hash(
+        type,
+        duration,
+        panelIndex,
+        Object.hashAll(colors),
+      );
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) return false;
-    return other is RadioColorFrame &&
+    return other is RadioVisualFrame &&
         other.type == type &&
         other.duration == duration &&
         other.panelIndex == panelIndex &&
-        other.color == color;
+        const ListEquality().equals(colors, other.colors);
   }
 }
