@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   group('DelayFrame -', () {
     test('Encode and decode', () async {
-      final frame = DelayFrame(const Duration(seconds: 6));
+      final frame = DelayFrame(duration: const Duration(seconds: 6));
 
       final encoded = frame.toBytes();
       final encodedFrame = DelayFrame.fromBytes(encoded);
@@ -16,8 +16,8 @@ void main() {
 
     test('Equality check', () async {
       const duration = Duration(seconds: 6);
-      final frame1 = DelayFrame(duration);
-      final frame2 = DelayFrame(duration);
+      final frame1 = DelayFrame(duration: duration);
+      final frame2 = DelayFrame(duration: duration);
 
       expect(frame1, equals(frame2));
       expect(frame2, equals(frame1));

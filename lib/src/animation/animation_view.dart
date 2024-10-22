@@ -68,9 +68,17 @@ class RadioPanelView {
   /// is thrown.
   RadioColorFrame toRadioColorFrame([Duration duration = Duration.zero]) {
     if (colors.length == 1) {
-      return RadioColorFrame(duration, index, colors.first);
+      return RadioColorFrame(
+        duration: duration,
+        index: index,
+        color: colors.first,
+      );
     } else if (hasAllColorsIdentical()) {
-      return RadioColorFrame(duration, index, colors.first);
+      return RadioColorFrame(
+        duration: duration,
+        index: index,
+        color: colors.first,
+      );
     } else {
       throw StateError(
         'Cannot convert to RadioColorFrame. '
@@ -81,7 +89,11 @@ class RadioPanelView {
 
   /// Converts this [RadioPanelView] to [RadioVisualFrame].
   RadioVisualFrame toRadioVisualFrame([Duration duration = Duration.zero]) {
-    return RadioVisualFrame(duration, index, colors);
+    return RadioVisualFrame(
+      duration: duration,
+      index: index,
+      colors: colors,
+    );
   }
 
   @override
@@ -123,7 +135,7 @@ class AnimationView {
           );
         }
       } else {
-        final localIndex = newFrame.panelIndex - 1;
+        final localIndex = newFrame.index - 1;
         // shift index due to broadcast panel at 0
         radioPanels[localIndex] =
             radioPanels[localIndex].copyWithColor(newFrame.color);
@@ -136,7 +148,7 @@ class AnimationView {
           );
         }
       } else {
-        final localIndex = newFrame.panelIndex - 1;
+        final localIndex = newFrame.index - 1;
         // shift index due to broadcast panel at 0
         radioPanels[localIndex] = radioPanels[localIndex].copyWith(
           colors: newFrame.colors,
@@ -184,17 +196,17 @@ class AnimationView {
       if (radioPanels.first.hasAllColorsIdentical()) {
         return [
           RadioColorFrame(
-            duration,
-            RadioFrame.broadcastChannelIndex,
-            radioPanels.first.colors.first,
+            duration: duration,
+            index: RadioFrame.broadcastChannelIndex,
+            color: radioPanels.first.colors.first,
           )
         ];
       } else {
         return [
           RadioVisualFrame(
-            duration,
-            RadioFrame.broadcastChannelIndex,
-            radioPanels.first.colors,
+            duration: duration,
+            index: RadioFrame.broadcastChannelIndex,
+            colors: radioPanels.first.colors,
           ),
         ];
       }

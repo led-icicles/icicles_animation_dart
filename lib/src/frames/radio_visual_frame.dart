@@ -9,11 +9,11 @@ class RadioVisualFrame extends RadioFrame {
 
   final List<Color> colors;
 
-  RadioVisualFrame(
-    super.duration,
-    super.panelIndex,
-    this.colors,
-  );
+  RadioVisualFrame({
+    required super.duration,
+    required super.index,
+    required this.colors,
+  });
 
   /// [(uint8)type][(uint16)duration][(uint8)panelIndex][(uint8)red][(uint8)green][(uint8)blue]
   @override
@@ -37,18 +37,22 @@ class RadioVisualFrame extends RadioFrame {
   }
 
   /// Copy radio color frame instance
-  RadioVisualFrame copy() => RadioVisualFrame(duration, panelIndex, colors);
+  RadioVisualFrame copy() => RadioVisualFrame(
+        duration: duration,
+        index: index,
+        colors: colors,
+      );
 
   @override
   RadioVisualFrame copyWith({
     Duration? duration,
-    int? panelIndex,
+    int? index,
     List<Color>? colors,
   }) =>
       RadioVisualFrame(
-        duration ?? this.duration,
-        panelIndex ?? this.panelIndex,
-        colors ?? this.colors,
+        duration: duration ?? this.duration,
+        index: index ?? this.index,
+        colors: colors ?? this.colors,
       );
 
   @override
@@ -56,7 +60,7 @@ class RadioVisualFrame extends RadioFrame {
     final writer = Writer(size, endian)
       ..writeFrameType(type)
       ..writeDuration(duration)
-      ..writeUint8(panelIndex)
+      ..writeUint8(index)
       ..writeAllColors(colors);
 
     return writer.bytes;
@@ -76,9 +80,9 @@ class RadioVisualFrame extends RadioFrame {
     }
 
     return RadioVisualFrame(
-      reader.readDuration(),
-      reader.readUint8(),
-      reader.readColors(colorsCount),
+      duration: reader.readDuration(),
+      index: reader.readUint8(),
+      colors: reader.readColors(colorsCount),
     );
   }
 
@@ -98,7 +102,7 @@ class RadioVisualFrame extends RadioFrame {
   int get hashCode => Object.hash(
         type,
         duration,
-        panelIndex,
+        index,
         Object.hashAll(colors),
       );
 
@@ -108,7 +112,7 @@ class RadioVisualFrame extends RadioFrame {
     return other is RadioVisualFrame &&
         other.type == type &&
         other.duration == duration &&
-        other.panelIndex == panelIndex &&
+        other.index == index &&
         const ListEquality().equals(colors, other.colors);
   }
 }

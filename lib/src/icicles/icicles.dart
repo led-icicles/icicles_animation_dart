@@ -214,7 +214,7 @@ class Icicles {
   /// This method is used internally by the [show] method
   /// to add a new frame to the [animation].
   VisualFrame toFrame(Duration duration) {
-    return VisualFrame(duration, _pixels);
+    return VisualFrame(duration: duration, pixels: _pixels);
   }
 
   /// Sets the color of the radio panel specified by the [panelIndex].
@@ -285,7 +285,11 @@ class Icicles {
   /// It creates and adds a frame to the [animation] class.
   void show(Duration duration) {
     for (int i = 0; i < _radioPanels.length; i++) {
-      animation.addFrame(RadioVisualFrame(Duration.zero, i + 1, _radioPanels[i]));
+      animation.addFrame(RadioVisualFrame(
+        duration: Duration.zero,
+        index: i + 1,
+        colors: _radioPanels[i],
+      ));
     }
     animation.addFrame(toFrame(duration));
   }

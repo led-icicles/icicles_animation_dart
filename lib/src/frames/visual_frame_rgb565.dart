@@ -15,14 +15,18 @@ class VisualFrameRgb565 extends VisualFrame {
     return typeSize + durationSize + colorsSize;
   }
 
-  VisualFrameRgb565(super.duration, super.pixels);
+  VisualFrameRgb565({
+    required super.duration,
+    required super.pixels,
+  });
 
   factory VisualFrameRgb565.fromVisualFrame(VisualFrame frame) {
-    return VisualFrameRgb565(frame.duration, frame.pixels);
+    return VisualFrameRgb565(duration: frame.duration, pixels: frame.pixels);
   }
 
   /// Converts frame from the rgb565 to the rgb888
-  VisualFrame toVisualFrame() => VisualFrame(duration, pixels);
+  VisualFrame toVisualFrame() =>
+      VisualFrame(duration: duration, pixels: pixels);
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
@@ -55,7 +59,7 @@ class VisualFrameRgb565 extends VisualFrame {
     for (var i = 0; i < pixels.length; i++) {
       pixels[i] = reader.readColor565();
     }
-    return VisualFrameRgb565(duration, pixels);
+    return VisualFrameRgb565(duration: duration, pixels: pixels);
   }
 
   factory VisualFrameRgb565.fromBytes(

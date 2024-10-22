@@ -8,14 +8,18 @@ void main() {
       const panelIndex = 2;
       const color = Colors.green;
       const duration = Duration(seconds: 6);
-      final frame = RadioColorFrame(duration, panelIndex, color);
+      final frame = RadioColorFrame(
+        duration: duration,
+        index: panelIndex,
+        color: color,
+      );
 
       final encoded = frame.toBytes();
       final encodedFrame = RadioColorFrame.fromBytes(encoded);
 
       expect(frame.duration, encodedFrame.duration);
       expect(frame.type, encodedFrame.type);
-      expect(frame.panelIndex, encodedFrame.panelIndex);
+      expect(frame.index, encodedFrame.index);
       expect(frame.color, color);
       expect(frame.size, encodedFrame.size);
       expect(frame.size, equals(7));
@@ -26,8 +30,16 @@ void main() {
       const panelIndex = 2;
       const color = Colors.green;
       const duration = Duration(seconds: 6);
-      final frame1 = RadioColorFrame(duration, panelIndex, color);
-      final frame2 = RadioColorFrame(duration, panelIndex, color);
+      final frame1 = RadioColorFrame(
+        duration: duration,
+        index: panelIndex,
+        color: color,
+      );
+      final frame2 = RadioColorFrame(
+        duration: duration,
+        index: panelIndex,
+        color: color,
+      );
 
       expect(frame1, equals(frame2));
       expect(frame2, equals(frame1));
@@ -38,7 +50,7 @@ void main() {
       );
       expect(
         frame1,
-        isNot(equals(frame1.copyWith(panelIndex: 1))),
+        isNot(equals(frame1.copyWith(index: 1))),
       );
       expect(
         frame1,

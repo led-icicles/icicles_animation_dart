@@ -123,7 +123,7 @@ class Animation {
           view = view.copyWith(
             frame: view.frame.copyWith(duration: frame.duration),
             radioPanels: view.radioPanels.map((panel) {
-              if (frame.isBroadcast || frame.panelIndex == panel.index) {
+              if (frame.isBroadcast || frame.index == panel.index) {
                 return panel.copyWithColor(frame.color);
               } else {
                 return panel;
@@ -137,7 +137,7 @@ class Animation {
           view = view.copyWith(
             frame: view.frame.copyWith(duration: frame.duration),
             radioPanels: view.radioPanels.map((panel) {
-              if (frame.isBroadcast || frame.panelIndex == panel.index) {
+              if (frame.isBroadcast || frame.index == panel.index) {
                 return panel.copyWith(colors: frame.colors);
               } else {
                 return panel;
@@ -202,8 +202,8 @@ class Animation {
     return AnimationView(
       VisualFrame(
         /// zero duration - this is just a placeholder
-        Duration.zero,
-        List.filled(xCount * yCount, Colors.black),
+        duration: Duration.zero,
+        pixels: List.filled(xCount * yCount, Colors.black),
       ),
       List<RadioPanelView>.generate(
         radioPanelsCount,
@@ -311,12 +311,12 @@ class Animation {
 
     final additiveFrame = useRgb565
         ? AdditiveFrameRgb565(
-            frame.duration,
-            changedPixels,
+            duration: frame.duration,
+            changedPixels: changedPixels,
           )
         : AdditiveFrame(
-            frame.duration,
-            changedPixels,
+            duration: frame.duration,
+            changedPixels: changedPixels,
           );
 
     final isAdditiveFrameSmaller = additiveFrame.size < frame.size;
@@ -382,9 +382,9 @@ class Animation {
   }
 
   bool _addRadioColorFrame(RadioColorFrame frame, {bool optimize = true}) {
-    if (frame.panelIndex > header.radioPanelsCount) {
+    if (frame.index > header.radioPanelsCount) {
       throw ArgumentError(
-        'Invalid panel index (${frame.panelIndex}). '
+        'Invalid panel index (${frame.index}). '
         'This animation supports "${header.radioPanelsCount}" radio panels.',
       );
     }
@@ -412,9 +412,9 @@ class Animation {
       }
     } else {
       final radioPanelView = currentView.radioPanels.firstWhere(
-        (radioPanel) => radioPanel.index == frame.panelIndex,
+        (radioPanel) => radioPanel.index == frame.index,
         orElse: () => throw ArgumentError(
-          'Panel with provided index (${frame.panelIndex}) does not exist.',
+          'Panel with provided index (${frame.index}) does not exist.',
         ),
       );
       final isChanged =
@@ -429,7 +429,7 @@ class Animation {
         final lastFrame = _frames.lastOrNull;
         if (lastFrame is RadioFrame &&
             lastFrame.duration == Duration.zero &&
-            lastFrame.panelIndex == frame.panelIndex) {
+            lastFrame.index == frame.index) {
           return _replaceLastSavedFrame(frame);
         } else {
           return _saveFrame(frame);
@@ -439,9 +439,9 @@ class Animation {
   }
 
   bool _addRadioVisualFrame(RadioVisualFrame frame, {bool optimize = true}) {
-    if (frame.panelIndex > header.radioPanelsCount) {
+    if (frame.index > header.radioPanelsCount) {
       throw ArgumentError(
-        'Invalid panel index (${frame.panelIndex}). '
+        'Invalid panel index (${frame.index}). '
         'This animation supports "${header.radioPanelsCount}" radio panels.',
       );
     }
@@ -454,7 +454,11 @@ class Animation {
     //the RadioColorFrame can be used
     if (frame.checkAllColorsIdentical()) {
       return _addRadioColorFrame(
-        RadioColorFrame(frame.duration, frame.panelIndex, frame.colors.first),
+        RadioColorFrame(
+          duration: frame.duration,
+          index: frame.index,
+          color: frame.colors.first,
+        ),
         optimize: optimize,
       );
     }
@@ -479,9 +483,9 @@ class Animation {
       }
     } else {
       final radioPanelView = currentView.radioPanels.firstWhere(
-        (radioPanel) => radioPanel.index == frame.panelIndex,
+        (radioPanel) => radioPanel.index == frame.index,
         orElse: () => throw ArgumentError(
-          'Panel with provided index (${frame.panelIndex}) does not exist.',
+          'Panel with provided index (${frame.index}) does not exist.',
         ),
       );
       final isChanged =
@@ -496,7 +500,7 @@ class Animation {
         final lastFrame = _frames.lastOrNull;
         if (lastFrame is RadioFrame &&
             lastFrame.duration == Duration.zero &&
-            lastFrame.panelIndex == frame.panelIndex) {
+            lastFrame.index == frame.index) {
           return _replaceLastSavedFrame(frame);
         } else {
           return _saveFrame(frame);

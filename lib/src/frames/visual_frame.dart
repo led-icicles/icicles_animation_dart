@@ -37,10 +37,10 @@ class VisualFrame extends Frame {
   List<Color> getRow(AnimationHeader header, int y) =>
       List<Color>.generate(header.xCount, (x) => pixels[x * header.yCount + y]);
 
-  VisualFrame(
-    super.duration,
-    List<Color> pixels,
-  ) : pixels = List.unmodifiable(pixels);
+  VisualFrame({
+    required super.duration,
+    required List<Color> pixels,
+  }) : pixels = List.unmodifiable(pixels);
 
   factory VisualFrame.filled(
     Duration duration,
@@ -48,8 +48,8 @@ class VisualFrame extends Frame {
     Color color,
   ) {
     return VisualFrame(
-      duration,
-      List.filled(pixels, color),
+      duration: duration,
+      pixels: List.filled(pixels, color),
     );
   }
 
@@ -79,8 +79,8 @@ class VisualFrame extends Frame {
     List<Color>? pixels,
   }) =>
       VisualFrame(
-        duration ?? this.duration,
-        pixels ?? this.pixels,
+        duration: duration ?? this.duration,
+        pixels: pixels ?? this.pixels,
       );
 
   /// [(1)type][(2)duration][(ledsCount*3)pixels]
@@ -108,7 +108,7 @@ class VisualFrame extends Frame {
         Color.linearBlend(from.pixels[i], to.pixels[i], progress)
     ];
 
-    return VisualFrame(duration ?? to.duration, pixels);
+    return VisualFrame(duration: duration ?? to.duration, pixels: pixels);
   }
 
   @override
@@ -142,7 +142,7 @@ class VisualFrame extends Frame {
     for (var i = 0; i < pixels.length; i++) {
       pixels[i] = reader.readColor();
     }
-    return VisualFrame(duration, pixels);
+    return VisualFrame(duration: duration, pixels: pixels);
   }
 
   factory VisualFrame.fromBytes(

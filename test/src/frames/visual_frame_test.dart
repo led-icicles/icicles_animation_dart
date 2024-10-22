@@ -1,6 +1,4 @@
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
-import 'package:icicles_animation_dart/src/frames/visual_frame.dart';
-import 'package:icicles_animation_dart/src/core/color.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -11,7 +9,10 @@ void main() {
         Colors.green,
         Colors.blue,
       ];
-      final frame = VisualFrame(const Duration(seconds: 6), pixels);
+      final frame = VisualFrame(
+        duration: const Duration(seconds: 6),
+        pixels: pixels,
+      );
 
       final encoded = frame.toBytes();
       final encodedFrame = VisualFrame.fromBytes(encoded, pixels.length);
@@ -34,8 +35,14 @@ void main() {
         Colors.blue,
       ];
       const duration = Duration(seconds: 6);
-      final visualFrame = VisualFrame(duration, pixels);
-      final visualFrame565 = VisualFrameRgb565(duration, pixels);
+      final visualFrame = VisualFrame(
+        duration: duration,
+        pixels: pixels,
+      );
+      final visualFrame565 = VisualFrameRgb565(
+        duration: duration,
+        pixels: pixels,
+      );
 
       expect(visualFrame, isNot(equals(visualFrame565)));
       expect(visualFrame, equals(visualFrame.copy()));

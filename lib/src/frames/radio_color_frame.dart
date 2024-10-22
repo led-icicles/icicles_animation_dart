@@ -8,11 +8,11 @@ class RadioColorFrame extends RadioFrame {
 
   final Color color;
 
-  RadioColorFrame(
-    super.duration,
-    super.panelIndex,
-    this.color,
-  );
+  RadioColorFrame({
+    required super.duration,
+    required super.index,
+    required this.color,
+  });
 
   /// [(uint8)type][(uint16)duration][(uint8)panelIndex][(uint8)red][(uint8)green][(uint8)blue]
   @override
@@ -35,18 +35,19 @@ class RadioColorFrame extends RadioFrame {
   }
 
   /// Copy radio color frame instance
-  RadioColorFrame copy() => RadioColorFrame(duration, panelIndex, color);
+  RadioColorFrame copy() =>
+      RadioColorFrame(duration: duration, index: index, color: color);
 
   @override
   RadioColorFrame copyWith({
     Duration? duration,
-    int? panelIndex,
+    int? index,
     Color? color,
   }) =>
       RadioColorFrame(
-        duration ?? this.duration,
-        panelIndex ?? this.panelIndex,
-        color ?? this.color,
+        duration: duration ?? this.duration,
+        index: index ?? this.index,
+        color: color ?? this.color,
       );
 
   @override
@@ -54,7 +55,7 @@ class RadioColorFrame extends RadioFrame {
     final writer = Writer(size, endian)
       ..writeFrameType(type)
       ..writeDuration(duration)
-      ..writeUint8(panelIndex)
+      ..writeUint8(index)
       ..writeColor(color);
 
     return writer.bytes;
@@ -73,9 +74,9 @@ class RadioColorFrame extends RadioFrame {
     }
 
     return RadioColorFrame(
-      reader.readDuration(),
-      reader.readUint8(),
-      reader.readColor(),
+      duration: reader.readDuration(),
+      index: reader.readUint8(),
+      color: reader.readColor(),
     );
   }
 
@@ -90,7 +91,7 @@ class RadioColorFrame extends RadioFrame {
   }
 
   @override
-  int get hashCode => Object.hash(type, duration, panelIndex, color);
+  int get hashCode => Object.hash(type, duration, index, color);
 
   @override
   bool operator ==(Object other) {
@@ -98,7 +99,7 @@ class RadioColorFrame extends RadioFrame {
     return other is RadioColorFrame &&
         other.type == type &&
         other.duration == duration &&
-        other.panelIndex == panelIndex &&
+        other.index == index &&
         other.color == color;
   }
 }

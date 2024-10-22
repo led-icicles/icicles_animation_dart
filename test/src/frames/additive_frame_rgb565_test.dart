@@ -11,7 +11,10 @@ void main() {
     ]);
     final duration = const Duration(seconds: 6);
 
-    final frame = AdditiveFrameRgb565(duration, changedPixels);
+    final frame = AdditiveFrameRgb565(
+      duration: duration,
+      changedPixels: changedPixels,
+    );
     final encoded = frame.toBytes();
     final encodedFrame = AdditiveFrameRgb565.fromBytes(encoded);
 

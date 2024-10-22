@@ -7,14 +7,18 @@ void main() {
     test('RadioVisualFrame - Encode and decode', () async {
       const panelIndex = 2;
       const duration = Duration(seconds: 6);
-      final frame = RadioVisualFrame(duration, panelIndex, colors);
+      final frame = RadioVisualFrame(
+        duration: duration,
+        index: panelIndex,
+        colors: colors,
+      );
 
       final encoded = frame.toBytes();
       final encodedFrame = RadioVisualFrame.fromBytes(encoded, colors.length);
 
       expect(frame.duration, encodedFrame.duration);
       expect(frame.type, encodedFrame.type);
-      expect(frame.panelIndex, encodedFrame.panelIndex);
+      expect(frame.index, encodedFrame.index);
       expect(frame.colors, equals(colors));
       expect(frame.size, encodedFrame.size);
       expect(frame.size, equals(13));
@@ -35,8 +39,16 @@ void main() {
     test('Equality check', () async {
       const panelIndex = 2;
       const duration = Duration(seconds: 6);
-      final frame1 = RadioVisualFrame(duration, panelIndex, colors);
-      final frame2 = RadioVisualFrame(duration, panelIndex, colors);
+      final frame1 = RadioVisualFrame(
+        duration: duration,
+        index: panelIndex,
+        colors: colors,
+      );
+      final frame2 = RadioVisualFrame(
+        duration: duration,
+        index: panelIndex,
+        colors: colors,
+      );
 
       expect(frame1, equals(frame2));
       expect(frame2, equals(frame1));
@@ -47,7 +59,7 @@ void main() {
       );
       expect(
         frame1,
-        isNot(equals(frame1.copyWith(panelIndex: 1))),
+        isNot(equals(frame1.copyWith(index: 1))),
       );
       expect(
         frame1,

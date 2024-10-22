@@ -10,10 +10,10 @@ class AdditiveFrame extends Frame {
   static const maxChangedPixelIndex = uint16MaxSize;
   final List<IndexedColor> changedPixels;
 
-  AdditiveFrame(
-    super.duration,
-    this.changedPixels,
-  ) {
+  AdditiveFrame({
+    required super.duration,
+    required this.changedPixels,
+  }) {
     if (changedPixels.length > AdditiveFrame.maxChangedPixelIndex) {
       throw ArgumentError(
           'Provided more changed pixels than maximum allowed. Check [AdditiveFrame.maxChangedPixelIndex].');
@@ -50,9 +50,9 @@ class AdditiveFrame extends Frame {
     }
 
     if (frame is VisualFrameRgb565) {
-      return VisualFrameRgb565(duration, pixels);
+      return VisualFrameRgb565(duration: duration, pixels: pixels);
     } else {
-      return VisualFrame(duration, pixels);
+      return VisualFrame(duration: duration, pixels: pixels);
     }
   }
 
@@ -68,9 +68,9 @@ class AdditiveFrame extends Frame {
     }.values.toList();
 
     if (this is AdditiveFrameRgb565) {
-      return AdditiveFrameRgb565(duration, pixels);
+      return AdditiveFrameRgb565(duration: duration, changedPixels: pixels);
     } else {
-      return AdditiveFrame(duration, pixels);
+      return AdditiveFrame(duration: duration, changedPixels: pixels);
     }
   }
 
@@ -83,7 +83,10 @@ class AdditiveFrame extends Frame {
       nextFrame,
     );
 
-    return AdditiveFrame(nextFrame.duration, changedPixels);
+    return AdditiveFrame(
+      duration: nextFrame.duration,
+      changedPixels: changedPixels,
+    );
   }
 
   // [(1 - uint8)type][(2 - uint16)duration][(2 - uint16)size][(x * 5)changedPixels]
@@ -132,7 +135,7 @@ class AdditiveFrame extends Frame {
       (_) => reader.readIndexedColor(),
     );
 
-    return AdditiveFrame(duration, changedPixels);
+    return AdditiveFrame(duration: duration, changedPixels: changedPixels);
   }
 
   factory AdditiveFrame.fromBytes(
@@ -153,8 +156,8 @@ class AdditiveFrame extends Frame {
     List<IndexedColor>? changedPixels,
   }) =>
       AdditiveFrame(
-        duration ?? this.duration,
-        changedPixels ?? this.changedPixels,
+        duration: duration ?? this.duration,
+        changedPixels: changedPixels ?? this.changedPixels,
       );
 
   @override

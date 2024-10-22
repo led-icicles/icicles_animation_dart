@@ -10,14 +10,17 @@ abstract class RadioFrame extends Frame {
   /// [isBroadcast] getter.
   ///
   /// Panel index cannot be larger than [RadioColorFrame.maxPanelIndex].
-  final int panelIndex;
+  final int index;
 
   bool get isBroadcast {
-    return panelIndex == RadioFrame.broadcastChannelIndex;
+    return index == RadioFrame.broadcastChannelIndex;
   }
 
-  RadioFrame(super.duration, this.panelIndex) {
-    if (panelIndex.isNegative || panelIndex > uint8MaxSize) {
+  RadioFrame({
+    required super.duration,
+    required this.index,
+  }) {
+    if (index.isNegative || index > uint8MaxSize) {
       throw ArgumentError(
         'Not valid panel index provided. '
         'Panel index should be larger or equal 0 (for broadcast) '

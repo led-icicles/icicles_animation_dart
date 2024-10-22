@@ -16,14 +16,22 @@ class AdditiveFrameRgb565 extends AdditiveFrame {
     return typeSize + durationSize + sizeFieldSize + changedPixelsSize;
   }
 
-  AdditiveFrameRgb565(super.duration, super.changedPixels);
+  AdditiveFrameRgb565({
+    required super.duration,
+    required super.changedPixels,
+  });
 
   factory AdditiveFrameRgb565.fromAdditiveFrame(AdditiveFrame frame) {
-    return AdditiveFrameRgb565(frame.duration, frame.changedPixels);
+    return AdditiveFrameRgb565(
+      duration: frame.duration,
+      changedPixels: frame.changedPixels,
+    );
   }
 
-  AdditiveFrame toAdditiveFrame() =>
-      AdditiveFrameRgb565(duration, changedPixels);
+  AdditiveFrame toAdditiveFrame() => AdditiveFrameRgb565(
+        duration: duration,
+        changedPixels: changedPixels,
+      );
 
   @override
   Uint8List toBytes([Endian endian = Endian.little]) {
@@ -60,7 +68,10 @@ class AdditiveFrameRgb565 extends AdditiveFrame {
       (_) => reader.readIndexedColor565(),
     );
 
-    return AdditiveFrameRgb565(duration, changedPixels);
+    return AdditiveFrameRgb565(
+      duration: duration,
+      changedPixels: changedPixels,
+    );
   }
 
   factory AdditiveFrameRgb565.fromBytes(
@@ -79,7 +90,7 @@ class AdditiveFrameRgb565 extends AdditiveFrame {
     List<IndexedColor>? changedPixels,
   }) =>
       AdditiveFrameRgb565(
-        duration ?? this.duration,
-        changedPixels ?? this.changedPixels,
+        duration: duration ?? this.duration,
+        changedPixels: changedPixels ?? this.changedPixels,
       );
 }

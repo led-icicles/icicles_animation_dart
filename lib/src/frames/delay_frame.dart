@@ -6,9 +6,11 @@ class DelayFrame extends Frame {
   @override
   final FrameType type = FrameType.delay;
 
-  DelayFrame(super.duration);
+  DelayFrame({
+    required super.duration,
+  });
 
-  DelayFrame.fromFrame(Frame frame) : super(frame.duration);
+  DelayFrame.fromFrame(Frame frame) : super(duration: frame.duration);
 
   /// [(1)type][(2)duration]
   @override
@@ -38,7 +40,7 @@ class DelayFrame extends Frame {
         throw ArgumentError('Invalid frame type : ${frameType.name}');
       }
     }
-    return DelayFrame(reader.readDuration());
+    return DelayFrame(duration: reader.readDuration());
   }
 
   factory DelayFrame.fromBytes(
@@ -55,7 +57,7 @@ class DelayFrame extends Frame {
   DelayFrame copyWith({
     Duration? duration,
   }) =>
-      DelayFrame(duration ?? this.duration);
+      DelayFrame(duration: duration ?? this.duration);
 
   @override
   int get hashCode => Object.hash(type, duration);

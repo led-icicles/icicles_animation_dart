@@ -13,7 +13,10 @@ void main() {
       ]);
       final duration = const Duration(seconds: 6);
 
-      final frame = AdditiveFrame(duration, changedPixels);
+      final frame = AdditiveFrame(
+        duration: duration,
+        changedPixels: changedPixels,
+      );
 
       final encoded = frame.toBytes();
 
@@ -59,8 +62,14 @@ void main() {
       ]);
       final duration = const Duration(seconds: 6);
 
-      final additiveFrame = AdditiveFrame(duration, changedPixels);
-      final additiveFrame565 = AdditiveFrameRgb565(duration, changedPixels);
+      final additiveFrame = AdditiveFrame(
+        duration: duration,
+        changedPixels: changedPixels,
+      );
+      final additiveFrame565 = AdditiveFrameRgb565(
+        duration: duration,
+        changedPixels: changedPixels,
+      );
       expect(additiveFrame, isNot(equals(additiveFrame565)));
       expect(additiveFrame, equals(additiveFrame.copy()));
       expect(additiveFrame565, equals(additiveFrame565.copy()));

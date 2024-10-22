@@ -8,7 +8,10 @@ void main() {
       Colors.green,
       Colors.blue,
     ];
-    final frame = VisualFrameRgb565(const Duration(seconds: 6), pixels);
+    final frame = VisualFrameRgb565(
+      duration: const Duration(seconds: 6),
+      pixels: pixels,
+    );
 
     final encoded = frame.toBytes();
     final encodedFrame = VisualFrameRgb565.fromBytes(encoded, pixels.length);
