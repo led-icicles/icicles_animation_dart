@@ -9,6 +9,7 @@ class Icicles {
   final Animation animation;
 
   final List<Color> _pixels;
+  final List<List<Color>> _radioPanels;
 
   /// Returns the current animation pixels.
   ///
@@ -40,7 +41,11 @@ class Icicles {
   /// Constructs an abstraction of icicles,
   /// which allows for the simple creation of animations.
   Icicles(this.animation)
-      : _pixels = List.of(animation.currentView.frame.pixels);
+      : _pixels = List.of(animation.currentView.frame.pixels),
+        _radioPanels = List.generate(
+          animation.currentView.radioPanels.length,
+          (index) => List.of(animation.currentView.radioPanels[index].colors),
+        );
 
   void _isValidIndex(int index) {
     if (index >= _pixels.length || index < 0) {
@@ -152,20 +157,16 @@ class Icicles {
       _pixels[i] = Color.linearBlend(_pixels[i], color, progress);
     }
     if (blendRadioPanels) {
-      for (final radioPanel in animation.currentView.radioPanels) {
-        if (radioPanel.hasAllColorsIdentical()) {
-          animation.addFrame(RadioColorFrame(
-            Duration.zero,
-            radioPanel.index,
-            radioPanel.colors.first.blend(color, progress),
-          ));
-        } else {
-          animation.addFrame(RadioVisualFrame(
-            Duration.zero,
-            radioPanel.index,
-            radioPanel.colors.map((c) => c.blend(color, progress)).toList(),
-          ));
-        }
+      blendAllRadioPanels(color, progress);
+    }
+  }
+
+  /// Blends all radio panels colors with the supplied [color]
+  /// by the given [progress].
+  void blendAllRadioPanels(Color color, double progress) {
+    for (final radioPanelPixels in _radioPanels) {
+      for (var i = 0; i < radioPanelPixels.length; i++) {
+        radioPanelPixels[i] = radioPanelPixels[i].blend(color, progress);
       }
     }
   }
@@ -176,20 +177,15 @@ class Icicles {
       _pixels[i] = _pixels[i].lighten(progress);
     }
     if (lightenRadioPanels) {
-      for (final radioPanel in animation.currentView.radioPanels) {
-        if (radioPanel.hasAllColorsIdentical()) {
-          animation.addFrame(RadioColorFrame(
-            Duration.zero,
-            radioPanel.index,
-            radioPanel.colors.first.lighten(progress),
-          ));
-        } else {
-          animation.addFrame(RadioVisualFrame(
-            Duration.zero,
-            radioPanel.index,
-            radioPanel.colors.map((color) => color.lighten(progress)).toList(),
-          ));
-        }
+      lightenAllRadioPanels(progress);
+    }
+  }
+
+  /// Lighten all [pixels] colors by [progress] amount (`1.0` = white)
+  void lightenAllRadioPanels(double progress) {
+    for (final radioPanelPixels in _radioPanels) {
+      for (var i = 0; i < radioPanelPixels.length; i++) {
+        radioPanelPixels[i] = radioPanelPixels[i].lighten(progress);
       }
     }
   }
@@ -200,20 +196,15 @@ class Icicles {
       _pixels[i] = _pixels[i].darken(progress);
     }
     if (darkenRadioPanels) {
-      for (final radioPanel in animation.currentView.radioPanels) {
-        if (radioPanel.hasAllColorsIdentical()) {
-          animation.addFrame(RadioColorFrame(
-            Duration.zero,
-            radioPanel.index,
-            radioPanel.colors.first.darken(progress),
-          ));
-        } else {
-          animation.addFrame(RadioVisualFrame(
-            Duration.zero,
-            radioPanel.index,
-            radioPanel.colors.map((color) => color.darken(progress)).toList(),
-          ));
-        }
+      darkenAllRadioPanels(progress);
+    }
+  }
+
+  /// Darken all radio panel colors by [progress] amount (`1.0` = black)
+  void darkenAllRadioPanels(double progress) {
+    for (final radioPanelPixels in _radioPanels) {
+      for (var i = 0; i < radioPanelPixels.length; i++) {
+        radioPanelPixels[i] = radioPanelPixels[i].darken(progress);
       }
     }
   }
@@ -228,40 +219,55 @@ class Icicles {
 
   /// Sets the color of the radio panel specified by the [panelIndex].
   ///
-  /// When setting `duration` to any value other than 0ms, the panel color will be displayed
-  /// immediately and the next frame will be delayed by the specified time.
+  /// Panel indexes start from 1, setting [panelIndex] to `0` will update
+  /// all available radio panels.
   ///
-  /// Skipping the `duration` will cause the radio panel colors to be displayed
-  /// together with the `show` method invocation.
+  /// To display it use the [show] method.
+  void setRadioPanelPixelColor(
+    int panelIndex,
+    int pixelIndex,
+    Color color,
+  ) {
+    RangeError.checkValidIndex(panelIndex - 1, _radioPanels, 'radioPanels');
+    final pixels = _radioPanels[panelIndex - 1];
+    RangeError.checkValidIndex(pixelIndex, pixels, 'radioPanelPixels');
+    pixels[pixelIndex] = color;
+  }
+
+  /// Sets the color of the radio panel specified by the [panelIndex].
   ///
   /// Panel indexes start from 1, setting [panelIndex] to `0` will update
   /// all available radio panels.
+  ///
+  /// To display it use the [show] method.
   void setRadioPanelColor(
     int panelIndex,
-    Color color, [
-    Duration duration = Duration.zero,
-  ]) {
-    animation.addFrame(RadioColorFrame(duration, panelIndex, color));
+    Color color,
+  ) {
+    final pixels = _radioPanels[panelIndex - 1];
+    for (int i = 0; i < pixels.length; i++) {
+      pixels[i] = color;
+    }
   }
 
   /// Sets the colors of all available radio panels.
   ///
-  /// When setting `duration` to any value other than 0ms, the panel color will be displayed
-  /// immediately and the next frame will be delayed by the specified time.
-  ///
-  /// Skipping the `duration` will cause the radio panel colors to be displayed
-  /// together with the `show` method invocation.
-  void setAllRadioPanelsColor(
-    Color color, [
-    Duration duration = Duration.zero,
-  ]) {
-    animation.addFrame(RadioColorFrame(duration, 0, color));
+  /// To display it use the [show] method.
+  void setAllRadioPanelsColor(Color color) {
+    for (final radioPanelPixels in _radioPanels) {
+      for (var i = 0; i < radioPanelPixels.length; i++) {
+        radioPanelPixels[i] = color;
+      }
+    }
   }
 
   /// Displays the current icicles state for a provided [duration]
   ///
   /// It creates and adds a frame to the [animation] class.
   void show(Duration duration) {
+    for (int i = 0; i < _radioPanels.length; i++) {
+      animation.addFrame(RadioVisualFrame(duration, i + 1, _radioPanels[i]));
+    }
     animation.addFrame(toFrame(duration));
   }
 }

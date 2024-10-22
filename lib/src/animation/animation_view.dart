@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
+import 'package:meta/meta.dart';
 
 enum SerialMessageTypes {
   /// Keep LEDs aware of ongoing serial communication.
@@ -20,24 +21,34 @@ enum SerialMessageTypes {
   const SerialMessageTypes(this.value);
 }
 
+@immutable
 class RadioPanelView {
   final int index;
   final List<Color> colors;
 
-  const RadioPanelView(this.index, this.colors)
+  RadioPanelView(this.index, List<Color> colors)
       : assert(
-          colors.length > 0,
+          colors.isNotEmpty,
           'The color list must include at least one color.',
-        );
+        ),
+        colors = List<Color>.unmodifiable(colors);
 
   RadioPanelView copyWith({
     int? index,
     List<Color>? colors,
-  }) =>
-      RadioPanelView(
-        index ?? this.index,
-        colors ?? this.colors,
+  }) {
+    if (colors != null && colors.length != this.colors.length) {
+      throw ArgumentError(
+        'Invalid colors list length: Provided ${colors.length} colors, '
+            'but the expected length is ${this.colors.length}.',
+        'colors',
       );
+    }
+    return RadioPanelView(
+      index ?? this.index,
+      colors ?? this.colors,
+    );
+  }
 
   RadioPanelView copyWithColor(Color color) => RadioPanelView(
         index,
@@ -86,6 +97,7 @@ class RadioPanelView {
 
 /// Class used for serial communication,
 /// represents the current icicles state
+@immutable
 class AnimationView {
   final VisualFrame frame;
   final List<RadioPanelView> radioPanels;
@@ -116,10 +128,26 @@ class AnimationView {
         radioPanels[localIndex] =
             radioPanels[localIndex].copyWithColor(newFrame.color);
       }
+    } else if (newFrame is RadioVisualFrame) {
+      if (newFrame.isBroadcast) {
+        for (var i = 0; i < radioPanels.length; i++) {
+          radioPanels[i] = radioPanels[i].copyWith(
+            colors: newFrame.colors,
+          );
+        }
+      } else {
+        final localIndex = newFrame.panelIndex - 1;
+        // shift index due to broadcast panel at 0
+        radioPanels[localIndex] = radioPanels[localIndex].copyWith(
+          colors: newFrame.colors,
+        );
+      }
     }
 
     return copyWith(frame: updatedFrame, radioPanels: radioPanels);
   }
+
+  AnimationView copy() => copyWith();
 
   AnimationView copyWith({
     VisualFrame? frame,
