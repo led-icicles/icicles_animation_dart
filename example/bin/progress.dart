@@ -3,12 +3,12 @@ import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 void main() async {
   final animation = Animation(
     'Progress',
-    xCount: 20,
-    yCount: 30,
+    xCount: 32,
+    yCount: 8,
     radioPanelsCount: 2,
     radioPanelPixelCount: 60,
     loopsCount: 10,
-    framerate: Framerate.fps24,
+    framerate: Framerate.fps60,
     framerateBehavior: FramerateBehavior.drop,
     useRgb565: false,
     optimize: true,
@@ -31,9 +31,9 @@ void main() async {
           ..setAllPixelsColor(backgroundColor)
           ..setAllRadioPanelsColor(backgroundColor);
         final progress = i;
-        final turnedOnCount = (progress * animation.header.yCount).round();
-        for (int y = 0; y < turnedOnCount; y++) {
-          icicles.setRowColor(y, foregroundColor);
+        final turnedOnCount = (progress * animation.header.xCount).round();
+        for (int x = 0; x < turnedOnCount; x++) {
+          icicles.setColumnColor(x, foregroundColor);
         }
 
         final radioTurnedOnCount =
@@ -41,7 +41,6 @@ void main() async {
 
         for (final panel in animation.currentView.radioPanels) {
           for (int i = 0; i < radioTurnedOnCount; i++) {
-            print("P: ${panel.index} I: $i");
             icicles.setRadioPanelPixelColor(panel.index, i, foregroundColor);
           }
         }
