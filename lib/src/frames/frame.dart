@@ -30,7 +30,11 @@ enum FrameType {
 
   /// [(uint8)type][(uint16)duration][(uint8)panelIndex][(uint8)red][(uint8)green][(uint8)blue]
   radioColor(100),
-  radioVisualFrame(101);
+  radioVisualFrame(101),
+
+  /// Not yet implemented
+  @experimental
+  radioVisual565Frame(102);
 
   final int value;
 

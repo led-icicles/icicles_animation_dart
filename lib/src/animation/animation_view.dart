@@ -21,6 +21,20 @@ enum SerialMessageTypes {
   const SerialMessageTypes(this.value);
 }
 
+enum RadioViewType {
+  /// No update/no view for panel
+  none(0),
+
+  /// Displays only a single color
+  color(1),
+
+  /// Displays all colors
+  visual(2);
+
+  const RadioViewType(this.value);
+  final int value;
+}
+
 @immutable
 class RadioPanelView {
   final int index;
@@ -170,10 +184,11 @@ class AnimationView {
         radioPanels ?? this.radioPanels,
       );
 
-  int getRadioPanelSize() {
+  int getRadioPanelSize(RadioPanelView panel) {
     const panelIndexSize = uint8SizeInBytes;
-    const color = uint8SizeInBytes * 3;
-    return panelIndexSize + color;
+    const viewType = uint8SizeInBytes;
+    final pixelSize = panel.colors.length * uint8SizeInBytes * 3;
+    return panelIndexSize + viewType + pixelSize;
   }
 
   /// Converts the current view into most valid [RadioFrame].
@@ -223,8 +238,8 @@ class AnimationView {
 
   ///  Convert to bytes that can be send over serial (skip duration)
   Uint8List toBytes([Endian endian = Endian.little]) {
-    final radioPanelSize = getRadioPanelSize();
-    final radioPanelsSize = radioPanelSize * radioPanels.length;
+    final radioPanelsSize =
+        radioPanels.fold(0, (sum, panel) => sum + getRadioPanelSize(panel));
     final frameSize = getFrameSize();
     final messageTypeSize = uint8SizeInBytes;
     final viewSize = messageTypeSize + frameSize + radioPanelsSize;
@@ -243,6 +258,7 @@ class AnimationView {
 
       writer
         ..writeUint8(radioPanelView.index)
+        ..writeUint8(RadioViewType.visual.value)
         ..writeAllColors(radioPanelView.colors);
     }
 
