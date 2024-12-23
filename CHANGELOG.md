@@ -1,3 +1,8 @@
+## 2.0.1
+
+- Fixed radio panels issues.
+    - Copy color values of _RadioVisualFrame_
+
 ## 1.4.0
 
 - Updated package dependencies

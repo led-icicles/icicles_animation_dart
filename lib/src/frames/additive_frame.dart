@@ -12,8 +12,8 @@ class AdditiveFrame extends Frame {
 
   AdditiveFrame({
     required super.duration,
-    required this.changedPixels,
-  }) {
+    required List<IndexedColor> changedPixels,
+  }) : changedPixels = List.unmodifiable(changedPixels) {
     if (changedPixels.length > AdditiveFrame.maxChangedPixelIndex) {
       throw ArgumentError(
           'Provided more changed pixels than maximum allowed. Check [AdditiveFrame.maxChangedPixelIndex].');

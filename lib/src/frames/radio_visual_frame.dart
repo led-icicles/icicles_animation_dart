@@ -12,8 +12,8 @@ class RadioVisualFrame extends RadioFrame {
   RadioVisualFrame({
     required super.duration,
     required super.index,
-    required this.colors,
-  });
+    required List<Color> colors,
+  }) : colors = List.unmodifiable(colors);
 
   /// [(uint8)type][(uint16)duration][(uint8)panelIndex][(uint8)red][(uint8)green][(uint8)blue]
   @override
