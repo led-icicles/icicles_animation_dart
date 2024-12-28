@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:icicles_animation_dart/src/core/encodable.dart';
-import 'package:icicles_animation_dart/src/core/size.dart';
+import 'package:icicles_animation_dart/src/core/sizes.dart';
 import 'package:meta/meta.dart';
 
 enum FrameType {

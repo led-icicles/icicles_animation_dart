@@ -1,9 +1,18 @@
-const int16MaxSize = 32767;
-const uint16MaxSize = 65535;
-const uint16SizeInBytes = 2;
+class Size {
+  final int width;
+  final int height;
 
-const uint8MaxSize = 255;
-const uint8SizeInBytes = 1;
+  const Size(this.width, this.height);
 
-const nullChar = 0;
-const nullCharSizeInBytes = 1;
+  int get length => width * height;
+
+  @override
+  int get hashCode => Object.hash(width, height);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(other, this)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is Size && other.width == width && other.height == height;
+  }
+}
