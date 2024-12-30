@@ -3,22 +3,6 @@ import 'package:icicles_animation_dart/src/core/pixels_view.dart';
 export 'tweens/tween.dart';
 export 'curves/curve.dart';
 
-abstract interface class AnimationController {
-  List<Color> get pixels;
-  int get pixelsCount;
-  int get xCount;
-  int get yCount;
-  int getPixelIndex(int x, int y);
-  Color getPixelColor(int x, int y);
-  Color getPixelColorAtIndex(int index);
-  void setPixelColor(int x, int y, Color color);
-  void setPixelColorAtIndex(int index, Color color);
-  VisualFrame toFrame(Duration duration);
-
-  void setRadioPanelPixelColor(int panelIndex, int pixelIndex, Color color);
-  void setRadioPanelColor(int panelIndex, Color color);
-}
-
 /// An abstraction of icicles, which allows for the simple
 /// creation of animations.
 class Icicles {
@@ -27,14 +11,14 @@ class Icicles {
 
   final PixelsView _view;
 
-  // final List<Color> _pixels;
-  final List<List<Color>> _radioPanels;
+  // final List<PixelsView> _pixels;
+  final List<PixelsView> _radioPanels;
 
   /// Returns the current animation pixels.
   ///
   /// The returned list cannot be modified.
   List<Color> get pixels {
-    return _view.pixels;
+    return List.unmodifiable(_view.toList());
   }
 
   /// Returns the total number of pixels that are supported by this animation
@@ -66,7 +50,10 @@ class Icicles {
         ),
         _radioPanels = List.generate(
           animation.currentView.radioPanels.length,
-          (index) => List.of(animation.currentView.radioPanels[index].colors),
+          (index) => PixelsView(
+            Size(animation.currentView.radioPanels.length, 1),
+            animation.currentView.radioPanels[index].colors,
+          ),
         );
 
   /// Converts two-dimensional x,y coordinates into
@@ -104,12 +91,12 @@ class Icicles {
 
   /// Sets [color] under the specified [x], [y] coordinates.
   void setPixelColor(int x, int y, Color color) {
-    return _view.setPixelColor(x, y, color);
+    return _view.setPixelAt(x, y, color);
   }
 
   /// Sets [color] under the specified [index].
   void setPixelColorAtIndex(int index, Color color) {
-    return _view.setPixelColorAtIndex(index, color);
+    return _view.setPixel(index, color);
   }
 
   /// Sets the [x] column to the specified [color].
@@ -145,7 +132,7 @@ class Icicles {
     bool blendRadioPanels = false,
   }) {
     for (var i = 0; i < _view.length; i++) {
-      _view.setPixelColorAtIndex(
+      _view.setPixel(
         i,
         Color.linearBlend(
           getPixelColorAtIndex(i),
@@ -164,7 +151,8 @@ class Icicles {
   void blendAllRadioPanels(Color color, double progress) {
     for (final radioPanelPixels in _radioPanels) {
       for (var i = 0; i < radioPanelPixels.length; i++) {
-        radioPanelPixels[i] = radioPanelPixels[i].blend(color, progress);
+        radioPanelPixels.setPixel(
+            i, radioPanelPixels.getPixelColorAtIndex(i).blend(color, progress));
       }
     }
   }
@@ -183,7 +171,8 @@ class Icicles {
   void lightenAllRadioPanels(double progress) {
     for (final radioPanelPixels in _radioPanels) {
       for (var i = 0; i < radioPanelPixels.length; i++) {
-        radioPanelPixels[i] = radioPanelPixels[i].lighten(progress);
+        radioPanelPixels.setPixel(
+            i, radioPanelPixels.getPixelColorAtIndex(i).lighten(progress));
       }
     }
   }
@@ -202,7 +191,8 @@ class Icicles {
   void darkenAllRadioPanels(double progress) {
     for (final radioPanelPixels in _radioPanels) {
       for (var i = 0; i < radioPanelPixels.length; i++) {
-        radioPanelPixels[i] = radioPanelPixels[i].darken(progress);
+        radioPanelPixels.setPixel(
+            i, radioPanelPixels.getPixelColorAtIndex(i).darken(progress));
       }
     }
   }
@@ -212,7 +202,7 @@ class Icicles {
   /// This method is used internally by the [show] method
   /// to add a new frame to the [animation].
   VisualFrame toFrame(Duration duration) {
-    return VisualFrame(duration: duration, pixels: _view.pixels);
+    return VisualFrame(duration: duration, pixels: _view.toList());
   }
 
   /// Sets the color of the radio panel specified by the [panelIndex].
@@ -229,7 +219,7 @@ class Icicles {
     RangeError.checkValidIndex(panelIndex - 1, _radioPanels, 'radioPanels');
     final pixels = _radioPanels[panelIndex - 1];
     RangeError.checkValidIndex(pixelIndex, pixels, 'radioPanelPixels');
-    pixels[pixelIndex] = color;
+    pixels.setPixel(pixelIndex, color);
   }
 
   /// Sets the color of the radio panel specified by the [panelIndex].
@@ -244,7 +234,7 @@ class Icicles {
   ) {
     final pixels = _radioPanels[panelIndex - 1];
     for (int i = 0; i < pixels.length; i++) {
-      pixels[i] = color;
+      pixels.setPixel(i, color);
     }
   }
 
@@ -254,7 +244,7 @@ class Icicles {
   void setAllRadioPanelsColor(Color color) {
     for (final radioPanelPixels in _radioPanels) {
       for (var i = 0; i < radioPanelPixels.length; i++) {
-        radioPanelPixels[i] = color;
+        radioPanelPixels.setPixel(i, color);
       }
     }
   }
@@ -274,7 +264,7 @@ class Icicles {
       );
     }
     for (int i = 0; i < _radioPanels.length; i++) {
-      _radioPanels[i] = colors;
+      _radioPanels[i].setPixels(colors);
     }
   }
 
@@ -286,14 +276,10 @@ class Icicles {
       animation.addFrame(RadioVisualFrame(
         duration: Duration.zero,
         index: i + 1,
-        colors: _radioPanels[i],
+        colors: _radioPanels[i].toList(),
       ));
     }
     animation.addFrame(toFrame(duration));
   }
 }
 
-class MaskedIcicles extends Icicles {
-  final List<Color> mask;
-  MaskedIcicles(super.animation, {required this.mask});
-}

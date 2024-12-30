@@ -175,6 +175,7 @@ class Color {
   int get blue => (0x000000ff & value) >> 0;
 
   bool get isOpaque => alpha == 255;
+  bool get isTransparent => alpha == 0;
 
   /// Returns a new color that matches this color with the alpha channel
   /// replaced with `a` (which ranges from 0 to 255).
@@ -374,6 +375,7 @@ final class Colors extends Iterable<Color> {
   static const lawnGreen = Color.fromRGB(80, 192, 0);
   static const black = Color.fromRGB(0, 0, 0);
   static const white = Color.fromRGB(255, 255, 255);
+  static const transparent = Color.fromARGB(0, 0, 0, 0);
 
   /// Array of all [Colors] without the [black] and [white] color.
   static const all = [
@@ -431,6 +433,9 @@ class IndexedColor implements Color {
 
   @override
   bool get isOpaque => color.isOpaque;
+
+  @override
+  bool get isTransparent => color.isTransparent;
 
   @override
   IndexedColor withAlpha(int a) => IndexedColor(index, color.withAlpha(a));
