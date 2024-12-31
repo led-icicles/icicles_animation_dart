@@ -8,21 +8,15 @@ class Icicles {
   /// Current definition of animation.
   final Animation animation;
 
-  final PixelsView _view;
+  final PixelsView strip;
 
   // final List<PixelsView> _pixels;
   final List<PixelsView> _radioPanels;
-
-  /// Returns the current animation pixels.
-  ///
-  /// The returned list cannot be modified.
-  List<Color> get pixels {
-    return List.unmodifiable(_view.toList());
-  }
+  List<PixelsView> get radioPanels => List.unmodifiable(_radioPanels);
 
   /// Returns the total number of pixels that are supported by this animation
   int get pixelsCount {
-    return _view.length;
+    return strip.length;
   }
 
   /// Returns the number of radio panels that are supported by this animation
@@ -30,20 +24,13 @@ class Icicles {
     return animation.header.radioPanelsCount;
   }
 
-  /// Returns the number of columns (icicles)
-  int get xCount {
-    return animation.header.xCount;
-  }
-
-  /// Returns the number of rows (pixels per icicle)
-  int get yCount {
-    return animation.header.yCount;
-  }
+  /// Returns [strip] size.
+  Size get size => strip.size;
 
   /// Constructs an abstraction of icicles,
   /// which allows for the simple creation of animations.
   Icicles(this.animation)
-      : _view = PixelsView(
+      : strip = PixelsView(
           Size(animation.header.xCount, animation.header.yCount),
           animation.currentView.frame.pixels,
         ),
@@ -62,7 +49,7 @@ class Icicles {
   /// However, if you want to read the color of a pixel at the specified
   /// location, use the [getPixelColor] method instead.
   int getPixelIndex(int x, int y) {
-    return _view.getPixelIndex(x, y);
+    return strip.getPixelIndex(x, y);
   }
 
   /// Returns the current color of the pixel in the given [x], [y] coordinates.
@@ -72,7 +59,7 @@ class Icicles {
   /// final color = icicles.pixels[getPixelIndex(x, y)];
   /// ```
   Color getPixelColor(int x, int y) {
-    return _view.getPixelColor(x, y);
+    return strip.getPixelColor(x, y);
   }
 
   /// Returns the current color of the pixel in the given [index].
@@ -85,37 +72,37 @@ class Icicles {
   /// final color = icicles.pixels[index];
   /// ```
   Color getPixelColorAtIndex(int index) {
-    return _view.getPixelColorAtIndex(index);
+    return strip.getPixelColorAtIndex(index);
   }
 
   /// Sets [color] under the specified [x], [y] coordinates.
   void setPixelColor(int x, int y, Color color) {
-    return _view.setPixelAt(x, y, color);
+    return strip.setPixelAt(x, y, color);
   }
 
   /// Sets [color] under the specified [index].
   void setPixelColorAtIndex(int index, Color color) {
-    return _view.setPixel(index, color);
+    return strip.setPixel(index, color);
   }
 
   /// Sets the [x] column to the specified [color].
   void setColumnColor(int x, Color color) {
-    return _view.setColumnColor(x, color);
+    return strip.setColumnColor(x, color);
   }
 
   /// Sets the [y] row to the specified [color].
   void setRowColor(int y, Color color) {
-    return _view.setRowColor(y, color);
+    return strip.setRowColor(y, color);
   }
 
   /// Sets all pixels to the specified [color].
   void setAllPixelsColor(Color color) {
-    return _view.setAllPixelsColor(color);
+    return strip.setAllPixelsColor(color);
   }
 
   /// Replaces all pixels with the specified [pixels].
   void setPixels(List<Color> pixels) {
-    return _view.setPixels(pixels);
+    return strip.setPixels(pixels);
   }
 
   /// Blends all [pixels] colors with the supplied [color]
@@ -130,8 +117,8 @@ class Icicles {
     double progress, {
     bool blendRadioPanels = false,
   }) {
-    for (var i = 0; i < _view.length; i++) {
-      _view.setPixel(
+    for (var i = 0; i < strip.length; i++) {
+      strip.setPixel(
         i,
         Color.linearBlend(
           getPixelColorAtIndex(i),
@@ -158,7 +145,7 @@ class Icicles {
 
   /// Lighten all [pixels] colors by [progress] amount (`1.0` = white)
   void lightenAllPixels(double progress, {bool lightenRadioPanels = false}) {
-    for (var i = 0; i < _view.length; i++) {
+    for (var i = 0; i < strip.length; i++) {
       setPixelColorAtIndex(i, getPixelColorAtIndex(i).lighten(progress));
     }
     if (lightenRadioPanels) {
@@ -178,7 +165,7 @@ class Icicles {
 
   /// Darken all [pixels] colors by [progress] amount (`1.0` = black)
   void darkenAllPixels(double progress, {bool darkenRadioPanels = false}) {
-    for (var i = 0; i < _view.length; i++) {
+    for (var i = 0; i < strip.length; i++) {
       setPixelColorAtIndex(i, getPixelColorAtIndex(i).darken(progress));
     }
     if (darkenRadioPanels) {
@@ -201,7 +188,7 @@ class Icicles {
   /// This method is used internally by the [show] method
   /// to add a new frame to the [animation].
   VisualFrame toFrame(Duration duration) {
-    return VisualFrame(duration: duration, pixels: _view.toList());
+    return VisualFrame(duration: duration, pixels: strip.toList());
   }
 
   /// Sets the color of the radio panel specified by the [panelIndex].

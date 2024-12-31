@@ -1,21 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 
-class Pixels extends Iterable<Color> {
-  final Size _size;
-  final List<Color> _pixels;
+abstract interface class Pixels implements Iterable<Color> {
+  Size get size;
+  @override
+  int get length;
 
-  Pixels(this._size, List<Color> pixels)
-      : assert(pixels.length == _size.length),
-        _pixels = List.of(pixels, growable: false);
-  Pixels.empty(this._size)
-      : _pixels =
-            List.filled(_size.length, const Color(0x00000000), growable: false);
-  Pixels.filled(this._size, Color fill)
-      : _pixels = List.filled(_size.length, fill, growable: false);
-  Pixels.of(Pixels pixels)
-      : _size = pixels.size,
-        _pixels = List.of(pixels._pixels, growable: false);
+  factory Pixels(Size size, List<Color> data) = _Pixels;
+  factory Pixels.empty(Size size) = _Pixels.empty;
+  factory Pixels.filled(Size size, Color fill) = _Pixels.filled;
+  factory Pixels.of(Pixels pixels) = _Pixels.of;
 
   /// Verify wether two visual frames are compatible.
   static void assertCompatibility(
@@ -27,35 +21,71 @@ class Pixels extends Iterable<Color> {
     }
   }
 
+  Color getPixel(int index);
+  void setPixel(int index, Color color);
+}
+
+class _Pixels extends Iterable<Color> implements Pixels {
+  final Size _size;
+  final List<Color> _data;
+
+  @override
   Size get size => _size;
 
+  _Pixels(this._size, List<Color> data)
+      : assert(data.length == _size.length),
+        _data = List.of(
+          data,
+          growable: false,
+        );
+  _Pixels.empty(this._size)
+      : _data = List.filled(
+          _size.length,
+          const Color(0x00000000),
+          growable: false,
+        );
+  _Pixels.filled(this._size, Color fill)
+      : _data = List.filled(
+          _size.length,
+          fill,
+          growable: false,
+        );
+  _Pixels.of(Pixels pixels)
+      : _size = pixels.size,
+        _data = List.of(
+          pixels,
+          growable: false,
+        );
+
   void _assertValidIndex(int index) {
-    if (index >= _pixels.length || index < 0) {
-      throw RangeError.index(index, _pixels, 'pixels',
-          'Invalid pixel index provided ($index). Valid range is from "0" to "${_pixels.length - 1}"');
+    if (index >= _data.length || index < 0) {
+      throw RangeError.index(index, _data, 'pixels',
+          'Invalid pixel index provided ($index). Valid range is from "0" to "${_data.length - 1}"');
     }
   }
 
+  @override
   void setPixel(int index, Color color) {
     _assertValidIndex(index);
-    _pixels[index] = color;
+    _data[index] = color;
   }
 
+  @override
   Color getPixel(int index) {
     _assertValidIndex(index);
-    return _pixels[index];
+    return _data[index];
   }
 
   @override
-  int get length => _pixels.length;
+  int get length => _data.length;
 
   @override
-  Iterator<Color> get iterator => _pixels.iterator;
+  Iterator<Color> get iterator => _data.iterator;
 
   @override
   int get hashCode => Object.hash(
         size,
-        Object.hashAll(_pixels),
+        Object.hashAll(_data),
       );
 
   @override
@@ -64,7 +94,7 @@ class Pixels extends Iterable<Color> {
     if (other.runtimeType != runtimeType) return false;
     return other is Pixels &&
         other.size == size &&
-        const ListEquality().equals(_pixels, other._pixels);
+        IterableEquality().equals(this, other);
   }
 }
 
@@ -75,6 +105,13 @@ class PixelsView extends Iterable<Color> implements Pixels {
   PixelsView.empty(Size size) : data = Pixels.empty(size);
   PixelsView.filled(Size size, Color fill) : data = Pixels.filled(size, fill);
   PixelsView.of(Pixels pixels) : data = pixels;
+
+  void _assertValidIndex(int index) {
+    if (index >= data.length || index < 0) {
+      throw RangeError.index(index, data, 'pixels',
+          'Invalid pixel index provided ($index). Valid range is from "0" to "${data.length - 1}"');
+    }
+  }
 
   /// Sets [color] under the specified [x], [y] coordinates.
   void setPixelAt(int x, int y, Color color) {
@@ -176,13 +213,6 @@ class PixelsView extends Iterable<Color> implements Pixels {
   }
 
   @override
-  void _assertValidIndex(int index) {
-    data._assertValidIndex(index);
-  }
-
-  @override
-  Size get _size => data._size;
-  @override
   Size get size => data.size;
 
   @override
@@ -197,9 +227,6 @@ class PixelsView extends Iterable<Color> implements Pixels {
 
   @override
   Iterator<Color> get iterator => data.iterator;
-
-  @override
-  List<Color> get _pixels => data._pixels;
 }
 
 class MaskedPixelView extends PixelsView {
