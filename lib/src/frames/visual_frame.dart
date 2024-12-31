@@ -39,7 +39,7 @@ class VisualFrame extends Frame {
 
   VisualFrame({
     required super.duration,
-    required List<Color> pixels,
+    required Iterable<Color> pixels,
   }) : pixels = List.unmodifiable(pixels);
 
   factory VisualFrame.filled(

@@ -1,5 +1,4 @@
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
-import 'package:icicles_animation_dart/src/core/pixels_view.dart';
 export 'tweens/tween.dart';
 export 'curves/curve.dart';
 
@@ -207,8 +206,7 @@ class Icicles {
 
   /// Sets the color of the radio panel specified by the [panelIndex].
   ///
-  /// Panel indexes start from 1, setting [panelIndex] to `0` will update
-  /// all available radio panels.
+  /// Panel indexes start from `0`.
   ///
   /// To display it use the [show] method.
   void setRadioPanelPixelColor(
@@ -216,26 +214,23 @@ class Icicles {
     int pixelIndex,
     Color color,
   ) {
-    RangeError.checkValidIndex(panelIndex - 1, _radioPanels, 'radioPanels');
-    final pixels = _radioPanels[panelIndex - 1];
+    RangeError.checkValidIndex(panelIndex, _radioPanels, 'radioPanels');
+    final pixels = _radioPanels[panelIndex];
     RangeError.checkValidIndex(pixelIndex, pixels, 'radioPanelPixels');
     pixels.setPixel(pixelIndex, color);
   }
 
   /// Sets the color of the radio panel specified by the [panelIndex].
   ///
-  /// Panel indexes start from 1, setting [panelIndex] to `0` will update
-  /// all available radio panels.
+  /// Panel indexes starts from `0`.
   ///
   /// To display it use the [show] method.
   void setRadioPanelColor(
     int panelIndex,
     Color color,
   ) {
-    final pixels = _radioPanels[panelIndex - 1];
-    for (int i = 0; i < pixels.length; i++) {
-      pixels.setPixel(i, color);
-    }
+    final pixels = _radioPanels[panelIndex];
+    pixels.setAllPixelsColor(color);
   }
 
   /// Sets the colors of all available radio panels.
@@ -243,9 +238,7 @@ class Icicles {
   /// To display it use the [show] method.
   void setAllRadioPanelsColor(Color color) {
     for (final radioPanelPixels in _radioPanels) {
-      for (var i = 0; i < radioPanelPixels.length; i++) {
-        radioPanelPixels.setPixel(i, color);
-      }
+      radioPanelPixels.setAllPixelsColor(color);
     }
   }
 
@@ -282,4 +275,3 @@ class Icicles {
     animation.addFrame(toFrame(duration));
   }
 }
-

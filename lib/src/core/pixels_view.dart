@@ -7,14 +7,15 @@ class Pixels extends Iterable<Color> {
 
   Pixels(this._size, List<Color> pixels)
       : assert(pixels.length == _size.length),
-        _pixels = List.of(pixels);
+        _pixels = List.of(pixels, growable: false);
   Pixels.empty(this._size)
-      : _pixels = List.filled(_size.length, const Color(0x00000000));
+      : _pixels =
+            List.filled(_size.length, const Color(0x00000000), growable: false);
   Pixels.filled(this._size, Color fill)
-      : _pixels = List.filled(_size.length, fill);
+      : _pixels = List.filled(_size.length, fill, growable: false);
   Pixels.of(Pixels pixels)
       : _size = pixels.size,
-        _pixels = List.of(pixels._pixels);
+        _pixels = List.of(pixels._pixels, growable: false);
 
   /// Verify wether two visual frames are compatible.
   static void assertCompatibility(
@@ -68,12 +69,12 @@ class Pixels extends Iterable<Color> {
 }
 
 class PixelsView extends Iterable<Color> implements Pixels {
-  final Pixels _data;
+  final Pixels data;
 
-  PixelsView(Size size, List<Color> pixels) : _data = Pixels(size, pixels);
-  PixelsView.empty(Size size) : _data = Pixels.empty(size);
-  PixelsView.filled(Size size, Color fill) : _data = Pixels.filled(size, fill);
-  PixelsView.of(Pixels pixels) : _data = pixels;
+  PixelsView(Size size, List<Color> pixels) : data = Pixels(size, pixels);
+  PixelsView.empty(Size size) : data = Pixels.empty(size);
+  PixelsView.filled(Size size, Color fill) : data = Pixels.filled(size, fill);
+  PixelsView.of(Pixels pixels) : data = pixels;
 
   /// Sets [color] under the specified [x], [y] coordinates.
   void setPixelAt(int x, int y, Color color) {
@@ -138,7 +139,7 @@ class PixelsView extends Iterable<Color> implements Pixels {
       List<Color>.generate(size.height, (y) => getPixel(x * size.height + y));
 
   List<Color> getRow(int y) => List<Color>.generate(
-      size.width, (x) => _data.getPixel(x * size.height + y));
+      size.width, (x) => data.getPixel(x * size.height + y));
 
   /// Blend [from] frame with [to] frame using [progress].
   ///
@@ -152,7 +153,7 @@ class PixelsView extends Iterable<Color> implements Pixels {
     Pixels.assertCompatibility(from, to);
 
     final pixels = [
-      for (var i = 0; i < from._data.length; i++)
+      for (var i = 0; i < from.data.length; i++)
         Color.linearBlend(from.getPixel(i), to.getPixel(i), progress)
     ];
 
@@ -165,40 +166,40 @@ class PixelsView extends Iterable<Color> implements Pixels {
   }
 
   @override
-  int get hashCode => Object.hash(size, Object.hashAll(_data));
+  int get hashCode => Object.hash(size, Object.hashAll(data));
 
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
     if (other.runtimeType != runtimeType) return false;
-    return other is PixelsView && other._data == _data;
+    return other is PixelsView && other.data == data;
   }
 
   @override
   void _assertValidIndex(int index) {
-    _data._assertValidIndex(index);
+    data._assertValidIndex(index);
   }
 
   @override
-  Size get _size => _data._size;
+  Size get _size => data._size;
   @override
-  Size get size => _data.size;
+  Size get size => data.size;
 
   @override
   Color getPixel(int index) {
-    return _data.getPixel(index);
+    return data.getPixel(index);
   }
 
   @override
   void setPixel(int index, Color color) {
-    return _data.setPixel(index, color);
+    return data.setPixel(index, color);
   }
 
   @override
-  Iterator<Color> get iterator => _data.iterator;
+  Iterator<Color> get iterator => data.iterator;
 
   @override
-  List<Color> get _pixels => _data._pixels;
+  List<Color> get _pixels => data._pixels;
 }
 
 class MaskedPixelView extends PixelsView {

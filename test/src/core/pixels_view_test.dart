@@ -39,7 +39,7 @@ void main() {
   });
 
   group('PixelsView -', () {
-    group('mask', () {
+    group('masking', () {
       test('withMask -', () {
         final data = Pixels.empty(Size(2, 2));
         final mask = Pixels(

@@ -16,7 +16,7 @@ void main() {
     expect(animation.frames, hasLength(0));
 
     icicles
-      ..setRadioPanelPixelColor(1, 0, Colors.red)
+      ..setRadioPanelPixelColor(0, 0, Colors.red)
       ..show(Duration(seconds: 1));
 
     expect(animation.frames, [
@@ -28,8 +28,8 @@ void main() {
     ]);
 
     icicles
-      ..setRadioPanelPixelColor(1, 0, Colors.red)
-      ..setRadioPanelPixelColor(2, 1, Colors.green)
+      ..setRadioPanelPixelColor(0, 0, Colors.red)
+      ..setRadioPanelPixelColor(1, 1, Colors.green)
       ..setAllPixelsColor(Colors.blue)
       ..show(Duration(seconds: 2));
 
