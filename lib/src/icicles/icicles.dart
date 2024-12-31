@@ -42,6 +42,15 @@ class Icicles {
           ),
         );
 
+  Icicles._internal(this.animation, this.strip, this._radioPanels);
+
+  Icicles withMask(PixelsView stripMask, List<PixelsView> radioPanels) {
+    return Icicles._internal(animation, strip.withMask(stripMask), [
+      for (final (index, view) in radioPanels.indexed)
+        view.withMask(radioPanels[index])
+    ]);
+  }
+
   /// Converts two-dimensional x,y coordinates into
   /// a one-dimensional pixel index.
   ///
