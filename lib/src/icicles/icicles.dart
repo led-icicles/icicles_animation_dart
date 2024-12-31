@@ -37,7 +37,7 @@ class Icicles {
         _radioPanels = List.generate(
           animation.currentView.radioPanels.length,
           (index) => PixelsView(
-            Size(animation.currentView.radioPanels.length, 1),
+            Size(animation.header.radioPanelPixelCount, 1),
             animation.currentView.radioPanels[index].colors,
           ),
         );
