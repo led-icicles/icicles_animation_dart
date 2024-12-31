@@ -46,7 +46,7 @@ class Icicles {
 
   Icicles withMask(PixelsView stripMask, List<PixelsView> radioPanels) {
     return Icicles._internal(animation, strip.withMask(stripMask), [
-      for (final (index, view) in radioPanels.indexed)
+      for (final (index, view) in _radioPanels.indexed)
         view.withMask(radioPanels[index])
     ]);
   }
