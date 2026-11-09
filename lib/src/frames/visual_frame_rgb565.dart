@@ -29,6 +29,16 @@ class VisualFrameRgb565 extends VisualFrame {
       VisualFrame(duration: duration, pixels: pixels);
 
   @override
+  VisualFrameRgb565 copyWith({
+    Duration? duration,
+    List<Color>? pixels,
+  }) =>
+      VisualFrameRgb565(
+        duration: duration ?? this.duration,
+        pixels: pixels ?? this.pixels,
+      );
+
+  @override
   Uint8List toBytes([Endian endian = Endian.little]) {
     final writer = Writer(size, endian)
       ..writeFrameType(type)

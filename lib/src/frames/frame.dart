@@ -67,7 +67,7 @@ abstract class Frame implements Encodable {
   Frame({
     required this.duration,
   }) {
-    if (!duration.isNegative && duration > Frame.maxDuration) {
+    if (duration.isNegative || duration > Frame.maxDuration) {
       throw ArgumentError(
         'Not valid duration provided. Duration should be larger or equal 0 but no larger than [Frame.maxDuration].',
       );

@@ -47,7 +47,7 @@ void main() async {
             in animation.currentView.radioPanels.indexed) {
           final fromLeft = panelIndex % 2 == 0;
           for (int i = 0; i < radioTurnedOnCount; i++) {
-            icicles.setRadioPanelPixelColor(panel.index,
+            icicles.setRadioPanelPixelColor(panelIndex,
                 fromLeft ? i : (panel.colors.length - 1 - i), foregroundColor);
           }
         }

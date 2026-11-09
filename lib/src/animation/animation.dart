@@ -217,14 +217,14 @@ class Animation {
 
   /// Add frame to the animation without optimization
   bool _saveFrame(Frame frame) {
-    _frames.add(frame);
     _updateView(frame);
+    _frames.add(frame);
     return true;
   }
 
   bool _replaceLastSavedFrame(Frame frame) {
-    _frames.last = frame;
     _updateView(frame);
+    _frames.last = frame;
     return true;
   }
 
@@ -443,6 +443,18 @@ class Animation {
       throw ArgumentError(
         'Invalid panel index (${frame.index}). '
         'This animation supports "${header.radioPanelsCount}" radio panels.',
+      );
+    }
+
+    if (!header.version.supportsRadioVisualFrames &&
+        frame.checkAllColorsIdentical()) {
+      return _addRadioColorFrame(
+        RadioColorFrame(
+          duration: frame.duration,
+          index: frame.index,
+          color: frame.colors.first,
+        ),
+        optimize: optimize,
       );
     }
 
@@ -804,5 +816,13 @@ class Animation {
 
   void clear() {
     _frames.clear();
+    _currentView = _initView(
+      xCount: header.xCount,
+      yCount: header.yCount,
+      radioPanelsCount: header.radioPanelsCount,
+      radioPanelPixelCount: header.radioPanelPixelCount,
+    );
+    _bufferedView = _currentView;
+    _durationFromPrevFrame = Duration.zero;
   }
 }

@@ -72,6 +72,14 @@ class AnimationHeader implements Encodable {
     this.radioPanelsCount = 0,
     this.radioPanelPixelCount = 1,
   }) {
+    if (name.contains(String.fromCharCode(nullChar))) {
+      throw ArgumentError.value(
+        name,
+        'name',
+        'The animation name cannot contain the NUL character, '
+            'it is used as the name terminator.',
+      );
+    }
     if (xCount > uint8MaxSize) {
       throw ArgumentError('Only 255 leds in X axis are supported.');
     }

@@ -72,7 +72,7 @@ class Writer extends EncodingManager {
   /// Color occupies 24bits in the [bytes] array
   void writeColor(Color color) {
     final encodedColor =
-        color.isOpaque ? Color.alphaBlend(color, Colors.black) : color;
+        color.isOpaque ? color : Color.alphaBlend(color, Colors.black);
 
     writeUint8(encodedColor.red);
     writeUint8(encodedColor.green);
@@ -86,9 +86,12 @@ class Writer extends EncodingManager {
     }
   }
 
-  /// Converts the color to rgb565 and writes it.
+  /// Writes [color] as rgb565, blending opacity like [writeColor].
   void writeColor565(Color color) {
-    writeUint16(color.toRgb565());
+    final encodedColor =
+        color.isOpaque ? color : Color.alphaBlend(color, Colors.black);
+
+    writeUint16(encodedColor.toRgb565());
   }
 
   /// Encode all colors to rgb565 and write.
@@ -106,7 +109,7 @@ class Writer extends EncodingManager {
 
   void writeIndexedColor565(IndexedColor color) {
     writeUint16(color.index);
-    writeUint16(color.toRgb565());
+    writeColor565(color);
   }
 
   void writeSerialMessageType(SerialMessageTypes type) {

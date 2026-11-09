@@ -60,7 +60,7 @@ class VisualFrame extends Frame {
   ) {
     if (prevFrame is! VisualFrame || nextFrame is! VisualFrame) {
       throw ArgumentError('Bad frame type.');
-    } else if (prevFrame.size != nextFrame.size) {
+    } else if (prevFrame.pixels.length != nextFrame.pixels.length) {
       throw ArgumentError('Frames cannot have different sizes.');
     }
   }

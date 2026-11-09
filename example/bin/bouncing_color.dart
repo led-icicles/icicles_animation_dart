@@ -18,7 +18,7 @@ void main() async {
     curve: Curves.bounceOut,
     parent: Tween.number(
       begin: 0,
-      end: icicles.yCount,
+      end: icicles.size.height,
     ),
   );
 
