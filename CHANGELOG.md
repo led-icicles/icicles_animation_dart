@@ -1,3 +1,13 @@
+## 3.2.0
+
+Generated animations are byte-identical to 3.1.0.
+
+- Added _AnimationIndex_ (`Animation.toIndex()`): views of a single pass with `viewAt(time)`.
+- Added `Framerate.frameStart`/`frameDuration`: a fixed-step timeline in whole milliseconds, without drift.
+- Added `AnimationHeader.hasSameLayout`.
+- Added `Icicles.setView`.
+- Added _BlendMode_ and `Color.composite`.
+
 ## 3.1.0
 
 Generated animations are byte-identical to 3.0.0.

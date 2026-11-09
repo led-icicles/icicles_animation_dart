@@ -1,6 +1,6 @@
 name: icicles_animation_dart
 description: Dart library for creating icicle animations.
-version: 3.1.0
+version: 3.2.0
 repository: https://github.com/led-icicles/icicles_animation_dart
 
 environment:

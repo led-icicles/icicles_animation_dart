@@ -61,7 +61,8 @@ abstract class Frame implements Encodable {
   /// Frame type
   FrameType get type;
 
-  /// The frame duration.
+  /// The frame duration, encoded in whole milliseconds: [toBytes] drops
+  /// the sub-millisecond part.
   final Duration duration;
 
   Frame({

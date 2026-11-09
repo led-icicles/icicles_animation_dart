@@ -6,6 +6,7 @@ import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 import 'package:icicles_animation_dart/src/frames/additive_frame_rgb565.dart';
 
 export 'animation_header.dart';
+export 'animation_index.dart';
 export 'animation_view.dart';
 
 enum Framerate {
@@ -41,6 +42,20 @@ enum Framerate {
 
   Duration get minFrameDuration =>
       Duration(milliseconds: (1000 / framesPerSecond).floor());
+
+  /// Start of the frame at [index] on a fixed-step timeline, rounded to
+  /// whole milliseconds, so frame durations do not accumulate drift.
+  Duration frameStart(int index) {
+    RangeError.checkNotNegative(index, 'index');
+    return Duration(
+      milliseconds: (index * 2000 + framesPerSecond) ~/ (framesPerSecond * 2),
+    );
+  }
+
+  /// Duration of the frame at [index] on the [frameStart] timeline:
+  /// [minFrameDuration] or 1 ms longer.
+  Duration frameDuration(int index) =>
+      frameStart(index + 1) - frameStart(index);
 
   const Framerate(this.framesPerSecond);
 }
@@ -105,6 +120,9 @@ class Animation {
         header.loopsCount == 0 ? infiniteLoopsLimit ?? 1 : header.loopsCount;
     return _play(loopsCount);
   }
+
+  /// Indexes a single pass of the current frames, regardless of loops.
+  AnimationIndex toIndex() => AnimationIndex(_play(1));
 
   Iterable<AnimationView> _play(int loopsCount) sync* {
     final initialFrame = VisualFrame.filled(

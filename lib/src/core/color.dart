@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:icicles_animation_dart/src/core/blend_mode.dart';
+
 /// Linearly interpolate between two integers.
 ///
 /// Same as [lerpDouble] but specialized for non-null `int` type.
@@ -334,6 +336,36 @@ class Color {
       );
     }
   }
+
+  /// Composites [source] over [destination] using the [mode] blending of
+  /// their channels, weighted by the [source] alpha like in [alphaBlend].
+  static Color composite(Color source, Color destination, BlendMode mode) {
+    if (mode == BlendMode.normal) return alphaBlend(source, destination);
+    final backAlpha = destination.alpha;
+    int channel(int s, int d) =>
+        ((0xff - backAlpha) * s + backAlpha * _blendChannel(mode, s, d)) ~/
+        0xff;
+    return alphaBlend(
+      Color.fromARGB(
+        source.alpha,
+        channel(source.red, destination.red),
+        channel(source.green, destination.green),
+        channel(source.blue, destination.blue),
+      ),
+      destination,
+    );
+  }
+
+  static int _multiplyChannel(int a, int b) => (a * b + 127) ~/ 0xff;
+
+  static int _blendChannel(BlendMode mode, int s, int d) => switch (mode) {
+        BlendMode.normal => s,
+        BlendMode.add => math.min(s + d, 0xff),
+        BlendMode.screen => s + d - _multiplyChannel(s, d),
+        BlendMode.multiply => _multiplyChannel(s, d),
+        BlendMode.max => math.max(s, d),
+        BlendMode.min => math.min(s, d),
+      };
 
   /// Returns an alpha value representative of the provided [opacity] value.
   ///

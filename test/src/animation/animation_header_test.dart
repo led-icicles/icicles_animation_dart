@@ -72,4 +72,35 @@ void main() {
     expect(decodedHeader.radioPanelsCount, equals(2));
     expect(decodedHeader.loopsCount, equals(2));
   });
+
+  test('AnimationHeader - hasSameLayout', () {
+    AnimationHeader header({
+      String name = 'a',
+      AnimationVersion version = AnimationVersion.v2,
+      int loopsCount = 1,
+      int xCount = 20,
+      int yCount = 30,
+      int radioPanelsCount = 2,
+      int radioPanelPixelCount = 3,
+    }) =>
+        AnimationHeader(
+          name: name,
+          version: version,
+          loopsCount: loopsCount,
+          xCount: xCount,
+          yCount: yCount,
+          radioPanelsCount: radioPanelsCount,
+          radioPanelPixelCount: radioPanelPixelCount,
+        );
+
+    final base = header();
+    expect(
+        base.hasSameLayout(
+            header(name: 'b', version: AnimationVersion.v1, loopsCount: 0)),
+        isTrue);
+    expect(base.hasSameLayout(header(xCount: 21)), isFalse);
+    expect(base.hasSameLayout(header(yCount: 31)), isFalse);
+    expect(base.hasSameLayout(header(radioPanelsCount: 3)), isFalse);
+    expect(base.hasSameLayout(header(radioPanelPixelCount: 1)), isFalse);
+  });
 }

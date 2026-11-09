@@ -258,6 +258,44 @@ class Icicles {
     }
   }
 
+  /// Sets the pixels and radio panels to the [view] state.
+  ///
+  /// The [view] is validated before any change. To display it use the [show]
+  /// method.
+  void setView(AnimationView view) {
+    if (view.frame.pixels.length != strip.length) {
+      throw ArgumentError(
+        'Invalid pixels length: Provided ${view.frame.pixels.length} pixels, '
+            'but the expected length is ${strip.length}.',
+        'view',
+      );
+    }
+    if (view.radioPanels.length != _radioPanels.length) {
+      throw ArgumentError(
+        'Invalid radio panels count: Provided ${view.radioPanels.length} '
+            'panels, but the expected count is ${_radioPanels.length}.',
+        'view',
+      );
+    }
+    for (final panel in view.radioPanels) {
+      RangeError.checkValueInInterval(
+          panel.index, 1, _radioPanels.length, 'index');
+      final expectedLength = _radioPanels[panel.index - 1].length;
+      if (panel.colors.length != expectedLength) {
+        throw ArgumentError(
+          'Invalid radio panel ${panel.index} colors length: Provided '
+              '${panel.colors.length} colors, but the expected length is '
+              '$expectedLength.',
+          'view',
+        );
+      }
+    }
+    strip.setPixels(view.frame.pixels);
+    for (final panel in view.radioPanels) {
+      _radioPanels[panel.index - 1].setPixels(panel.colors);
+    }
+  }
+
   /// Displays the current icicles state for a provided [duration]
   ///
   /// It creates and adds a frame to the [animation] class.

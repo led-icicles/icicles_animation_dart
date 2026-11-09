@@ -63,6 +63,14 @@ class AnimationHeader implements Encodable {
     return xCount * yCount;
   }
 
+  /// Whether [other] has the same pixels and radio panels layout,
+  /// ignoring the name, loops and version.
+  bool hasSameLayout(AnimationHeader other) =>
+      xCount == other.xCount &&
+      yCount == other.yCount &&
+      radioPanelsCount == other.radioPanelsCount &&
+      radioPanelPixelCount == other.radioPanelPixelCount;
+
   AnimationHeader({
     required this.xCount,
     required this.yCount,
