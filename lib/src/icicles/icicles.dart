@@ -1,5 +1,6 @@
 import 'package:icicles_animation_dart/icicles_animation_dart.dart';
 export 'tweens/tween.dart';
+export 'tweens/curve_tween.dart';
 export 'curves/curve.dart';
 
 /// An abstraction of icicles, which allows for the simple

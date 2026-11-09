@@ -21,5 +21,5 @@ class NumberTween implements Tween<num> {
   }
 
   @override
-  String toString() => 'DoubleTween($begin → $end)';
+  String toString() => 'NumberTween($begin → $end)';
 }

@@ -104,12 +104,8 @@ class Color {
   /// vibrant as that hue gets. You can think of this as the purity of the
   /// color filter over the light.
   ///
-  /// [lightness], from 0.0 to 1.0. The lightness of a color describes how bright
-  /// a color is. A value of 0.0 indicates black, and 1.0 indicates white. You
-  /// can think of this as the intensity of the light behind the filter. As the
-  /// lightness approaches 0.5, the colors get brighter and appear more
-  /// saturated, and over 0.5, the colors start to become less saturated and
-  /// approach white at 1.0.
+  /// [lightness], from 0.0 to 1.0, is the HSV value despite the name: 0.0 is
+  /// black and 1.0 is the full [hue] color, not white. See [Color.fromHSL].
   factory Color.fromAHSL(
       double alpha, double hue, double saturation, double lightness) {
     final chroma = saturation * lightness;
@@ -467,7 +463,7 @@ class IndexedColor implements Color {
 
   @override
   Color blend(Color color, double progress) =>
-      IndexedColor(index, color.blend(color, progress));
+      IndexedColor(index, this.color.blend(color, progress));
 
   @override
   bool operator ==(Object other) {

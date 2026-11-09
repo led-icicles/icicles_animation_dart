@@ -34,11 +34,8 @@ void main() async {
   /// use the Colors.red constant defined by this library.
   icicles.setAllPixelsColor(Color.fromRGB(255, 0, 0));
 
-  /// Sets the radio panels color to red.
-  ///
-  /// LED of the panel with index 0 - stands for the broadcast
-  /// channel, thanks to that all available radio panels
-  /// will become red
+  /// Sets the first radio panel (index 0) to red.
+  /// Use `setAllRadioPanelsColor` to set all of them.
   icicles.setRadioPanelColor(0, Colors.red);
 
   /// Display the current icicles state for 2 seconds

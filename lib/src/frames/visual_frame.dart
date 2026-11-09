@@ -26,16 +26,18 @@ class VisualFrame extends Frame {
   /// Throws the [RangeError] if the provided
   /// [x], [y] coordinates are out of range.
   int getPixelIndex(AnimationHeader header, int x, int y) {
+    RangeError.checkValueInInterval(x, 0, header.xCount - 1, 'x');
+    RangeError.checkValueInInterval(y, 0, header.yCount - 1, 'y');
     final index = x * header.yCount + y;
     _assertValidPixelIndex(index);
     return index;
   }
 
-  List<Color> getColumn(AnimationHeader header, int x) =>
-      List<Color>.generate(header.yCount, (y) => pixels[x * header.yCount + y]);
+  List<Color> getColumn(AnimationHeader header, int x) => List<Color>.generate(
+      header.yCount, (y) => pixels[getPixelIndex(header, x, y)]);
 
-  List<Color> getRow(AnimationHeader header, int y) =>
-      List<Color>.generate(header.xCount, (x) => pixels[x * header.yCount + y]);
+  List<Color> getRow(AnimationHeader header, int y) => List<Color>.generate(
+      header.xCount, (x) => pixels[getPixelIndex(header, x, y)]);
 
   VisualFrame({
     required super.duration,

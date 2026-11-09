@@ -11,7 +11,7 @@ class ProgressBar {
   bool get isActive => stoper != null;
 
   void render(double progress, {bool force = false}) {
-    if (!stdout.hasTerminal) return;
+    if (!_hasTerminal()) return;
 
     if (isActive) {
       if (!force && stoper!.elapsedMilliseconds < 100) {
@@ -51,10 +51,18 @@ class ProgressBar {
   }
 
   void done() {
-    if (!stdout.hasTerminal) return;
+    if (!_hasTerminal()) return;
     render(1.0, force: true);
     stdout.writeln();
     stoper?.stop();
     stoper = null;
+  }
+}
+
+bool _hasTerminal() {
+  try {
+    return stdout.hasTerminal;
+  } on UnsupportedError {
+    return false;
   }
 }

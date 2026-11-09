@@ -122,9 +122,9 @@ class PixelsView extends Iterable<Color> implements Pixels {
   /// Throws the [RangeError] if the provided
   /// [x], [y] coordinates are out of range.
   int getPixelIndex(int x, int y) {
-    final index = x * size.height + y;
-    _assertValidIndex(index);
-    return index;
+    RangeError.checkValueInInterval(x, 0, size.width - 1, 'x');
+    RangeError.checkValueInInterval(y, 0, size.height - 1, 'y');
+    return x * size.height + y;
   }
 
   Color getPixelColor(int x, int y) {
@@ -173,10 +173,10 @@ class PixelsView extends Iterable<Color> implements Pixels {
   }
 
   List<Color> getColumn(int x) =>
-      List<Color>.generate(size.height, (y) => getPixel(x * size.height + y));
+      List<Color>.generate(size.height, (y) => getPixel(getPixelIndex(x, y)));
 
   List<Color> getRow(int y) => List<Color>.generate(
-      size.width, (x) => data.getPixel(x * size.height + y));
+      size.width, (x) => data.getPixel(getPixelIndex(x, y)));
 
   /// Blend [from] frame with [to] frame using [progress].
   ///

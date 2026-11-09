@@ -1,3 +1,18 @@
+## 3.1.0
+
+Generated animations are byte-identical to 3.0.0.
+
+- `play()` plays an infinite animation (`loopsCount: 0`) once, or `infiniteLoopsLimit` times.
+- An animation uses a single color format: `fromBytes` detects RGB565, `toBytes`/`toFile` accept `useRgb565`.
+- _AdditiveFrameRgb565.toAdditiveFrame_ returns an RGB888 frame.
+- Out of range `x`/`y` coordinates throw `RangeError` instead of addressing another pixel.
+- Fixed _IndexedColor.blend_.
+- `fromBytes`, `debugPrint` and _ProgressBar_ work without `stdout` (web).
+- Exported _CurveTween_.
+- Drop framerate no longer throws when a frame exceeds `Frame.maxDuration`.
+- Cached `Animation.frames`.
+- Documentation fixes, `lints` 6.
+
 ## 3.0.0
 
 - **Breaking:** _Icicles_ uses _PixelsView_: `pixels` replaced by `strip`, `xCount`/`yCount` by `size`.

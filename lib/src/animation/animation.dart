@@ -57,15 +57,22 @@ enum FramerateBehavior {
 }
 
 void debugPrint(String msg) {
-  if (!stdout.hasTerminal) return;
+  if (!_hasTerminal()) return;
   print(msg);
+}
+
+bool _hasTerminal() {
+  try {
+    return stdout.hasTerminal;
+  } on UnsupportedError {
+    return false;
+  }
 }
 
 class Animation {
   final _frames = <Frame>[];
-  List<Frame> get frames {
-    return List.unmodifiable(_frames);
-  }
+  List<Frame>? _framesSnapshot;
+  List<Frame> get frames => _framesSnapshot ??= List.unmodifiable(_frames);
 
   AnimationHeader get header => _header;
   final AnimationHeader _header;
@@ -84,7 +91,22 @@ class Animation {
   final Framerate framerate;
   final FramerateBehavior framerateBehavior;
 
-  Iterable<AnimationView> play() sync* {
+  /// Loops [infiniteLoopsLimit] times when [AnimationHeader.loopsCount] is 0
+  /// (infinite), like a controller limit; defaults to 1.
+  Iterable<AnimationView> play({int? infiniteLoopsLimit}) {
+    if (infiniteLoopsLimit != null && infiniteLoopsLimit < 1) {
+      throw ArgumentError.value(
+        infiniteLoopsLimit,
+        'infiniteLoopsLimit',
+        'Must be at least 1.',
+      );
+    }
+    final loopsCount =
+        header.loopsCount == 0 ? infiniteLoopsLimit ?? 1 : header.loopsCount;
+    return _play(loopsCount);
+  }
+
+  Iterable<AnimationView> _play(int loopsCount) sync* {
     final initialFrame = VisualFrame.filled(
       Duration.zero,
       header.pixelsCount,
@@ -101,7 +123,7 @@ class Animation {
     );
 
     var loop = 0;
-    while (loop++ < header.loopsCount) {
+    while (loop++ < loopsCount) {
       var view = AnimationView(initialFrame, radioPanels);
 
       for (final frame in _frames) {
@@ -219,12 +241,14 @@ class Animation {
   bool _saveFrame(Frame frame) {
     _updateView(frame);
     _frames.add(frame);
+    _framesSnapshot = null;
     return true;
   }
 
   bool _replaceLastSavedFrame(Frame frame) {
     _updateView(frame);
     _frames.last = frame;
+    _framesSnapshot = null;
     return true;
   }
 
@@ -582,6 +606,14 @@ class Animation {
             /// Process buffered frame and add it instead of the current frame
             view.getRadioFrames().forEach((frame) => _addFrameInternal(frame));
 
+            if (cumulativeDuration > Frame.maxDuration) {
+              _addFrameInternal(
+                view.frame.copyWith(duration: Frame.maxDuration),
+              );
+              return DelayFrame(
+                duration: cumulativeDuration - Frame.maxDuration,
+              );
+            }
             return view.frame.copyWith(duration: cumulativeDuration);
           }
         }
@@ -634,18 +666,40 @@ class Animation {
         header.size, (currentSize, frame) => currentSize + frame.size);
   }
 
-  Uint8List toBytes([Endian endian = Endian.little]) {
+  Frame _inColorFormat(Frame frame, bool rgb565) {
+    if (rgb565) {
+      if (frame is VisualFrameRgb565 || frame is AdditiveFrameRgb565) {
+        return frame;
+      } else if (frame is VisualFrame) {
+        return VisualFrameRgb565.fromVisualFrame(frame);
+      } else if (frame is AdditiveFrame) {
+        return AdditiveFrameRgb565.fromAdditiveFrame(frame);
+      }
+    } else if (frame is VisualFrameRgb565) {
+      return frame.toVisualFrame();
+    } else if (frame is AdditiveFrameRgb565) {
+      return frame.toAdditiveFrame();
+    }
+    return frame;
+  }
+
+  /// Encodes in the [useRgb565] color format, by default the animation one.
+  Uint8List toBytes([Endian endian = Endian.little, bool? useRgb565]) {
     if (_frames.isEmpty) {
       throw StateError('Animation is empty.');
     }
+    final rgb565 = useRgb565 ?? this.useRgb565;
+    final frames = [for (final frame in _frames) _inColorFormat(frame, rgb565)];
+    final size = frames.fold(_header.size, (sum, frame) => sum + frame.size);
     final writer = Writer(size, endian)
       ..writeEncodable(_header)
-      ..writeAllEncodable(_frames);
+      ..writeAllEncodable(frames);
 
     return writer.bytes;
   }
 
-  Future<File> toFile(String path) async {
+  /// Writes in the [useRgb565] color format, by default the animation one.
+  Future<File> toFile(String path, {bool? useRgb565}) async {
     if (_frames.isEmpty) {
       throw StateError(
         'You cannot save an animation without frames. '
@@ -663,27 +717,16 @@ class Animation {
     final bar = ProgressBar();
     bar.render(0);
 
+    final rgb565 = useRgb565 ?? this.useRgb565;
+    var writtenSize = _header.size;
+
     try {
       sink.add(_header.toBytes());
       await sink.flush();
 
       for (var i = 0; i < _frames.length; i++) {
-        final frame = _frames[i];
-
-        final Uint8List bytes;
-
-        if (useRgb565) {
-          if (frame is VisualFrame) {
-            bytes = VisualFrameRgb565.fromVisualFrame(frame).toBytes();
-          } else if (frame is AdditiveFrame) {
-            bytes = AdditiveFrameRgb565.fromAdditiveFrame(frame).toBytes();
-          } else {
-            bytes = frame.toBytes();
-          }
-        } else {
-          bytes = frame.toBytes();
-        }
-
+        final bytes = _inColorFormat(_frames[i], rgb565).toBytes();
+        writtenSize += bytes.length;
         sink.add(bytes);
         bar.render(i / _frames.length);
       }
@@ -697,7 +740,7 @@ class Animation {
 
       debugPrint(
         'Written ${_frames.length} frames with overall '
-        'size of ${(size / 1000).toStringAsFixed(2)}KB '
+        'size of ${(writtenSize / 1000).toStringAsFixed(2)}KB '
         'and duration of ${duration.inSeconds}s '
         'in ${toFileWatch.elapsedMilliseconds}ms.',
       );
@@ -726,6 +769,72 @@ class Animation {
 
     final header = AnimationHeader.fromReader(reader);
 
+    final pixelsCount = header.pixelsCount;
+    final frames = <Frame>[];
+
+    while (reader.hasMoreData) {
+      final frameType = reader.readFrameType();
+      switch (frameType) {
+        case FrameType.visual:
+          frames.add(VisualFrame.fromReader(
+            reader,
+            pixelsCount,
+            withType: false,
+          ));
+
+          break;
+        case FrameType.visualRgb565:
+          frames.add(VisualFrameRgb565.fromReader(
+            reader,
+            pixelsCount,
+            withType: false,
+          ));
+
+          break;
+        case FrameType.delay:
+          frames.add(DelayFrame.fromReader(
+            reader,
+            withType: false,
+          ));
+
+          break;
+        case FrameType.radioColor:
+          frames.add(RadioColorFrame.fromReader(
+            reader,
+            withType: false,
+          ));
+          break;
+        case FrameType.radioVisualFrame:
+          if (!header.version.supportsRadioVisualFrames) {
+            throw StateError(
+              'Unsupported frame type: The current animation version does not '
+              'support RadioVisualFrame, but such a frame '
+              'is present in the animation data.',
+            );
+          }
+          frames.add(RadioVisualFrame.fromReader(
+            reader,
+            header.radioPanelPixelCount,
+            withType: false,
+          ));
+          break;
+        case FrameType.additive:
+          frames.add(AdditiveFrame.fromReader(
+            reader,
+            withType: false,
+          ));
+          break;
+        case FrameType.additiveRgb565:
+          frames.add(AdditiveFrameRgb565.fromReader(
+            reader,
+            withType: false,
+          ));
+          break;
+        default:
+          throw UnsupportedError('Unsupported frame type: "$frameType"');
+      }
+    }
+
     final animation = Animation(
       header.name,
       xCount: header.xCount,
@@ -734,74 +843,14 @@ class Animation {
       radioPanelsCount: header.radioPanelsCount,
       radioPanelPixelCount: header.radioPanelPixelCount,
       optimize: false,
-      useRgb565: false,
+      useRgb565: frames.any(
+        (frame) => frame is VisualFrameRgb565 || frame is AdditiveFrameRgb565,
+      ),
       version: header.version,
       framerate: Framerate.unlimited,
     );
-
-    final pixelsCount = header.pixelsCount;
-
-    while (reader.hasMoreData) {
-      final frameType = reader.readFrameType();
-      switch (frameType) {
-        case FrameType.visual:
-          animation.addFrame(VisualFrame.fromReader(
-            reader,
-            pixelsCount,
-            withType: false,
-          ));
-
-          break;
-        case FrameType.visualRgb565:
-          animation.addFrame(VisualFrameRgb565.fromReader(
-            reader,
-            pixelsCount,
-            withType: false,
-          ));
-
-          break;
-        case FrameType.delay:
-          animation.addFrame(DelayFrame.fromReader(
-            reader,
-            withType: false,
-          ));
-
-          break;
-        case FrameType.radioColor:
-          animation.addFrame(RadioColorFrame.fromReader(
-            reader,
-            withType: false,
-          ));
-          break;
-        case FrameType.radioVisualFrame:
-          if (!animation.header.version.supportsRadioVisualFrames) {
-            throw StateError(
-              'Unsupported frame type: The current animation version does not '
-              'support RadioVisualFrame, but such a frame '
-              'is present in the animation data.',
-            );
-          }
-          animation.addFrame(RadioVisualFrame.fromReader(
-            reader,
-            header.radioPanelPixelCount,
-            withType: false,
-          ));
-          break;
-        case FrameType.additive:
-          animation.addFrame(AdditiveFrame.fromReader(
-            reader,
-            withType: false,
-          ));
-          break;
-        case FrameType.additiveRgb565:
-          animation.addFrame(AdditiveFrameRgb565.fromReader(
-            reader,
-            withType: false,
-          ));
-          break;
-        default:
-          throw UnsupportedError('Unsupported frame type: "$frameType"');
-      }
+    for (final frame in frames) {
+      animation.addFrame(frame);
     }
 
     startWatch.stop();
@@ -816,6 +865,7 @@ class Animation {
 
   void clear() {
     _frames.clear();
+    _framesSnapshot = null;
     _currentView = _initView(
       xCount: header.xCount,
       yCount: header.yCount,

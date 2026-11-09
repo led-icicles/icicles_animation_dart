@@ -28,7 +28,7 @@ class AdditiveFrameRgb565 extends AdditiveFrame {
     );
   }
 
-  AdditiveFrame toAdditiveFrame() => AdditiveFrameRgb565(
+  AdditiveFrame toAdditiveFrame() => AdditiveFrame(
         duration: duration,
         changedPixels: changedPixels,
       );
